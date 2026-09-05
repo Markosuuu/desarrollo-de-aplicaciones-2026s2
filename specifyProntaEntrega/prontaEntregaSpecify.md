@@ -28,25 +28,31 @@ Se utilizarán las siguientes fuentes de datos:
 ## Inicio y transferencia de tokens
 
 Existirá un único superusuario que será el dueño inicial de todos los tokens de los jugadores. 
-Cada jugador tendrá un total de 100 tokens emitidos. 
+Cada jugador tendrá un total de 100 tokens emitidos.
+Si un jugador se queda sin tokens, no se podrá comprar más hasta que otro usuario venda tokens de ese jugador.
 En el momento cero, cada token tendrá un valor inicial de 1 crédito.
 A partir de ese momento, la cotización de los tokens irá cambiando según la estrategia de valuación configurada en el sistema y la evolución del valor del jugador.
 
 ## Operaciones de compra y venta
 
+### Compra
 En una operación de compra, el sistema deberá:
-* validar que exista disponibilidad de tokens, 
-* utilizar la cotización vigente del jugador, 
-* actualizar la posición del usuario y
-* registrar la operación. 
- 
+* validar que el usuario tenga saldo suficiente para realizar la operación, en caso de no tener saldo suficiente, se deberá rechazar la operación
+* validar que exista disponibilidad de tokens, en caso de no tener la cantidad solicitada, se deberá rechazar la operación
+* utilizar la cotización vigente del jugador
+* si la cotización de un jugador cambia durante una operación, se deberá utilizar la cotización previa a la actualización,
+* actualizar la posición del usuario
+* registrar la operación.
+
+Las operaciones de compra de los usuarios deberán realizarse inicialmente contra el superusuario, quien concentra la tenencia inicial de todos los tokens.
+
+### Venta
 En una operación de venta, el sistema deberá:
 * validar que el usuario posea la cantidad de tokens a vender, 
 * actualizar su saldo, 
 * ajustar su posición y 
 * registrar la operación. 
 
-Las operaciones de compra de los usuarios deberán realizarse inicialmente contra el superusuario, quien concentra la tenencia inicial de todos los tokens.
 El sistema deberá permitir el registro y creación de nuevos usuarios para operar en el mercado.
 
 ## Portfolio del usuario
@@ -57,6 +63,8 @@ El sistema deberá permitir visualizar la posición del usuario, debe incluir:
 * ganancia o pérdida
 * historial de operaciones
 
+El portafolio es parte del frontend, no se debe tratar como una entidad del backend
+
 ## Interfaz
 
 El sistema deberá contar con una interfaz de usuario (Frontend) que consuma las APIs expuestas por el backend.
@@ -66,3 +74,10 @@ Esta interfaz deberá permitir:
 * Visualización del ranking de jugadores.
 * Operar en el mercado (compra y venta de tokens) autenticándose como usuario.
 * Gestión y visualización del portfolio personal.
+
+## Requerimientos funcionales
+
+Solo implementar para una primera versión del sistema los siguientes requerimientos funcionales:
+
+1. Que un usuario pueda registrarse y obtener un apikey para operar en el sistema.
+2. Que un usuario pueda consultar el catálogo de jugadores.
