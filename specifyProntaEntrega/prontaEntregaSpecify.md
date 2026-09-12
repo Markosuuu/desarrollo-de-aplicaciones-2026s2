@@ -80,4 +80,5 @@ Esta interfaz deberá permitir:
 Solo implementar para una primera versión del sistema los siguientes requerimientos funcionales:
 
 1. Que un usuario pueda registrarse y obtener un apikey para operar en el sistema.
-2. Que un usuario pueda consultar el catálogo de jugadores.
+2. Que un usuario pueda iniciar sesion y obtener un apikey para operar en el sistema.
+3. Que un usuario pueda consultar el catálogo de jugadores.

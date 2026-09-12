@@ -20,39 +20,34 @@ user: postgres / password: root
 
 Los tests NO usan este perfil: van contra Testcontainers, siempre.
 
-## Technical Context
+## Contexto tecnico
 
-**Language/Version**: [Java 21, Spring Boot 4.x, usá la versión más reciente de Spring Boot 4.x, gradle]
+**Lenguaje de programación/Version**: [Java 21, Spring Boot 4.x, usá la versión más reciente de Spring Boot 4.x, gradle]
 
-**Storage**: [PostgreSQL]
+**Almacenamiento**: [PostgreSQL]
 
 **Testing**: [JUnit 5, Testcontainers, Spring Boot Test]
 
-**Target Platform**: [Local development environment, Docker Desktop]
+**Plataforma objetivo**: [Ambiente de desarrollo local, Docker Desktop]
 
-**Project Type**: [web-service]
+**TIpo de proyecto**: [web-service]
 
-## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+## Estructura de proyecto
 
-[Gates determined based on constitution file]
-
-## Project Structure
-
-### Documentation (this feature)
+### Documentación (de esta feature)
 
 ```text
 specs/[###-feature]/
-├── plan.md              # This file (/speckit-plan command output)
+├── plan.md              # Este archivo (/speckit-plan output)
 ├── research.md          # Phase 0 output (/speckit-plan command)
 ├── data-model.md        # Phase 1 output (/speckit-plan command)
 ├── quickstart.md        # Phase 1 output (/speckit-plan command)
 ├── contracts/           # Phase 1 output (/speckit-plan command)
-└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
+└── tasks.md             # Phase 2 output (/speckit-tasks command - no creado por /speckit-plan)
 ```
 
-### Source Code (repository root)
+### Codigo fuente (repository root)
 
 Este es una estructura que deberías respetar pero puedes crear los directorios que creas convenientes, consultando primero
 Los DTOs solo se usan en la capa de controllers.
@@ -76,12 +71,10 @@ frontend/
 └── styles/
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
 
-## Complexity Tracking
+## Traqueo de complejidad
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+> **Completar solo si la validacion de la constitution tiene violaciones que deben ser justificadas**
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
