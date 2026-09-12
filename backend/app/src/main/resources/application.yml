@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: pronta-entrega
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:prontaentrega;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+  sql:
+    init:
+      mode: always
+
+jwt:
+  secret: ${JWT_SECRET:prontaentrega-dev-secret-key-1234567890-abcdefghijklmnopqrstuvwxyz}
+  expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+
+logging:
+  level:
+    org.springframework.security: INFO
+    com.prontaentrega: INFO
