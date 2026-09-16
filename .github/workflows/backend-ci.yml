@@ -1,48 +1,56 @@
-name: CI
+
+name: Backend-Continuous-Integration
 
 on:
   push:
-    branches:
-      - main
-      - dev
-
+    branches: [ "main", "dev" ]
   pull_request:
-    branches:
-      - main
-      - dev
+    types: [ opened, reopened ]
 
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
 
     services:
       postgres:
-        image: postgres:16
+        image: postgres:15
         env:
-          POSTGRES_DB: pronta_entrega_db
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: root
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test_db
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U postgres -d testdb"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd "pg_isready"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Java
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
+          java-version: 21
           distribution: temurin
-          java-version: '21'
-          cache: gradle
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+      - name: Grant execute permission for Gradle
+        run: chmod +x gradlew
 
-      - name: Run tests
-        run: ./backend/gradlew test
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle/wrapper/gradle-wrapper.properties') }}
+
+      - name: Build and run tests
+        env:
+          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/pronta_entrega_db
+          SPRING_DATASOURCE_USERNAME: potgres
+          SPRING_DATASOURCE_PASSWORD: root
+          SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
+        run: ./gradlew clean test
