@@ -3,7 +3,6 @@ backend/.gradle/
 backend/**/build/
 backend/**/out/
 backend/**/*.class
-backend/**/*.jar
 backend/**/*.log
 
 # IDE
