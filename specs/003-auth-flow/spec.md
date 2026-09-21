@@ -13,6 +13,8 @@
 ### Session 2026-09-20
 
 - Q: Should the login and registration flow use real persisted user accounts with server-side validation, or is a mock in-memory account system acceptable for this feature? → A: Real persisted user accounts and server-side validation
+- Q: How should validation and error feedback be handled in the interface? → A: Use Yup schemas for string and email validation, and display errors as Toastify notifications
+- Q: Should the theme preference be persisted in the database? → A: No. Theme is an interface-only preference managed through ThemeContext/Tailwind without database persistence
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -75,10 +77,10 @@ Un usuario autenticado no puede volver a las páginas de acceso y debe poder cer
 
 - **FR-001**: El sistema MUST permitir que un usuario inicie sesión con correo y contraseña en la página de login usando credenciales persistidas del sistema.
 - **FR-002**: El sistema MUST validar que los campos de login no estén vacíos y que las credenciales sean correctas antes de permitir el acceso.
-- **FR-003**: El sistema MUST mostrar mensajes de error claros cuando faltan campos, el correo es inválido o la contraseña es incorrecta.
+- **FR-003**: El sistema MUST mostrar mensajes de error claros mediante notificaciones tipo Toastify cuando faltan campos, el correo es inválido o la contraseña es incorrecta.
 - **FR-004**: El sistema MUST permitir el registro con nombre, correo y contraseña en la sección de registro y guardar la cuenta como usuario persistente.
-- **FR-005**: El sistema MUST validar los campos de registro y mostrar errores si faltan datos, el formato es incorrecto o la información no es válida.
-- **FR-006**: El sistema MUST redirigir automáticamente a un usuario autenticado desde la página de login o registro al home.
+- **FR-005**: El sistema MUST validar los campos de registro con reglas de formato y contenido y mostrar errores si faltan datos, el formato es incorrecto o la información no es válida.
+- **FR-006**: El sistema MUST redirigir a usuarios autenticados desde la página de login o registro al home y evitar que accedan a rutas públicas cuando ya existe una sesión activa.
 - **FR-007**: El sistema MUST llevar al usuario a una vista de home tras un login o registro exitosos.
 - **FR-008**: El home MUST incluir un botón de logout que cierre la sesión del usuario y lo redirija a la pantalla de login.
 - **FR-009**: El sistema MUST mantener una sesión activa para el usuario que ha ingresado correctamente y proteger el acceso a páginas públicas cuando ya está autenticado.
@@ -89,7 +91,6 @@ Un usuario autenticado no puede volver a las páginas de acceso y debe poder cer
 
 - **Usuario**: representa a la persona que accede al sitio; incluye nombre, correo y contraseña, además de su estado de autenticación.
 - **Sesión**: representa el acceso activo del usuario dentro de la aplicación y determina si puede ver login, registro o home.
-- **Tema**: representa la preferencia visual del usuario entre modo claro y modo oscuro.
 
 ## Success Criteria *(mandatory)*
 
@@ -104,6 +105,7 @@ Un usuario autenticado no puede volver a las páginas de acceso y debe poder cer
 ## Assumptions
 
 - El sistema usa una base de usuarios persistente para la autenticación básica con correo y contraseña, con validación real de credenciales.
+- La validación de strings y correos se realiza con Yup en la capa de formulario, y los errores se muestran como notificaciones Toastify.
 - La sesión del usuario se considera válida durante la navegación activa del sitio y no incluye recuperación de contraseña en esta entrega.
-- El modo oscuro es una preferencia visual del usuario dentro del sitio, no una configuración de cuenta con persistencia compleja.
+- El modo oscuro es una preferencia visual del usuario dentro del sitio y no debe persistirse en la base de datos; se controla desde ThemeContext y/o clases de Tailwind.
 - La funcionalidad de backend y frontend se integran como un flujo de sitio dinámico con validaciones del lado de la interfaz y del lado del servicio.
