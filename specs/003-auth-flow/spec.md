@@ -8,6 +8,12 @@
 
 **Input**: User description: "Necesito un sitio dinámico para mi backend. Páginas requeridas: Login, Registro, Home, Logout. El usuario debe poder iniciar sesión con correo y contraseña, con validaciones por campos faltantes o valores incorrectos. El registro debe pedir nombre, correo y contraseña, con validaciones similares. Tras iniciar sesión o registrarse, ambas acciones llevan a una vista home con un mensaje placeholder 'home'. Si ya hay sesión iniciada, el usuario no puede volver a login o registro y debe ser redirigido al home. El home debe tener un botón de logout que cierre la sesión y redirija a login. El diseño será simple, fondo blanco y texto negro, con posibilidad de cambiar al modo oscuro con fondo negro y texto blanco."
 
+## Clarifications
+
+### Session 2026-09-20
+
+- Q: Should the login and registration flow use real persisted user accounts with server-side validation, or is a mock in-memory account system acceptable for this feature? → A: Real persisted user accounts and server-side validation
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Iniciar sesión con credenciales válidas (Priority: P1)
@@ -58,19 +64,19 @@ Un usuario autenticado no puede volver a las páginas de acceso y debe poder cer
 
 ### Edge Cases
 
-- ¿Qué sucede si un usuario intenta iniciar sesión con un correo malformado o sin contraseña?
-- ¿Cómo responde el sistema si un usuario ya autenticado intenta volver a las páginas de acceso?
-- ¿Qué ocurre si el usuario cierra sesión desde home y luego intenta usar el historial del navegador para volver a una vista protegida?
-- ¿Qué pasa si el usuario cambia entre tema claro y oscuro varias veces durante la misma sesión?
+- Si un usuario intenta iniciar sesión con un correo malformado o sin contraseña, el sistema muestra un mensaje de error indicando el problema y no permite continuar.
+- Si un usuario ya autenticado intenta volver a las páginas de acceso, el sistema lo redirige automáticamente al home.
+- Si un usuario cierra sesión, solo puede acceder a las páginas de login y registro; cualquier intento de volver a una vista protegida requiere autenticación.
+- Si el usuario cambia entre el tema claro y oscuro, no ocurre ningún error ni interrupción en la navegación; simplemente se actualiza el tema del sitio.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: El sistema MUST permitir que un usuario inicie sesión con correo y contraseña en la página de login.
+- **FR-001**: El sistema MUST permitir que un usuario inicie sesión con correo y contraseña en la página de login usando credenciales persistidas del sistema.
 - **FR-002**: El sistema MUST validar que los campos de login no estén vacíos y que las credenciales sean correctas antes de permitir el acceso.
 - **FR-003**: El sistema MUST mostrar mensajes de error claros cuando faltan campos, el correo es inválido o la contraseña es incorrecta.
-- **FR-004**: El sistema MUST permitir el registro con nombre, correo y contraseña en la sección de registro.
+- **FR-004**: El sistema MUST permitir el registro con nombre, correo y contraseña en la sección de registro y guardar la cuenta como usuario persistente.
 - **FR-005**: El sistema MUST validar los campos de registro y mostrar errores si faltan datos, el formato es incorrecto o la información no es válida.
 - **FR-006**: El sistema MUST redirigir automáticamente a un usuario autenticado desde la página de login o registro al home.
 - **FR-007**: El sistema MUST llevar al usuario a una vista de home tras un login o registro exitosos.
@@ -97,7 +103,7 @@ Un usuario autenticado no puede volver a las páginas de acceso y debe poder cer
 
 ## Assumptions
 
-- El sistema cuenta con una base de usuarios simple para la autenticación básica con correo y contraseña.
+- El sistema usa una base de usuarios persistente para la autenticación básica con correo y contraseña, con validación real de credenciales.
 - La sesión del usuario se considera válida durante la navegación activa del sitio y no incluye recuperación de contraseña en esta entrega.
 - El modo oscuro es una preferencia visual del usuario dentro del sitio, no una configuración de cuenta con persistencia compleja.
 - La funcionalidad de backend y frontend se integran como un flujo de sitio dinámico con validaciones del lado de la interfaz y del lado del servicio.
