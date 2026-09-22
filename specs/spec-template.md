@@ -1,4 +1,4 @@
-# Scrapping de Jugadores con un scheduler para actualizar semanalmente la base de datos
+# Scrapping de Jugadores
 
 **Feature Branch**: `004-scrapping-jugadores`
 
@@ -26,22 +26,14 @@ Estas paginas se utilizaran para obtener de cada jugador la siguiente data:
 - rating
 - resultados e historial de partidos
 - alineaciones
-- fixtures 
+- fixtures
+
+En caso de que la base de datos a actualizar se encuentre vacia, esto no deberia ser un impedimento y la base de datos debe poblarse igualmente.
 
 Toda esta nueva información debera almacenarse en la entidad de modelo ya existente Jugador en el path `backend/app/src/main/java/com/prontaentrega/models/Jugador.java`. Los datos deben poderse luego recuperar sin necesidad de volver a consultar a estos proveedores externos.
 
 En caso de errores o fallas del proveedor externo o de cualquier tipo, el sistema debera tolerarlas y continuar funcionando con datos locales.
 
-Para realizar esto, se expondra un endpoint especifico que pueble la base de datos.
+Para realizar esto, se expondra un endpoint especifico que pueble la base de datos. Este endpoint, no tendra ninguna protección detras en terminos de rol. No sera necesario que para llamar este endpoint se tenga un rol de admin o algo similar. Eso se implementara en una feature futura.
 
-**Independent Test**: Puede probarse ejecutando la actualización de estadísticas mediante el endpoint manual utilizando proveedores externos simulados, verificando que las estadísticas obtenidas se persistan correctamente y que los datos existentes permanezcan disponibles ante una falla de un proveedor externo.
-
----
-
-### User Story 2 - Actualización semanal (Priority: P2)
-
-El sistema debe ejecutar automáticamente la actualización de estadísticas una vez por semana. Inicialmente se propone los domingos a la 1:00 AM, pero debe poder ser configurable facilmente en el codigo en caso de que la fecha y horario de actualización se quiera cambiar.
-
-Para realizar esta User Story, se utilizara un scheduler de Java.
-
-No se contempla para toda esta feature manejar un sistema de snapshots del catalogo de jugadores. Todo eso se deja para una futura feature.
+**Independent Test**: Puede probarse ejecutando la actualización de estadísticas mediante el endpoint manual utilizando proveedores externos simulados, verificando que las estadísticas obtenidas se persistan correctamente, que los datos existentes permanezcan disponibles ante una falla de un proveedor externo, y que en caso de fallas se retorne un error descriptivo y claro. 
