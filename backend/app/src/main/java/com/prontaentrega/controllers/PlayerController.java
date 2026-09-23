@@ -35,6 +35,9 @@ public class PlayerController {
             @RequestParam(required = false) String nombre,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int perPage) {
+
+        // MARCOS, cuando hagas esto, no se como lo vas a hacer, pero cuando lo hagas, capaz estaria bueno
+        // que el repository te los devuelva ordenados por rating???? Manejalo vos, yo solo lo sugiero xD
         var response = playerCatalogService.search(liga, equipo, nombre, page, perPage);
         return ResponseEntity.ok(response);
     }
