@@ -47,7 +47,7 @@ public class AuthService {
         validatePassword(password);
 
         if (usuarioRepository.existsByCorreoIgnoreCase(correo)) {
-            throw new DuplicateUserException("La cuenta ya existe");
+            throw new DuplicateUserException("Ya existe una cuenta con ese correo registrado");
         }
 
         Usuario usuario = new Usuario(nombre, correo, passwordEncoder.encode(password));
