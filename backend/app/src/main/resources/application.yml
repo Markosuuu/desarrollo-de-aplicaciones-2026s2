@@ -27,3 +27,8 @@ logging:
   level:
     org.springframework.security: INFO
     com.prontaentrega: INFO
+
+providers:
+  whoscored:
+    url: ${WHOSCORED_URL:https://www.whoscored.com/statisticsfeed/1/getplayerstatistics?category=summary&subcategory=offensive&statsAccumulationType=0&isCurrent=true&playerId=&teamIds=&matchId=&stageId=&tournamentOptions=2,3,4,5,22&sortBy=Rating&sortAscending=&age=&ageComparisonType=&appearances=&appearancesComparisonType=&field=Overall&nationality=&positionOptions=&timeOfTheGameEnd=&timeOfTheGameStart=&isMinApp=false&page=1&includeZeroValues=&numberOfPlayersToPick=10&incPens=}
+    timeout-ms: ${WHOSCORED_TIMEOUT_MS:15000}
