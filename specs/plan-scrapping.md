@@ -5,7 +5,6 @@
 ## Summary
 Esta funcionalidad busca agregar un flujo puro de backend para poder recopilar informacion, mediante el uso de scrapping, de las siguientes fuentes:
 - WhoScored
-- Football-Data.org
 
 Estas paginas se utilizaran para obtener de cada jugador la siguiente información:
 - nombre
@@ -19,9 +18,6 @@ Estas paginas se utilizaran para obtener de cada jugador la siguiente informaci�
 - dribbles
 - faltas
 - rating
-- resultados e historial de partidos
-- alineaciones
-- fixtures
 
 Toda esta funcionalidad no contempla frontend ni contempla el manejo de un sistema de snapshots para persistir información antigua.
 
@@ -51,17 +47,17 @@ Para la implementacion de toda esta funcionalidad, se proponen las siguientes cl
 Un controller especicon un endpoint dedicado a actualizar la base de datos de jugadores.
 
 ### StatsUpdateService
-Un service, cuyo unico objetivo es encargarse de operar con WhoScoredScrapper, FootballDataScrapper, y PlayerRepository , para recopilar toda la informacion necesaria y persistirla/actualizarla en la base de datos.
+Un service, cuyo unico objetivo es encargarse de operar con WhoScoredScrapper, y PlayerRepository , para recopilar toda la informacion necesaria y persistirla/actualizarla en la base de datos. Debe estar bien diseñada para que contemple en una proxima iteracion añadir otra source de scrapping.
 
 ### WhoScoredScrapper
 Esta clase sera la encargada de recopilar toda la informacion necesaria de WhoScored.
 
-### FootballDataScrapper
-Esta clase sera la encargada de recopilar toda la informacion necesaria de Football-Data.org.
-
 ## Manejo de errores y fallas
 El flujo de esta funcionalidad tiene que ser tal que, en caso de fallos u errores de las paginas WhoScored y football-data, la base de datos no quede vacia.
 En caso de errores al obtener datos de las fuentes externas, la base de datos debera conservarse y no verse alterada ni modificada bajo ningun punto de vista.
+
+## Test (PRIORITARIO)
+Es imperativo y obligatorio que las pruebas realizadas no sean con mock ni nada de ese estilo, y que sean siempre pegandole a la url de WhoScored real que se describe en el proximo inciso.
 
 ## Scrapping de WhoScored
 Para realizar el scrapping de WhoScored, podes acceder al siguiente endpoint de tipo xhr (de ser necesario, podes cambiar el tamaño de pagina o cualquier otro campo que veas necesario para que la recopilación de datos sea mas rapida, pero ANTES consultalo conmigo):
@@ -133,6 +129,3 @@ Aca te dejo una respuesta de ejemplo, con un tamaño de pagina de 1, para que ve
         ] 
     } 
 ```
-
-## Scrapping de FootballData
-Para el scrapping de football-data.org se cuenta con la siguiente documentación provista por la pagina https://www.football-data.org/documentation/quickstart
