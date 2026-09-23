@@ -303,7 +303,7 @@ class PlayerCatalogRefreshIntegrationTest {
                 },
                 {
                   "playerId": null,
-                  "name": "Incompleto",
+                  "name": null,
                   "teamName": "Azul FC",
                   "tournamentName": "Liga Uno",
                   "age": 22,
