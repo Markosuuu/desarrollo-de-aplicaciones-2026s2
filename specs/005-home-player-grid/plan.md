@@ -35,9 +35,18 @@ Esta funcionalidad agrega al Home un catálogo paginado de jugadores con búsque
 - Arquitectura en capas: APROBADO. La funcionalidad se integra con la capa de backend existente y con la organización del frontend en `api`, `pages` y `styles`.
 - Lógica de negocio solo en modelo/servicio: APROBADO. La lógica de búsqueda y paginación ya existe en el servicio del backend, por lo que la UI solo consume y presenta resultados.
 - Validación en los niveles correctos: APROBADO. La validación del filtro se realiza con el backend y la UI maneja estados vacíos y búsqueda del usuario sin duplicar reglas de dominio.
-- Pruebas requeridas: APROBADO. El requisito se valida con pruebas de integración del backend y con verificación funcional del flujo de Home en el navegador.
-- Definición de terminado: APROBADO. La entrega requiere que el catálogo se muestre, filtre y pagine correctamente, con datos reales desde la base.
+- Pruebas requeridas: APROBADO, pero requiere evidencia explícita. El feature debe incluir pruebas de integración del backend para búsqueda vacía, límite de páginas y resultados filtrados, además de validación funcional del flujo de Home en navegador.
+- Definición de terminado: APROBADO. La entrega requiere que el catálogo se muestre, filtre y pagine correctamente, con datos reales desde la base; además, la colección de Postman debe incluir el endpoint de consulta con filtros y paginación.
 - Documentación e idioma: APROBADO. Todo el texto visible y la documentación asociada deben mantenerse en español.
+
+## Validation & Delivery Requirements
+
+Antes de cerrar la funcionalidad, se debe validar que:
+
+- `GET /api/players` responde correctamente con filtros por `nombre`, `equipo` y `liga`.
+- La paginación respeta `page` y `perPage` y no permite navegar fuera del rango disponible.
+- El catálogo vacío devuelve un estado de vacío claro y no rompe la vista de Home.
+- El flujo de Home queda documentado en `quickstart.md` y en la colección de Postman del proyecto.
 
 ## Project Structure
 
