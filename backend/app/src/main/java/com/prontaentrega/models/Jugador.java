@@ -10,6 +10,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Representa un jugador disponible en el catalogo local de ProntaEntrega.
@@ -18,10 +22,14 @@ import java.util.UUID;
  */
 @Entity
 @Table(name = "jugadores")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Jugador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter(AccessLevel.NONE)
     private UUID id;
 
     /**
@@ -98,11 +106,6 @@ public class Jugador {
     private Integer tokensRestantes;
 
     /**
-     * Constructor requerido por JPA.
-     */
-    public Jugador() {
-    }
-    /**
      * Construye un jugador completo validando los campos obligatorios del catalogo.
      */
     public Jugador(
@@ -127,35 +130,35 @@ public class Jugador {
             LocalDateTime fechaActualizacion,
             String fuente,
             Integer tokensRestantes) {
-        validarIdentidad(whoscoredId, nombre, equipo, liga);
+       validarIdentidad(whoscoredId, nombre, equipo, liga);
 
-        this.whoscoredId = whoscoredId;
-        this.nombre = nombre.trim();
-        this.equipo = equipo.trim();
-        this.liga = liga.trim();
+       this.whoscoredId = whoscoredId;
+       this.nombre = nombre.trim();
+       this.equipo = equipo.trim();
+       this.liga = liga.trim();
 
-        this.edad = edad;
-        this.altura = altura;
-        this.peso = peso;
-        this.posicion = posicion;
-        this.activo = activo;
+       this.edad = edad;
+       this.altura = altura;
+       this.peso = peso;
+       this.posicion = posicion;
+       this.activo = activo;
 
-        this.goles = goles;
-        this.asistencias = asistencias;
-        this.disparosPorPartido = disparosPorPartido;
-        this.keyPassesPorPartido = keyPassesPorPartido;
-        this.dribblesGanadosPorPartido = dribblesGanadosPorPartido;
-        this.faltasCometidasPorPartido = faltasCometidasPorPartido;
-        this.rating = rating;
-        this.minutosJugados = minutosJugados;
+       this.goles = goles;
+       this.asistencias = asistencias;
+       this.disparosPorPartido = disparosPorPartido;
+       this.keyPassesPorPartido = keyPassesPorPartido;
+       this.dribblesGanadosPorPartido = dribblesGanadosPorPartido;
+       this.faltasCometidasPorPartido = faltasCometidasPorPartido;
+       this.rating = rating;
+       this.minutosJugados = minutosJugados;
 
-        this.cotizacionActual = Objects.requireNonNull(
-                cotizacionActual, "La cotizacion es obligatoria");
-        this.fechaActualizacion = Objects.requireNonNull(
-                fechaActualizacion, "La fecha de actualizacion es obligatoria");
-        this.fuente = validarTexto(fuente, "La fuente es obligatoria");
-        this.tokensRestantes = Objects.requireNonNull(
-                tokensRestantes, "Los tokens restantes son obligatorios");
+       this.cotizacionActual = Objects.requireNonNull(
+               cotizacionActual, "La cotizacion es obligatoria");
+       this.fechaActualizacion = Objects.requireNonNull(
+               fechaActualizacion, "La fecha de actualizacion es obligatoria");
+       this.fuente = validarTexto(fuente, "La fuente es obligatoria");
+       this.tokensRestantes = Objects.requireNonNull(
+               tokensRestantes, "Los tokens restantes son obligatorios");
     }
 
     /**
@@ -328,125 +331,5 @@ public class Jugador {
         if (value != null && value.compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException(message);
         }
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public String getEquipo() {
-        return equipo;
-    }
-
-    public String getLiga() {
-        return liga;
-    }
-
-    public BigDecimal getCotizacionActual() {
-        return cotizacionActual;
-    }
-
-    public LocalDateTime getFechaActualizacion() {
-        return fechaActualizacion;
-    }
-
-    public Integer getEdad() {
-        return edad;
-    }
-
-    public Integer getGoles() {
-        return goles;
-    }
-
-    public Integer getAsistencias() {
-        return asistencias;
-    }
-
-    public BigDecimal getDisparosPorPartido() {
-        return disparosPorPartido;
-    }
-
-    public BigDecimal getPorcentajePasesExitosos() {
-        return porcentajePasesExitosos;
-    }
-
-    public BigDecimal getRating() {
-        return rating;
-    }
-
-    public BigDecimal getKeyPassesPorPartido() {
-        return keyPassesPorPartido;
-    }
-
-    public void setKeyPassesPorPartido(BigDecimal keyPassesPorPartido) {
-        this.keyPassesPorPartido = keyPassesPorPartido;
-    }
-
-    public BigDecimal getDribblesGanadosPorPartido() {
-        return dribblesGanadosPorPartido;
-    }
-
-    public void setDribblesGanadosPorPartido(BigDecimal dribblesGanadosPorPartido) {
-        this.dribblesGanadosPorPartido = dribblesGanadosPorPartido;
-    }
-
-    public BigDecimal getFaltasCometidasPorPartido() {
-        return faltasCometidasPorPartido;
-    }
-
-    public void setFaltasCometidasPorPartido(BigDecimal faltasCometidasPorPartido) {
-        this.faltasCometidasPorPartido = faltasCometidasPorPartido;
-    }
-
-    public Integer getAltura() {
-        return altura;
-    }
-
-    public void setAltura(Integer altura) {
-        this.altura = altura;
-    }
-
-    public Integer getPeso() {
-        return peso;
-    }
-
-    public void setPeso(Integer peso) {
-        this.peso = peso;
-    }
-
-    public String getPosicion() {
-        return posicion;
-    }
-
-    public void setPosicion(String posicion) {
-        this.posicion = posicion;
-    }
-
-    public Boolean getActivo() {
-        return activo;
-    }
-
-    public void setActivo(Boolean activo) {
-        this.activo = activo;
-    }
-
-    public Integer getMinutosJugados() {
-        return minutosJugados;
-    }
-
-    public void setMinutosJugados(Integer minutosJugados) {
-        this.minutosJugados = minutosJugados;
-    }
-
-    public Integer getTokensRestantes() {
-        return tokensRestantes;
-    }
-
-    public void setTokensRestantes(Integer tokensRestantes) {
-        this.tokensRestantes = tokensRestantes;
     }
 }
