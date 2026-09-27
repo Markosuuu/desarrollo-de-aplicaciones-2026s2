@@ -7,6 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.prontaentrega.models.Jugador;
 import com.prontaentrega.repository.JugadorRepository;
+import com.prontaentrega.utils.AbstractIntegrationTest;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -32,8 +33,7 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
-class PlayerControllerTest {
+class PlayerControllerTest extends AbstractIntegrationTest {
     private static final AtomicInteger providerStatus = new AtomicInteger(200);
     private static final AtomicReference<String> providerBody = new AtomicReference<>(payload());
     private static HttpServer server;

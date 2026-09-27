@@ -9,6 +9,7 @@ import com.prontaentrega.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
+import com.prontaentrega.utils.AbstractIntegrationTest;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 
@@ -31,8 +31,8 @@ import org.springframework.test.context.DynamicPropertySource;
  * Tests de integracion del refresh usando PostgreSQL real y un servidor HTTP real.
  */
 @SpringBootTest
-@ActiveProfiles("test")
-class PlayerCatalogRefreshIntegrationTest {
+class PlayerCatalogRefreshIntegrationTest extends AbstractIntegrationTest {
+
     private static final AtomicInteger providerStatus = new AtomicInteger(200);
     private static final AtomicReference<String> providerBody = new AtomicReference<>(validPayload());
     private static HttpServer server;
@@ -52,9 +52,6 @@ class PlayerCatalogRefreshIntegrationTest {
         registry.add("providers.whoscored.url", () -> "http://localhost:" + server.getAddress().getPort() + "/stats");
     }
 
-    /**
-     * Limpia PostgreSQL antes de cada caso para probar carga inicial y actualizaciones.
-     */
     @BeforeEach
     void cleanDatabase() {
         jugadorRepository.deleteAll();
@@ -62,9 +59,6 @@ class PlayerCatalogRefreshIntegrationTest {
         providerBody.set(validPayload());
     }
 
-    /**
-     * Detiene el servidor HTTP local usado por los tests.
-     */
     @AfterAll
     static void stopServer() {
         if (server != null) {

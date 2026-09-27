@@ -2,7 +2,6 @@ package com.prontaentrega.authentication;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -27,21 +26,21 @@ public class JwtService {
     public String generateToken(UUID userId, String correo) {
         Instant now = Instant.now();
         return Jwts.builder()
-                .setSubject(userId.toString())
+                .subject(userId.toString())
                 .claim("correo", correo)
-                .setId(UUID.randomUUID().toString())
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plusMillis(expirationMs)))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .id(UUID.randomUUID().toString())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(now.plusMillis(expirationMs)))
+                .signWith(getSigningKey())
                 .compact();
     }
 
     public Claims parseToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+        return Jwts.parser()
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public UUID userIdFromToken(String token) {
