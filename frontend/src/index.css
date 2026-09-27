@@ -54,12 +54,14 @@ button {
 }
 
 .home-shell {
-  align-items: start;
+  align-items: center;
   padding-top: 2.5rem;
 }
 
 .home-panel {
-  width: min(100%, 1280px);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
 }
 
 .auth-card,
@@ -168,7 +170,7 @@ body[data-theme='dark'] .search-field input {
 
 .player-card__top {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .player-position {
