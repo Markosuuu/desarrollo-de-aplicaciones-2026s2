@@ -1,4 +1,4 @@
-package com.prontaentrega.controllers;
+package com.prontaentrega.controllers.exceptionHandler;
 
 import com.prontaentrega.services.exceptions.CatalogUnavailableException;
 import com.prontaentrega.services.exceptions.DuplicateUserException;
@@ -22,7 +22,7 @@ public class GlobalExceptionHandler {
      * Maneja errores de validacion declarados en DTOs.
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         FieldError fieldError = ex.getBindingResult().getFieldError();
         String code = fieldError != null ? fieldError.getDefaultMessage() : "VALIDACION_INVALIDA";
         return error(HttpStatus.BAD_REQUEST, code, "Datos invalidos");
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
      * Maneja errores de validacion generados por servicios.
      */
     @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<Map<String, Object>> handleValidation(ValidationException ex) {
+    public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex) {
         return error(HttpStatus.BAD_REQUEST, ex.getCode(), ex.getMessage());
     }
 
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
      * Maneja intentos de registrar usuarios duplicados.
      */
     @ExceptionHandler(DuplicateUserException.class)
-    public ResponseEntity<Map<String, Object>> handleDuplicate(DuplicateUserException ex) {
+    public ResponseEntity<ErrorResponse> handleDuplicate(DuplicateUserException ex) {
         return error(HttpStatus.CONFLICT, "CORREO_DUPLICADO", ex.getMessage());
     }
 
@@ -48,7 +48,7 @@ public class GlobalExceptionHandler {
      * Maneja credenciales invalidas de autenticacion.
      */
     @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
+    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
         return error(HttpStatus.UNAUTHORIZED, "CREDENCIALES_INVALIDAS", "Credenciales invalidas");
     }
 
@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
      * Maneja tokens JWT invalidos o vencidos.
      */
     @ExceptionHandler(JwtException.class)
-    public ResponseEntity<Map<String, Object>> handleJwt(JwtException ex) {
+    public ResponseEntity<ErrorResponse> handleJwt(JwtException ex) {
         return error(HttpStatus.UNAUTHORIZED, "JWT_INVALIDO", "JWT invalido");
     }
 
@@ -64,7 +64,7 @@ public class GlobalExceptionHandler {
      * Maneja la ausencia de catalogo local disponible.
      */
     @ExceptionHandler(CatalogUnavailableException.class)
-    public ResponseEntity<Map<String, Object>> handleCatalogUnavailable(CatalogUnavailableException ex) {
+    public ResponseEntity<ErrorResponse> handleCatalogUnavailable(CatalogUnavailableException ex) {
         return error(HttpStatus.SERVICE_UNAVAILABLE, "CATALOGO_NO_DISPONIBLE", ex.getMessage());
     }
 
@@ -76,12 +76,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(RefreshCatalogResponse.failure(ex.getMessage()));
     }
 
-    private ResponseEntity<Map<String, Object>> error(HttpStatus status, String code, String message) {
-        return ResponseEntity.status(status).body(Map.of(
-                "error", Map.of(
-                        "code", code,
-                        "message", message
-                )
-        ));
+    private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message) {
+        ErrorResponse response = new ErrorResponse(
+                new ErrorResponse.ErrorDetail(code, message)
+        );
+
+        return ResponseEntity.status(status).body(response);
     }
 }

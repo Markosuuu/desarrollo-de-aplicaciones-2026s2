@@ -1,7 +1,14 @@
 package com.prontaentrega.controllers;
 
+import com.prontaentrega.controllers.exceptionHandler.ErrorResponse;
+import com.prontaentrega.services.dto.CatalogResponse;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.PlayerCatalogService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,16 +35,20 @@ public class PlayerController {
     /**
      * Lista jugadores persistidos localmente con filtros opcionales.
      */
+    @Operation(
+            summary = "Listar jugadores",
+            description = "Lista los jugadores de manera paginada con filtros opcionales de nomrbe, equipo y liga."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Retorna una pagina, con sus jugadores segun el filtro aplicado, e información referente al paginado.")
+    })
     @GetMapping("/players")
-    public ResponseEntity<?> getPlayers(
+    public ResponseEntity<CatalogResponse> getPlayers(
             @RequestParam(required = false) String liga,
             @RequestParam(required = false) String equipo,
             @RequestParam(required = false) String nombre,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int perPage) {
-
-        // MARCOS, cuando hagas esto, no se como lo vas a hacer, pero cuando lo hagas, capaz estaria bueno
-        // que el repository te los devuelva ordenados por rating???? Manejalo vos, yo solo lo sugiero xD
         var response = playerCatalogService.search(liga, equipo, nombre, page, perPage);
         return ResponseEntity.ok(response);
     }
@@ -45,6 +56,14 @@ public class PlayerController {
     /**
      * Dispara la actualizacion publica del catalogo desde WhoScored.
      */
+    @Operation(
+            summary = "Actualizar jugadores manualmente",
+            description = "Actualiza los jugadores de la base de datos por medio de scrapping de la pagina WhoScored, indicando cuantos nuevos se crearon, actualizaron o ignoraron."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Actualizacion exitosa y completada correctamente."),
+            @ApiResponse(responseCode = "502", description = "No se pudo completar la actualizacion debido a que WhoScored entrego datos no utilizables o ocurrio un error inesperado. No se realizan cambios y se conserva la informacion")
+    })
     @PostMapping("/players/update")
     public ResponseEntity<RefreshCatalogResponse> updatePlayers() {
         return ResponseEntity.status(HttpStatus.OK).body(playerCatalogService.refreshFromWhoScored());
