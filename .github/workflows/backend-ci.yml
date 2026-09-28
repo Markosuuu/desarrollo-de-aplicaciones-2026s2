@@ -20,7 +20,7 @@ jobs:
         env:
           POSTGRES_DB: pronta_entrega_db
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: "${{ secrets.DB_PASSWORD }}"
         ports:
           - 5432:5432
         options: >-
@@ -45,11 +45,11 @@ jobs:
           cache: gradle
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+        uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a #v4
 
       - name: Run tests
         env:
           DB_URL: jdbc:postgresql://localhost:5432/pronta_entrega_db
           DB_USERNAME: postgres
-          DB_PASSWORD: postgres
+          DB_PASSWORD: "${{ secrets.DB_PASSWORD }}"
         run: ./gradlew test
