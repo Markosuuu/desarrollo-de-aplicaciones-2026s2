@@ -3,6 +3,7 @@ package com.prontaentrega.controllers;
 import com.prontaentrega.controllers.dtos.AuthResponse;
 import com.prontaentrega.controllers.dtos.LoginRequest;
 import com.prontaentrega.controllers.dtos.RegisterRequest;
+import com.prontaentrega.controllers.dtos.UsuarioResponse;
 import com.prontaentrega.controllers.exceptionHandler.ErrorResponse;
 import com.prontaentrega.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -26,7 +29,6 @@ public class AuthController {
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
-
 
     @Operation(
             summary = "Registrarse",
@@ -50,7 +52,13 @@ public class AuthController {
     })
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
+        log.info("⌛ Registrando usuario: nombre={}, correo={}", request.nombre(), request.correo());
+        var authResult = authService.register(request.nombre(), request.correo(), request.password());
+
+        log.info("✅ Usuario registrado");
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(AuthResponse.from(authResult));
     }
 
     @Operation(
@@ -75,6 +83,10 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+        log.info("⌛ Iniciando sesión para usuario: correo={}", request.correo());
+        var result = authService.login(request.correo(), request.password());
+
+        log.info("✅ Inicio de sesión exitoso para usuario: correo={}", request.correo());
+        return ResponseEntity.ok(AuthResponse.from(result));
     }
 }

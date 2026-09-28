@@ -7,6 +7,7 @@ import com.prontaentrega.models.TokenEstado;
 import com.prontaentrega.models.Usuario;
 import com.prontaentrega.repository.TokenEstadoRepository;
 import com.prontaentrega.repository.UsuarioRepository;
+import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.services.exceptions.DuplicateUserException;
 import com.prontaentrega.services.exceptions.ValidationException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -49,23 +50,19 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que al registrar un usuario se devuelva correctamente su información y un token.*/
     @Test
     void registerShouldReturnUserAndToken() {
-        RegisterRequest request = new RegisterRequest("Ana", "ana@example.com", "clave123");
-
-        AuthResponse response = authService.register(request);
+        AuthResult response = authService.register("Ana", "ana@example.com", "clave123");
 
         assertNotNull(response);
         assertNotNull(response.token());
         assertNotNull(response.usuario());
-        assertEquals("Ana", response.usuario().nombre());
-        assertEquals("ana@example.com", response.usuario().correo());
+        assertEquals("Ana", response.usuario().getNombre());
+        assertEquals("ana@example.com", response.usuario().getCorreo());
     }
 
     /** Se verifica que al registrar un usuario se persista correctamente en la base de datos.*/
     @Test
     void registerShouldPersistUserAndTokenState() {
-        RegisterRequest request = new RegisterRequest("Ana", "ana@example.com", "clave123");
-
-        authService.register(request);
+        authService.register("Ana", "ana@example.com", "clave123");
 
         Usuario usuario = usuarioRepository
                 .findByCorreoIgnoreCase("ana@example.com")
@@ -87,9 +84,7 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que al registrar un usuario se normalicen correctamente el nombre y el correo. */
     @Test
     void registerShouldNormalizeNameAndEmail() {
-        RegisterRequest request = new RegisterRequest("  Ana  ", " ANA@EXAMPLE.COM ", "clave123");
-
-        authService.register(request);
+        authService.register("Ana", "ana@example.com", "clave123");
 
         Usuario usuario = usuarioRepository
                 .findByCorreoIgnoreCase("ana@example.com")
@@ -102,17 +97,11 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita registrar un usuario con un correo ya existente. */
     @Test
     void registerShouldRejectDuplicateEmail() {
-        RegisterRequest firstRequest = new RegisterRequest("Ana", "ana@example.com", "clave123"
-        );
-
-        authService.register(firstRequest);
-
-        RegisterRequest secondRequest = new RegisterRequest("Maria", "ana@example.com", "clave456"
-        );
+        authService.register("Ana", "ana@example.com", "clave123");
 
         DuplicateUserException exception = assertThrows(
                 DuplicateUserException.class,
-                () -> authService.register(secondRequest)
+                () -> authService.register("Maria", "ana@example.com", "clave456")
         );
 
         assertEquals(
@@ -129,11 +118,9 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita registrar un usuario sin un nombre válido. */
     @Test
     void registerShouldRejectBlankName() {
-        RegisterRequest request = new RegisterRequest("   ", "ana@example.com", "clave123");
-
         ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> authService.register(request)
+                () -> authService.register("   ", "ana@example.com", "clave123")
         );
 
         assertEquals("VALIDACION_INVALIDA", exception.getCode());
@@ -143,11 +130,9 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita registrar un usuario con un correo inválido. */
     @Test
     void registerShouldRejectInvalidEmail() {
-        RegisterRequest request = new RegisterRequest("Ana", "ana@", "clave123");
-
         ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> authService.register(request)
+                () -> authService.register("Ana", "ana@", "clave123")
         );
 
         assertEquals("VALIDACION_INVALIDA", exception.getCode());
@@ -157,11 +142,9 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita registrar un usuario con una contraseña menor a ocho caracteres. */
     @Test
     void registerShouldRejectPasswordShorterThanEightCharacters() {
-        RegisterRequest request = new RegisterRequest("Ana", "ana@example.com", "abc1234");
-
         ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> authService.register(request)
+                () -> authService.register("Ana", "ana@example.com", "abc1234")
         );
 
         assertEquals("VALIDACION_INVALIDA", exception.getCode());
@@ -171,11 +154,9 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita registrar un usuario con una contraseña sin letras. */
     @Test
     void registerShouldRejectPasswordWithoutLetters() {
-        RegisterRequest request = new RegisterRequest("Ana", "ana@example.com", "12345678");
-
         ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> authService.register(request)
+                () -> authService.register("Ana", "ana@example.com", "12345678")
         );
 
         assertEquals("VALIDACION_INVALIDA", exception.getCode());
@@ -185,11 +166,9 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita registrar un usuario con una contraseña sin números. */
     @Test
     void registerShouldRejectPasswordWithoutNumbers() {
-        RegisterRequest request = new RegisterRequest("Ana", "ana@example.com", "abcdefgh");
-
         ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> authService.register(request)
+                () -> authService.register("Ana", "ana@example.com", "abcdefgh")
         );
 
         assertEquals("VALIDACION_INVALIDA", exception.getCode());
@@ -199,11 +178,9 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita registrar un usuario con el nombre nulo. */
     @Test
     void registerShouldHandleNullName() {
-        RegisterRequest request = new RegisterRequest(null, "ana@example.com", "clave123");
-
         ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> authService.register(request)
+                () -> authService.register(null, "ana@example.com", "clave123")
         );
 
         assertEquals("VALIDACION_INVALIDA", exception.getCode());
@@ -212,11 +189,9 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita registrar un usuario con el correo nulo. */
     @Test
     void registerShouldHandleNullEmail() {
-        RegisterRequest request = new RegisterRequest("Ana", null, "clave123");
-
         ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> authService.register(request)
+                () -> authService.register("Ana", null, "clave123")
         );
 
         assertEquals("VALIDACION_INVALIDA", exception.getCode());
@@ -226,11 +201,9 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita registrar un usuario con una contraseña nula. */
     @Test
     void registerShouldHandleNullPassword() {
-        RegisterRequest request = new RegisterRequest("Ana", "ana@example.com", null);
-
         ValidationException exception = assertThrows(
                 ValidationException.class,
-                () -> authService.register(request)
+                () -> authService.register("Ana", "ana@example.com", null)
         );
 
         assertEquals("VALIDACION_INVALIDA", exception.getCode());
@@ -245,29 +218,23 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que un usuario pueda iniciar sesión con credenciales válidas y obtener un token. */
     @Test
     void loginShouldReturnTokenForValidCredentials() {
-        RegisterRequest registerRequest = new RegisterRequest("Ana", "ana@example.com", "clave123");
+        authService.register("Ana", "ana@example.com", "clave123");
 
-        authService.register(registerRequest);
-
-        LoginRequest loginRequest = new LoginRequest("ana@example.com", "clave123");
-
-        AuthResponse response = authService.login(loginRequest);
+        AuthResult response = authService.login("ana@example.com", "clave123");
 
         assertNotNull(response);
         assertNotNull(response.token());
         assertNotNull(response.usuario());
-        assertEquals("Ana", response.usuario().nombre());
-        assertEquals("ana@example.com", response.usuario().correo());
+        assertEquals("Ana", response.usuario().getNombre());
+        assertEquals("ana@example.com", response.usuario().getCorreo());
     }
 
     /** Se verifica que no se permita iniciar sesión con un correo que no existe. */
     @Test
     void loginShouldRejectUnknownEmail() {
-        LoginRequest loginRequest = new LoginRequest("unknown@example.com", "clave123");
-
         BadCredentialsException exception = assertThrows(
                 BadCredentialsException.class,
-                () -> authService.login(loginRequest)
+                () -> authService.login("unknown@example.com", "clave123")
         );
 
         assertEquals("Invalid credentials", exception.getMessage());
@@ -276,15 +243,11 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que no se permita iniciar sesión con una contraseña incorrecta. */
     @Test
     void loginShouldRejectInvalidPassword() {
-        RegisterRequest registerRequest = new RegisterRequest("Ana", "ana@example.com", "clave123");
-
-        authService.register(registerRequest);
-
-        LoginRequest loginRequest = new LoginRequest("ana@example.com", "clave456");
+        authService.register("Ana", "ana@example.com", "clave123");
 
         BadCredentialsException exception = assertThrows(
                 BadCredentialsException.class,
-                () -> authService.login(loginRequest)
+                () -> authService.login("ana@example.com", "clave456")
         );
 
         assertEquals("Invalid credentials", exception.getMessage());
@@ -293,29 +256,23 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     /** Se verifica que al iniciar sesión se normalice correctamente el correo. */
     @Test
     void loginShouldNormalizeEmail() {
-        RegisterRequest registerRequest = new RegisterRequest("Ana", "ana@example.com", "clave123");
-
-        authService.register(registerRequest);
+        authService.register("Ana", "ana@example.com", "clave123");
 
         LoginRequest loginRequest = new LoginRequest(" ANA@EXAMPLE.COM ", "clave123");
 
-        AuthResponse response = authService.login(loginRequest);
+        AuthResult response = authService.login(" ANA@EXAMPLE.COM ", "clave123");
 
         assertNotNull(response);
         assertNotNull(response.token());
-        assertEquals("ana@example.com", response.usuario().correo());
+        assertEquals("ana@example.com", response.usuario().getCorreo());
     }
 
     /** Se verifica que al iniciar sesión nuevamente se actualice la versión del estado del token. */
     @Test
     void loginShouldUpdateExistingTokenState() {
-        RegisterRequest registerRequest = new RegisterRequest("Ana", "ana@example.com", "clave123");
+        authService.register("Ana", "ana@example.com", "clave123");
 
-        authService.register(registerRequest);
-
-        LoginRequest loginRequest = new LoginRequest("ana@example.com", "clave123");
-
-        authService.login(loginRequest);
+        authService.login("ana@example.com", "clave123");
 
         Usuario usuario = usuarioRepository
                 .findByCorreoIgnoreCase("ana@example.com")
@@ -336,9 +293,7 @@ public class AuthServiceTest extends AbstractIntegrationTest {
                 passwordEncoder.encode("clave123"))
         );
 
-        LoginRequest loginRequest = new LoginRequest("ana@example.com", "clave123");
-
-        authService.login(loginRequest);
+        authService.login("ana@example.com", "clave123");
 
         TokenEstado tokenEstado = tokenEstadoRepository
                 .findByUsuarioId(usuario.getId())

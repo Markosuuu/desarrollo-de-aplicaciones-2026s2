@@ -2,8 +2,9 @@ package com.prontaentrega.services;
 
 import com.prontaentrega.models.Jugador;
 import com.prontaentrega.repository.JugadorRepository;
-import com.prontaentrega.services.dto.CatalogResponse;
+import com.prontaentrega.controllers.dtos.CatalogResponse;
 import com.prontaentrega.utils.AbstractIntegrationTest;
+import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +66,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
         saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -73,8 +74,8 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 10
         );
 
-        assertEquals(2, response.jugadores().size());
-        assertEquals(2, response.paginacion().total());
+        assertEquals(2, response.getTotalElements());
+        assertEquals(2, response.stream().count());
     }
 
     /** Se verifica que la búsqueda devuelva los jugadores que coinciden con el equipo indicado. */
@@ -83,15 +84,15 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
         saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 "Inter Miami",
                 null,
                 1,
                 10
         );
-        assertEquals(1, response.jugadores().size());
-        assertEquals("Lionel Messi", response.jugadores().getFirst().nombre());
+        assertEquals(1, response.getTotalElements());
+        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
     }
 
     /** Se verifica que la búsqueda devuelva los jugadores que coinciden con el nombre indicado. */
@@ -100,7 +101,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
         saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 "Messi",
@@ -108,8 +109,8 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 10
         );
 
-        assertEquals(1, response.jugadores().size());
-        assertEquals("Lionel Messi", response.jugadores().getFirst().nombre());
+        assertEquals(1, response.stream().count());
+        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
     }
 
     /** Se verifica que la búsqueda devuelva los jugadores que coinciden con la liga indicada. */
@@ -118,7 +119,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
         saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 "MLS    ",
                 null,
                 null,
@@ -126,8 +127,8 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 10
         );
 
-        assertEquals(1, response.jugadores().size());
-        assertEquals("Lionel Messi", response.jugadores().getFirst().nombre());
+        assertEquals(1, response.stream().count());
+        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
     }
 
     /** Se verifica que la búsqueda aplique correctamente múltiples filtros al mismo tiempo. */
@@ -137,7 +138,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(2, "Eder Aller", "Barcelona", "La Liga");
         saveJugador(3, "Luis Suarez", "Inter Miami", "MLS");
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 "MLS",
                 "Inter Miami",
                 "Messi",
@@ -145,10 +146,10 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 10
         );
 
-        assertEquals(1, response.jugadores().size());
-        assertEquals("Lionel Messi", response.jugadores().getFirst().nombre());
-        assertEquals("Inter Miami", response.jugadores().getFirst().equipo());
-        assertEquals("MLS", response.jugadores().getFirst().liga());
+        assertEquals(1, response.stream().count());
+        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
+        assertEquals("Inter Miami", response.stream().toList().getFirst().getEquipo());
+        assertEquals("MLS", response.stream().toList().getFirst().getLiga());
     }
 
     /** Se verifica que la búsqueda normalice los filtros antes de consultar el catálogo. */
@@ -157,7 +158,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
         saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 "  MLS  ",
                 "  Inter Miami  ",
                 "  Messi  ",
@@ -165,8 +166,8 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 10
         );
 
-        assertEquals(1, response.jugadores().size());
-        assertEquals("Lionel Messi", response.jugadores().getFirst().nombre());
+        assertEquals(1, response.stream().count());
+        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
     }
 
     /** Se verifica que la búsqueda respete la cantidad de jugadores solicitada por página. */
@@ -174,7 +175,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldReturnRequestedPlayersPerPage() {
         saveManyJugadores(3);
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -182,12 +183,12 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 2
         );
 
-        assertEquals(2, response.jugadores().size());
-        assertEquals("Jugador 1", response.jugadores().getFirst().nombre());
-        assertEquals("Jugador 2", response.jugadores().get(1).nombre());
-        assertEquals(2, response.paginacion().porPagina());
-        assertEquals(3, response.paginacion().total());
-        assertEquals(2, response.paginacion().totalPaginas());
+        assertEquals(2, response.stream().count());
+        assertEquals("Jugador 1", response.stream().toList().getFirst().getNombre());
+        assertEquals("Jugador 2", response.stream().toList().get(1).getNombre());
+        assertEquals(2, response.getSize());
+        assertEquals(3, response.getTotalElements());
+        assertEquals(2, response.getTotalPages());
     }
 
     /** Se verifica que la búsqueda devuelva correctamente los jugadores correspondientes a una página específica. */
@@ -195,7 +196,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldReturnPlayersFromRequestedPage() {
         saveManyJugadores(3);
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -203,12 +204,12 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 2
         );
 
-        assertEquals(1, response.jugadores().size());
-        assertEquals("Jugador 3", response.jugadores().getFirst().nombre());
-        assertEquals(2, response.paginacion().pagina());
-        assertEquals(2, response.paginacion().porPagina());
-        assertEquals(3, response.paginacion().total());
-        assertEquals(2, response.paginacion().totalPaginas());
+        assertEquals(1, response.getNumberOfElements());
+        assertEquals("Jugador 3", response.stream().toList().getFirst().getNombre());
+        assertEquals(1, response.getNumber());
+        assertEquals(1, response.getNumberOfElements());
+        assertEquals(3, response.getTotalElements());
+        assertEquals(2, response.getTotalPages());
     }
 
     /** Se verifica que una búsqueda sin coincidencias devuelva una respuesta vacía sin generar un error. */
@@ -216,7 +217,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldReturnEmptyResponseWhenNoPlayersMatch() {
         saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 "Jugador inexistente",
@@ -224,9 +225,9 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 10
         );
 
-        assertTrue(response.jugadores().isEmpty());
-        assertEquals(0, response.paginacion().total());
-        assertEquals(1, response.paginacion().totalPaginas());
+        assertTrue(response.stream().toList().isEmpty());
+        assertEquals(0, response.getTotalElements());
+        assertEquals(0, response.getTotalPages());
     }
 
     /** Se verifica que una página menor a uno se interprete como la primera página. */
@@ -234,7 +235,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldUseFirstPageWhenPageIsLessThanOne() {
         saveManyJugadores(3);
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -242,9 +243,9 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 2
         );
 
-        assertEquals(2, response.jugadores().size());
-        assertEquals("Jugador 1", response.jugadores().getFirst().nombre());
-        assertEquals(1, response.paginacion().pagina());
+        assertEquals(2, response.getNumberOfElements());
+        assertEquals("Jugador 1", response.getContent().getFirst().getNombre());
+        assertEquals(0, response.getNumber());
     }
 
     /** TEST DE LIMITES: Se verifica que una cantidad de jugadores por página mayor a 50 se limite a 50. */
@@ -252,7 +253,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldLimitPerPageToFifty() {
         saveManyJugadores(51);
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -260,10 +261,10 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 51
         );
 
-        assertEquals(50, response.jugadores().size());
-        assertEquals(50, response.paginacion().porPagina());
-        assertEquals(51, response.paginacion().total());
-        assertEquals(2, response.paginacion().totalPaginas());
+        assertEquals(50, response.getNumberOfElements());
+        assertEquals(50, response.getSize());
+        assertEquals(51, response.getTotalElements());
+        assertEquals(2, response.getTotalPages());
     }
 
     /** TEST DE LIMITES: Se verifica que una cantidad de jugadores por página igual a 50 retorne 50. */
@@ -271,7 +272,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchFiftyPerPageShouldReturnFifty() {
         saveManyJugadores(51);
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -279,10 +280,10 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 50
         );
 
-        assertEquals(50, response.jugadores().size());
-        assertEquals(50, response.paginacion().porPagina());
-        assertEquals(51, response.paginacion().total());
-        assertEquals(2, response.paginacion().totalPaginas());
+        assertEquals(50, response.getNumberOfElements());
+        assertEquals(50, response.getSize());
+        assertEquals(51, response.getTotalElements());
+        assertEquals(2, response.getTotalPages());
     }
 
     /** TEST DE LIMITES: Se verifica que una cantidad de jugadores por página igual a 49 retorne 49. */
@@ -290,7 +291,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void search49PerPageShouldReturn49Elements() {
         saveManyJugadores(51);
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -298,10 +299,10 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 49
         );
 
-        assertEquals(49, response.jugadores().size());
-        assertEquals(49, response.paginacion().porPagina());
-        assertEquals(51, response.paginacion().total());
-        assertEquals(2, response.paginacion().totalPaginas());
+        assertEquals(49, response.getNumberOfElements());
+        assertEquals(49, response.getSize());
+        assertEquals(51, response.getTotalElements());
+        assertEquals(2, response.getTotalPages());
     }
 
     /** TEST DE LIMITES: Se verifica que una cantidad de jugadores por página menor a uno se convierta en uno. */
@@ -309,7 +310,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldUseOneWhenPerPageIsLessThanOne() {
         saveManyJugadores(3);
 
-        CatalogResponse response = playerCatalogService.search(
+        Page<Jugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -317,9 +318,9 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 0
         );
 
-        assertEquals(1, response.jugadores().size());
-        assertEquals(1, response.paginacion().porPagina());
-        assertEquals(3, response.paginacion().total());
-        assertEquals(3, response.paginacion().totalPaginas());
+        assertEquals(1, response.getNumberOfElements());
+        assertEquals(1, response.getSize());
+        assertEquals(3, response.getTotalElements());
+        assertEquals(3, response.getTotalPages());
     }
 }
