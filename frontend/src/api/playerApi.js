@@ -22,7 +22,7 @@ export async function fetchPlayers({ page = 1, perPage = 20, nombre, equipo, lig
   if (liga) params.set('liga', liga);
 
   const queryString = params.toString();
-  const response = await fetch(`${API_BASE_URL}/players${queryString ? `?${queryString}` : ''}`, {
+  const response = await fetch(`${API_BASE_URL}/players${queryString}`, {
     headers: {
       Accept: 'application/json',
     },
