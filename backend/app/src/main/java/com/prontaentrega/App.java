@@ -2,10 +2,20 @@ package com.prontaentrega;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+/**
+ * Punto de entrada de la aplicacion Spring Boot.
+ */
 @SpringBootApplication
+@ConfigurationPropertiesScan
+@EnableScheduling
 public class App {
+    /**
+     * Carga variables locales y levanta el backend.
+     */
     public static void main(String[] args) {
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         dotenv.entries().forEach(entry ->

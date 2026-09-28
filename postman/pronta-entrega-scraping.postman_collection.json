@@ -1,0 +1,105 @@
+{
+  "info": {
+    "name": "ProntaEntrega - Scraping jugadores",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    }
+  ],
+  "item": [
+    {
+      "name": "Actualizar estadisticas de jugadores",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/players/update",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "players",
+            "update"
+          ]
+        }
+      },
+      "response": [
+        {
+          "name": "Actualizacion completada",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/players/update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "players",
+                "update"
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"success\": true,\n  \"message\": \"Actualizacion completada correctamente\",\n  \"created\": 8,\n  \"updated\": 2,\n  \"skipped\": 1,\n  \"source\": \"WhoScored\"\n}"
+        },
+        {
+          "name": "Proveedor no disponible",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/players/update",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "players",
+                "update"
+              ]
+            }
+          },
+          "status": "Bad Gateway",
+          "code": 502,
+          "_postman_previewlanguage": "json",
+          "body": "{\n  \"success\": false,\n  \"message\": \"No se pudo completar la actualizacion. Se conserva la informacion local vigente.\",\n  \"created\": 0,\n  \"updated\": 0,\n  \"skipped\": 0,\n  \"source\": \"WhoScored\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Consultar jugadores locales",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/players?page=1&perPage=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "players"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "perPage",
+              "value": "20"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

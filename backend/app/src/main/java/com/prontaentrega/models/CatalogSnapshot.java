@@ -10,12 +10,23 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+/**
+ * Registra el resultado de un intento de actualizacion del catalogo.
+ */
 @Entity
 @Table(name = "catalog_snapshots")
+@Getter
+@Setter
+@NoArgsConstructor
 public class CatalogSnapshot {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter(AccessLevel.NONE)
     private UUID id;
 
     @Column(name = "iniciado_en", nullable = false)
@@ -31,38 +42,8 @@ public class CatalogSnapshot {
     @Column
     private String error;
 
-    public CatalogSnapshot() {
-    }
-
-    public CatalogSnapshot(LocalDateTime iniciadoEn, LocalDateTime finalizadoEn, EstadoCatalogo estado, String error) {
-        this.iniciadoEn = iniciadoEn;
-        this.finalizadoEn = finalizadoEn;
-        this.estado = estado;
-        this.error = error;
-    }
-
     public enum EstadoCatalogo {
-        VALIDO,
-        FALLIDO
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public LocalDateTime getIniciadoEn() {
-        return iniciadoEn;
-    }
-
-    public LocalDateTime getFinalizadoEn() {
-        return finalizadoEn;
-    }
-
-    public EstadoCatalogo getEstado() {
-        return estado;
-    }
-
-    public String getError() {
-        return error;
+       VALIDO,
+       FALLIDO
     }
 }

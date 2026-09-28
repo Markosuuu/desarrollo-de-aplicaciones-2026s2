@@ -8,14 +8,22 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "usuarios")
+@Getter
+@Setter
+@NoArgsConstructor
 public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    @Setter(AccessLevel.NONE)
     private UUID id;
 
     @Column(nullable = false)
@@ -29,54 +37,17 @@ public class Usuario {
 
     @CreationTimestamp
     @Column(name = "creado_en", nullable = false, updatable = false)
+    @Setter(AccessLevel.NONE)
     private LocalDateTime creadoEn;
 
     @UpdateTimestamp
     @Column(name = "actualizado_en", nullable = false)
+    @Setter(AccessLevel.NONE)
     private LocalDateTime actualizadoEn;
-
-    public Usuario() {
-    }
 
     public Usuario(String nombre, String correo, String passwordHash) {
         this.nombre = nombre;
         this.correo = correo;
         this.passwordHash = passwordHash;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public String getCorreo() {
-        return correo;
-    }
-
-    public void setCorreo(String correo) {
-        this.correo = correo;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
-    }
-
-    public LocalDateTime getCreadoEn() {
-        return creadoEn;
-    }
-
-    public LocalDateTime getActualizadoEn() {
-        return actualizadoEn;
     }
 }
