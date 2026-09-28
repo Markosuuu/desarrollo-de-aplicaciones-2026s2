@@ -3,7 +3,11 @@ import test from 'node:test';
 import { registerSchema } from '../validation/registerSchema.js';
 
 test('registerSchema acepta nombre, correo y contraseña válidos', async () => {
-  await registerSchema.validate({ nombre: 'Ana', correo: 'ana@ejemplo.com', password: 'clave123' });
+  const input = { nombre: 'Ana', correo: 'ana@ejemplo.com', password: 'clave123' };
+
+  const result = await registerSchema.validate(input);
+
+  assert.deepEqual(result, input);
 });
 
 test('registerSchema rechaza correo inválido', async () => {

@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { fetchPlayers } from '../api/playerApi';
-import { useAuth } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext';
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { fetchPlayers } from "../api/playerApi";
+import { useAuth } from "../context/AuthContext";
+import { useTheme } from "../context/ThemeContext";
 
 const PAGE_SIZE = 20;
 
@@ -12,7 +12,7 @@ export default function HomePage() {
   const { isDark, toggleTheme } = useTheme();
   const [players, setPlayers] = useState([]);
   const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({
     pagina: 1,
     porPagina: PAGE_SIZE,
@@ -20,13 +20,13 @@ export default function HomePage() {
     totalPaginas: 1,
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
 
     setLoading(true);
-    setError('');
+    setError("");
 
     fetchPlayers({
       page,
@@ -46,7 +46,7 @@ export default function HomePage() {
             porPagina: PAGE_SIZE,
             total: nextPlayers.length,
             totalPaginas: 1,
-          }
+          },
         );
       })
       .catch((fetchError) => {
@@ -55,7 +55,9 @@ export default function HomePage() {
         }
 
         setPlayers([]);
-        setError(fetchError.message || 'No se pudo cargar el catálogo de jugadores.');
+        setError(
+          fetchError.message || "No se pudo cargar el catálogo de jugadores.",
+        );
       })
       .finally(() => {
         if (active) {
@@ -76,9 +78,14 @@ export default function HomePage() {
     }
 
     return players.filter((player) => {
-      const searchableText = [player.nombre, player.equipo, player.liga, player.posicion]
+      const searchableText = [
+        player.nombre,
+        player.equipo,
+        player.liga,
+        player.posicion,
+      ]
         .filter(Boolean)
-        .join(' ')
+        .join(" ")
         .toLowerCase();
 
       return searchableText.includes(normalized);
@@ -89,7 +96,7 @@ export default function HomePage() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   const handleSearch = (event) => {
@@ -112,10 +119,18 @@ export default function HomePage() {
           </div>
 
           <div className="topbar-actions">
-            <button type="button" className="theme-toggle" onClick={toggleTheme}>
-              {isDark ? 'Tema claro' : 'Tema oscuro'}
+            <button
+              type="button"
+              className="theme-toggle"
+              onClick={toggleTheme}
+            >
+              {isDark ? "Tema claro" : "Tema oscuro"}
             </button>
-            <button type="button" className="logout-button" onClick={handleLogout}>
+            <button
+              type="button"
+              className="logout-button"
+              onClick={handleLogout}
+            >
               Cerrar sesión
             </button>
           </div>
@@ -124,7 +139,9 @@ export default function HomePage() {
         <section className="home-card catalog-card">
           <div className="catalog-header">
             <div>
-              <p className="welcome">Bienvenido/a{user?.nombre ? `, ${user.nombre}` : ''}</p>
+              <p className="welcome">
+                Bienvenido/a{user?.nombre ? `, ${user.nombre}` : ""}
+              </p>
               <h2>Catálogo de jugadores</h2>
             </div>
 
@@ -139,38 +156,51 @@ export default function HomePage() {
             </label>
           </div>
 
-          {loading ? (
+          {loading && (
             <div className="catalog-state">Cargando jugadores...</div>
-          ) : error ? (
-            <div className="catalog-state catalog-error">{error}</div>
-          ) : filteredPlayers.length === 0 ? (
-            <div className="catalog-state">No se encontraron jugadores para esta búsqueda.</div>
-          ) : (
+          )}
+
+          {error && <div className="catalog-state catalog-error">{error}</div>}
+
+          {filteredPlayers.length === 0 && (
+            <div className="catalog-state">
+              No se encontraron jugadores para esta búsqueda.
+            </div>
+          )}
+
+          {filteredPlayers.length > 0 && (
             <>
               <div className="catalog-summary">
                 <span>{filteredPlayers.length} jugadores</span>
-                <span>Página {pagination.pagina} de {totalPages}</span>
+                <span>
+                  Página {pagination.pagina} de {totalPages}
+                </span>
               </div>
 
               <div className="player-grid">
                 {filteredPlayers.map((player) => (
-                  <article key={player.id ?? `${player.nombre}-${player.equipo}`} className="player-card">
+                  <article
+                    key={player.id ?? `${player.nombre}-${player.equipo}`}
+                    className="player-card"
+                  >
                     <div className="player-card__top">
-                      <span className="player-position">{player.posicion || 'Sin posición'}</span>
+                      <span className="player-position">
+                        {player.posicion || "Sin posición"}
+                      </span>
                     </div>
-                    <h3>{player.nombre || 'Jugador sin nombre'}</h3>
+                    <h3>{player.nombre || "Jugador sin nombre"}</h3>
                     <ul className="player-meta">
                       <li>
                         <span>Equipo</span>
-                        <strong>{player.equipo || '—'}</strong>
+                        <strong>{player.equipo || "—"}</strong>
                       </li>
                       <li>
                         <span>Liga</span>
-                        <strong>{player.liga || '—'}</strong>
+                        <strong>{player.liga || "—"}</strong>
                       </li>
                       <li>
                         <span>Posición</span>
-                        <strong>{player.posicion || '—'}</strong>
+                        <strong>{player.posicion || "—"}</strong>
                       </li>
                     </ul>
                   </article>
