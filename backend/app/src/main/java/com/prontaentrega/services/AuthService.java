@@ -1,14 +1,11 @@
 package com.prontaentrega.services;
 
 import com.prontaentrega.authentication.JwtService;
-import com.prontaentrega.controllers.dtos.AuthResponse;
-import com.prontaentrega.controllers.dtos.LoginRequest;
-import com.prontaentrega.controllers.dtos.RegisterRequest;
-import com.prontaentrega.controllers.dtos.UsuarioResponse;
 import com.prontaentrega.models.TokenEstado;
 import com.prontaentrega.models.Usuario;
 import com.prontaentrega.repository.TokenEstadoRepository;
 import com.prontaentrega.repository.UsuarioRepository;
+import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.services.exceptions.DuplicateUserException;
 import com.prontaentrega.services.exceptions.ValidationException;
 import io.jsonwebtoken.Claims;
@@ -36,40 +33,64 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     * Valida el nombre, correo y contraseña proporcionados.
+     * Si el correo ya está registrado, lanza una excepción de usuario duplicado.
+     * Si la validación es exitosa, guarda el usuario en la base de datos, genera un token JWT y persiste el estado del token.
+     *
+     * @param nombre Nombre del usuario a registrar.
+     * @param correo Correo electrónico del usuario a registrar.
+     * @param password Contraseña del usuario a registrar.
+     * @return Un objeto AuthResult que contiene los detalles del usuario registrado y el token JWT generado.
+     * @throws ValidationException Si el nombre, correo o contraseña no cumplen con los criterios de validación.
+     * @throws DuplicateUserException Si ya existe un usuario registrado con el mismo correo.
+     */
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
-        String nombre = normalizeName(request.nombre());
-        String correo = normalizeEmail(request.correo());
-        String password = request.password();
+    public AuthResult register(String nombre, String correo, String password) {
+        String n = normalizeName(nombre);
+        String c = normalizeEmail(correo);
+        String p = password;
 
-        validateNombre(nombre);
-        validateCorreo(correo);
-        validatePassword(password);
+        validateNombre(n);
+        validateCorreo(c);
+        validatePassword(p);
 
-        if (usuarioRepository.existsByCorreoIgnoreCase(correo)) {
+        if (usuarioRepository.existsByCorreoIgnoreCase(c)) {
             throw new DuplicateUserException("Ya existe una cuenta con ese correo registrado");
         }
 
-        Usuario usuario = new Usuario(nombre, correo, passwordEncoder.encode(password));
+        Usuario usuario = new Usuario(n, c, passwordEncoder.encode(p));
         Usuario saved = usuarioRepository.save(usuario);
         String token = jwtService.generateToken(saved.getId(), saved.getCorreo());
         persistTokenState(saved.getId(), token);
-        return new AuthResponse(UsuarioResponse.from(saved), token);
+        return new AuthResult(saved, token);
     }
 
+    /**
+     * Inicia sesión para un usuario existente.
+     * Valida el correo y la contraseña proporcionados.
+     * Si las credenciales son válidas, genera un token JWT y persiste el estado del token.
+     * Si las credenciales son inválidas, lanza una excepción de credenciales incorrectas.
+     *
+     * @param correo Correo electrónico del usuario que intenta iniciar sesión.
+     * @param password Contraseña del usuario que intenta iniciar sesión.
+     * @return Un objeto AuthResult que contiene los detalles del usuario autenticado y el token JWT generado.
+     * @throws BadCredentialsException Si las credenciales proporcionadas son inválidas.
+     */
     @Transactional
-    public AuthResponse login(LoginRequest request) {
-        String correo = normalizeEmail(request.correo());
-        Usuario usuario = usuarioRepository.findByCorreoIgnoreCase(correo)
+    public AuthResult login(String correo, String password) {
+        String c = normalizeEmail(correo);
+        Usuario usuario = usuarioRepository.findByCorreoIgnoreCase(c)
                 .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
 
-        if (!passwordEncoder.matches(request.password(), usuario.getPasswordHash())) {
+        if (!passwordEncoder.matches(password, usuario.getPasswordHash())) {
             throw new BadCredentialsException("Invalid credentials");
         }
 
         String token = jwtService.generateToken(usuario.getId(), usuario.getCorreo());
         persistTokenState(usuario.getId(), token);
-        return new AuthResponse(UsuarioResponse.from(usuario), token);
+        return new AuthResult(usuario, token);
     }
 
     private void persistTokenState(UUID usuarioId, String token) {

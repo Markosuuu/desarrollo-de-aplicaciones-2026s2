@@ -1,7 +1,9 @@
 package com.prontaentrega.controllers;
 
+import com.prontaentrega.controllers.dtos.CatalogResponse;
 import com.prontaentrega.controllers.exceptionHandler.ErrorResponse;
-import com.prontaentrega.services.dto.CatalogResponse;
+import com.prontaentrega.controllers.dtos.PlayerResponse;
+import com.prontaentrega.models.Jugador;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.PlayerCatalogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,6 +11,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import java.util.List;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Controller HTTP del catalogo de jugadores.
  */
+@Slf4j
 @RestController
 @RequestMapping("/api")
 public class PlayerController {
@@ -49,12 +56,27 @@ public class PlayerController {
             @RequestParam(required = false) String nombre,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int perPage) {
-        var response = playerCatalogService.search(liga, equipo, nombre, page, perPage);
+
+        log.info("⌛ Buscando los jugadores");
+        Page<Jugador> jugadores = playerCatalogService.search(liga, equipo, nombre, page, perPage);
+
+        List<PlayerResponse> players = jugadores.getContent().stream()
+            .map(PlayerResponse::from)
+            .toList();
+
+        var response = new CatalogResponse(players, new CatalogResponse.Paginacion(
+                page,
+                perPage,
+                jugadores.getTotalElements(),
+                jugadores.getTotalPages()
+        ));
+
+        log.info("✅ Jugadores encontrados: {}", jugadores.getTotalElements());
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Dispara la actualizacion publica del catalogo desde WhoScored.
+     * Dispara la actualizacion pública del catalogo desde WhoScored.
      */
     @Operation(
             summary = "Actualizar jugadores manualmente",
@@ -66,6 +88,9 @@ public class PlayerController {
     })
     @PostMapping("/players/update")
     public ResponseEntity<RefreshCatalogResponse> updatePlayers() {
-        return ResponseEntity.status(HttpStatus.OK).body(playerCatalogService.refreshFromWhoScored());
+        log.info("⌛ Actualizando catalogo de jugadores desde WhoScored");
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(playerCatalogService.refreshFromWhoScored());
     }
 }

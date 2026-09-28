@@ -1,10 +1,8 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.controllers.dtos.PlayerResponse;
 import com.prontaentrega.models.Jugador;
 import com.prontaentrega.repository.CatalogSnapshotRepository;
 import com.prontaentrega.repository.JugadorRepository;
-import com.prontaentrega.services.dto.CatalogResponse;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.WhoScoredPlayerStat;
 import com.prontaentrega.services.dto.external.WhoScoredResponse;
@@ -41,26 +39,22 @@ public class PlayerCatalogService {
     }
 
     /**
-     * Busca jugadores en la base local sin consultar proveedores externos.
+     * Busca jugadores en el catalogo local.
+     *
+     * @param liga Liga a la que pertenece el jugador
+     * @param equipo Equipo al que pertenece el jugador
+     * @param nombre Nombre del jugador
+     * @param page Número de página
+     * @param perPage Cantidad de resultados por página
+     * @return Page<Jugador> Página de jugadores encontrados
      */
     @Transactional(readOnly = true)
-    public CatalogResponse search(String liga, String equipo, String nombre, int page, int perPage) {
+    public Page<Jugador> search(String liga, String equipo, String nombre, int page, int perPage) {
         int safePage = Math.max(page, 1);
-        int safePerPage = Math.max(Math.min(perPage, 50), 1);
+        int safePerPage = Math.clamp(perPage, 1, 50);
 
         Pageable pageable = PageRequest.of(safePage - 1, safePerPage);
-        Page<Jugador> result = jugadorRepository.search(normalize(liga), normalize(equipo), normalize(nombre), pageable);
-
-        List<PlayerResponse> players = result.getContent().stream()
-                .map(PlayerResponse::from)
-                .toList();
-
-        return new CatalogResponse(players, new CatalogResponse.Paginacion(
-                safePage,
-                safePerPage,
-                result.getTotalElements(),
-                result.getTotalPages() == 0 ? 1 : result.getTotalPages()
-        ));
+        return jugadorRepository.search(normalize(liga), normalize(equipo), normalize(nombre), pageable);
     }
 
     /**
