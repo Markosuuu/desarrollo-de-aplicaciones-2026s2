@@ -384,6 +384,13 @@ body[data-theme="dark"] .player-position {
   font-size: 0.98rem;
 }
 
+.player-meta__liga {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+}
+
 .catalog-state {
   display: grid;
   place-items: center;

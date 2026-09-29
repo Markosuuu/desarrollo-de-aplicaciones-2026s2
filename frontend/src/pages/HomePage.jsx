@@ -4,6 +4,12 @@ import { useAuth } from "../context/AuthContext";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
 
+import liga_es from "../assets/liga-es.png";
+import liga_al from "../assets/liga-al.png";
+import liga_fr from "../assets/liga-fr.png";
+import liga_it from "../assets/liga-it.png";
+import liga_en from "../assets/liga-en.png";
+
 const PAGE_SIZE = 20;
 
 export default function HomePage() {
@@ -102,6 +108,23 @@ export default function HomePage() {
     setPage(safePage);
   };
 
+  const getIconoFromLiga = (liga) => {
+    switch (liga) {
+      case "LaLiga":
+        return liga_es;
+      case "Bundesliga":
+        return liga_al;
+      case "Ligue 1":
+        return liga_fr;
+      case "Serie A":
+        return liga_it;
+      case "Premier League":
+        return liga_en;
+      default:
+        break;
+    }
+  };
+
   return (
     <main className="home-shell">
       <div className="home-panel">
@@ -178,7 +201,14 @@ export default function HomePage() {
                       </li>
                       <li>
                         <span>Liga</span>
-                        <strong>{player.liga || "—"}</strong>
+                        <div className="player-meta__liga">
+                          <img
+                            src={getIconoFromLiga(player.liga)}
+                            alt="icono-liga"
+                            width={30}
+                          />
+                          <strong>{player.liga || "—"}</strong>
+                        </div>
                       </li>
                       <li>
                         <span>Posición</span>
