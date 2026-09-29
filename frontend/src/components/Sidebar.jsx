@@ -52,7 +52,7 @@ export default function Sidebar({ children }) {
           >
             <img src={isDark ? sol : luna} alt="" width={25} />
             <span className="sidebar__label">
-              Tema {isDark ? "oscuro" : "claro"}
+              Tema {isDark ? "claro" : "oscuro"}
             </span>
           </button>
           <button
