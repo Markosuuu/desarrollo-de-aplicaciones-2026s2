@@ -1,15 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { fetchPlayers } from "../api/playerApi";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
 
 const PAGE_SIZE = 20;
 
 export default function HomePage() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const [players, setPlayers] = useState([]);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -94,11 +90,6 @@ export default function HomePage() {
 
   const totalPages = Math.max(pagination.totalPaginas || 1, 1);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   const handleSearch = (event) => {
     setPage(1);
     setSearchTerm(event.target.value);
@@ -114,25 +105,8 @@ export default function HomePage() {
       <div className="home-panel">
         <header className="topbar">
           <div>
-            <p className="eyebrow">ProntaEntrega</p>
+            <p className="eyebrow texto-locura">ProntaEntrega</p>
             <h1>Home</h1>
-          </div>
-
-          <div className="topbar-actions">
-            <button
-              type="button"
-              className="theme-toggle"
-              onClick={toggleTheme}
-            >
-              {isDark ? "Tema claro" : "Tema oscuro"}
-            </button>
-            <button
-              type="button"
-              className="logout-button"
-              onClick={handleLogout}
-            >
-              Cerrar sesión
-            </button>
           </div>
         </header>
 
