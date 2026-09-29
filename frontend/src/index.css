@@ -92,7 +92,6 @@ button {
   height: 100vh;
   padding: 1rem;
   background: none;
-  /* color: #f8fafc; */
   transition:
     width 0.2s ease,
     flex-basis 0.2s ease;
@@ -141,11 +140,9 @@ button {
 .sidebar__avatar {
   display: grid;
   flex: 0 0 40px;
-  width: 40px;
   aspect-ratio: 1;
   place-items: center;
   border-radius: 50%;
-  background: #e6007e;
   color: white;
 }
 
@@ -598,9 +595,8 @@ body[data-theme="dark"] .theme-toggle {
 }
 
 .texto-locura {
-  color: #e6007e;
   font-size: 2rem;
-
+  font-weight: 500;
   background: linear-gradient(
     90deg,
     #29a8e0 0%,

@@ -16,7 +16,9 @@
     "vite": "^8.3.0"
   },
   "dependencies": {
+    "@blobatar/react": "^2.7.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "blobatar": "^2.7.0",
     "cors": "^2.8.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

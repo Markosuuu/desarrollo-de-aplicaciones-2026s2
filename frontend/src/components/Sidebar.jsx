@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { Blobatar } from "@blobatar/react";
+import "blobatar/motion.css";
 
 import sol from "../assets/icono-theme-sol.png";
 import luna from "../assets/icono-theme-luna.png";
@@ -29,10 +31,13 @@ export default function Sidebar({ children }) {
         >
           <span aria-hidden="true">{collapsed ? "»" : "«"}</span>
         </button>
-
         <div className="sidebar__user" title={user?.nombre || "Usuario"}>
           <span className="sidebar__avatar" aria-hidden="true">
-            {(user?.nombre || "U").charAt(0).toUpperCase()}
+            <Blobatar
+              name={user?.nombre || "Usuario"}
+              animate="hover"
+              width={50}
+            />
           </span>
           <span className="sidebar__username">{user?.nombre || "Usuario"}</span>
         </div>
