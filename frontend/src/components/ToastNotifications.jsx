@@ -1,5 +1,5 @@
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function ToastNotifications() {
   return (
@@ -10,7 +10,7 @@ export default function ToastNotifications() {
       newestOnTop
       closeOnClick
       pauseOnHover
-      theme="colored"
+      theme="dark"
     />
   );
 }

@@ -1,10 +1,11 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import ProtectedRoute from './components/ProtectedRoute';
-import ToastNotifications from './components/ToastNotifications';
-import { useAuth } from './context/AuthContext';
-import HomePage from './pages/HomePage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import { Navigate, Route, Routes } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Sidebar from "./components/Sidebar";
+import ToastNotifications from "./components/ToastNotifications";
+import { useAuth } from "./context/AuthContext";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -33,11 +34,16 @@ export default function App() {
           path="/"
           element={
             <ProtectedRoute requireAuth>
-              <HomePage />
+              <Sidebar>
+                <HomePage />
+              </Sidebar>
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<Navigate to={isAuthenticated ? '/' : '/login'} replace />} />
+        <Route
+          path="*"
+          element={<Navigate to={isAuthenticated ? "/" : "/login"} replace />}
+        />
       </Routes>
     </>
   );

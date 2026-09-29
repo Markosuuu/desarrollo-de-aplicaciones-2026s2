@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
+import album from "../assets/album_locura.png";
+
 export default function AuthView({
   schema,
   onSubmit,
@@ -46,6 +48,9 @@ export default function AuthView({
 
   return (
     <main className="auth-shell">
+      <div className="auth-image">
+        <img src={album} alt="imagen_album_locura_virus" width="70%" />
+      </div>
       <section className="auth-card">
         <h1>{title}</h1>
         <p className="auth-subtitle">{subtitle}</p>

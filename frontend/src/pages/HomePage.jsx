@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { fetchPlayers } from "../api/playerApi";
 import { useAuth } from "../context/AuthContext";
-import { useTheme } from "../context/ThemeContext";
+import { Blobatar } from "@blobatar/react";
+import "blobatar/motion.css";
+
+import liga_es from "../assets/liga-es.png";
+import liga_al from "../assets/liga-al.png";
+import liga_fr from "../assets/liga-fr.png";
+import liga_it from "../assets/liga-it.png";
+import liga_en from "../assets/liga-en.png";
 
 const PAGE_SIZE = 20;
 
 export default function HomePage() {
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { user } = useAuth();
   const [players, setPlayers] = useState([]);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -94,11 +98,6 @@ export default function HomePage() {
 
   const totalPages = Math.max(pagination.totalPaginas || 1, 1);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
-
   const handleSearch = (event) => {
     setPage(1);
     setSearchTerm(event.target.value);
@@ -109,30 +108,29 @@ export default function HomePage() {
     setPage(safePage);
   };
 
+  const getIconoFromLiga = (liga) => {
+    switch (liga) {
+      case "LaLiga":
+        return liga_es;
+      case "Bundesliga":
+        return liga_al;
+      case "Ligue 1":
+        return liga_fr;
+      case "Serie A":
+        return liga_it;
+      case "Premier League":
+        return liga_en;
+      default:
+        break;
+    }
+  };
+
   return (
     <main className="home-shell">
       <div className="home-panel">
         <header className="topbar">
           <div>
-            <p className="eyebrow">ProntaEntrega</p>
-            <h1>Home</h1>
-          </div>
-
-          <div className="topbar-actions">
-            <button
-              type="button"
-              className="theme-toggle"
-              onClick={toggleTheme}
-            >
-              {isDark ? "Tema claro" : "Tema oscuro"}
-            </button>
-            <button
-              type="button"
-              className="logout-button"
-              onClick={handleLogout}
-            >
-              Cerrar sesión
-            </button>
+            <h1 className="eyebrow texto-locura">ProntaEntrega</h1>
           </div>
         </header>
 
@@ -188,7 +186,14 @@ export default function HomePage() {
                         {player.posicion || "Sin posición"}
                       </span>
                     </div>
-                    <h3>{player.nombre || "Jugador sin nombre"}</h3>
+                    <div className="player-card__name">
+                      <Blobatar
+                        name={player.nombre || "Jugador"}
+                        animate="hover"
+                        width={50}
+                      />
+                      <h3>{player.nombre || "Jugador sin nombre"}</h3>
+                    </div>
                     <ul className="player-meta">
                       <li>
                         <span>Equipo</span>
@@ -196,7 +201,14 @@ export default function HomePage() {
                       </li>
                       <li>
                         <span>Liga</span>
-                        <strong>{player.liga || "—"}</strong>
+                        <div className="player-meta__liga">
+                          <img
+                            src={getIconoFromLiga(player.liga)}
+                            alt="icono-liga"
+                            width={30}
+                          />
+                          <strong>{player.liga || "—"}</strong>
+                        </div>
                       </li>
                       <li>
                         <span>Posición</span>
