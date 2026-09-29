@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { fetchPlayers } from "../api/playerApi";
 import { useAuth } from "../context/AuthContext";
+import { Blobatar } from "@blobatar/react";
+import "blobatar/motion.css";
 
 const PAGE_SIZE = 20;
 
@@ -105,8 +107,7 @@ export default function HomePage() {
       <div className="home-panel">
         <header className="topbar">
           <div>
-            <p className="eyebrow texto-locura">ProntaEntrega</p>
-            <h1>Home</h1>
+            <h1 className="eyebrow texto-locura">ProntaEntrega</h1>
           </div>
         </header>
 
@@ -162,7 +163,14 @@ export default function HomePage() {
                         {player.posicion || "Sin posición"}
                       </span>
                     </div>
-                    <h3>{player.nombre || "Jugador sin nombre"}</h3>
+                    <div className="player-card__name">
+                      <Blobatar
+                        name={player.nombre || "Jugador"}
+                        animate="hover"
+                        width={50}
+                      />
+                      <h3>{player.nombre || "Jugador sin nombre"}</h3>
+                    </div>
                     <ul className="player-meta">
                       <li>
                         <span>Equipo</span>

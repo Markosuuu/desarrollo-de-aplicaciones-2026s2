@@ -326,6 +326,12 @@ body[data-theme="dark"] .search-field input {
   justify-content: center;
 }
 
+.player-card__name {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .player-position {
   display: inline-flex;
   align-items: center;
