@@ -8,7 +8,7 @@ function toSafeTerm(value) {
   return SAFE_TERM.test(trimmed) ? trimmed : undefined;
 }
 
-export async function fetchPlayers({ page = 1, perPage = 20, nombre, equipo, liga } = {}) {
+export async function fetchPlayers({ page = 1, perPage = 20, nombre, equipo, liga, token } = {}) {
   const params = new URLSearchParams();
 
   params.set('page', String(page));
@@ -25,6 +25,7 @@ export async function fetchPlayers({ page = 1, perPage = 20, nombre, equipo, lig
   const response = await fetch(`${API_BASE_URL}/players?${queryString}`, {
     headers: {
       Accept: 'application/json',
+      Authorization: 'Bearer '+token
     },
   });
 
