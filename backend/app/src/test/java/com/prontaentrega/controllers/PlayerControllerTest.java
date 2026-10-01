@@ -132,7 +132,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(
-                        "No se pudo completar la actualizacion. WhoScored no informo correctamente la cantidad de paginas."
+                        "No se pudo completar la actualizacion. El proveedor no informo correctamente la cantidad de paginas."
                 ))
                 .andExpect(jsonPath("$.created").value(0))
                 .andExpect(jsonPath("$.updated").value(0))
@@ -163,7 +163,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(
-                        "No se pudo completar la actualizacion. WhoScored no produjo registros utiles."
+                        "No se pudo completar la actualizacion. El proveedor no produjo registros utiles."
                 ))
                 .andExpect(jsonPath("$.created").value(0))
                 .andExpect(jsonPath("$.updated").value(0))

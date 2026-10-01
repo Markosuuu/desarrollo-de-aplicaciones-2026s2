@@ -7,12 +7,12 @@ import java.util.List;
  * Respuesta principal de WhoScored usada para obtener la tabla de jugadores.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record WhoScoredResponse(
-        List<WhoScoredPlayerStat> playerTableStats,
+public record PlayerScrapperResponse(
+        List<PlayerStat> playerTableStats,
         Paging paging
 ) {
 
-    public List<WhoScoredPlayerStat> stats() {
+    public List<PlayerStat> stats() {
         return playerTableStats == null ? List.of() : playerTableStats;
     }
 
