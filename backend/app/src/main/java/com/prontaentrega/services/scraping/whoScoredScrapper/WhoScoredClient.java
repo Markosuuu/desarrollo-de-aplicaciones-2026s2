@@ -1,11 +1,13 @@
-package com.prontaentrega.services.scraping;
+package com.prontaentrega.services.scraping.whoScoredScrapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prontaentrega.services.dto.external.WhoScoredResponse;
+import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
 import java.net.http.HttpClient;
 import java.time.Duration;
+
+import com.prontaentrega.services.scraping.PlayerScrapper;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -18,7 +20,7 @@ import java.net.CookiePolicy;
  * Cliente HTTP responsable de obtener estadisticas de jugadores desde WhoScored.
  */
 @Component
-public class WhoScoredClient {
+public class WhoScoredClient implements PlayerScrapper {
 
     private final WhoScoredProperties properties;
     private final CookieManager cookieManager = new CookieManager();
@@ -40,7 +42,7 @@ public class WhoScoredClient {
      * @param pageSize cantidad de jugadores por pagina
      * @return respuesta de WhoScored con jugadores y datos de paginacion
      */
-    public WhoScoredResponse fetchPlayerStatsPage(int page, int pageSize) {
+    public PlayerScrapperResponse fetchPlayerStatsPage(int page, int pageSize) {
         if (properties.url() == null || properties.url().isBlank()) {
             throw new ProviderUnavailableException(
                     "WHOSCORED_URL_INVALIDA",
@@ -80,8 +82,8 @@ public class WhoScoredClient {
                 );
             }
 
-            WhoScoredResponse response =
-                    objectMapper.readValue(body, WhoScoredResponse.class);
+            PlayerScrapperResponse response =
+                    objectMapper.readValue(body, PlayerScrapperResponse.class);
 
             if (response == null) {
                 throw new ProviderUnavailableException(
@@ -106,6 +108,11 @@ public class WhoScoredClient {
                     "No se pudo completar la actualizacion. Se conserva la informacion local vigente."
             );
         }
+    }
+
+    @Override
+    public String source() {
+        return "WhoScored";
     }
 
     private JdkClientHttpRequestFactory requestFactory() {
