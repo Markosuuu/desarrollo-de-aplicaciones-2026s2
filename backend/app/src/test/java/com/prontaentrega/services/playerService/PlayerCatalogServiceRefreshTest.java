@@ -1,4 +1,4 @@
-package com.prontaentrega.integration;
+package com.prontaentrega.services.playerService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,7 +31,7 @@ import org.springframework.test.context.DynamicPropertySource;
  * Tests de integracion del refresh usando PostgreSQL real y un servidor HTTP real.
  */
 @SpringBootTest
-class PlayerCatalogRefreshIntegrationTest extends AbstractIntegrationTest {
+class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
 
     private static final AtomicInteger providerStatus = new AtomicInteger(200);
     private static final AtomicReference<String> providerBody = new AtomicReference<>(validPayload());

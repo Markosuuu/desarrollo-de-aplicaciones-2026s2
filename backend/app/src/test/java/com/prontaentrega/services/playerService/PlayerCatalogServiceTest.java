@@ -1,8 +1,8 @@
-package com.prontaentrega.services;
+package com.prontaentrega.services.playerService;
 
 import com.prontaentrega.models.Jugador;
 import com.prontaentrega.repository.JugadorRepository;
-import com.prontaentrega.controllers.dtos.CatalogResponse;
+import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.BeforeEach;
