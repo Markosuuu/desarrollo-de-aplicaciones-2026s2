@@ -7,6 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.prontaentrega.models.Jugador;
 import com.prontaentrega.repository.JugadorRepository;
+import com.prontaentrega.repository.UsuarioRepository;
+import com.prontaentrega.services.AuthService;
+import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -23,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,6 +46,11 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     @Autowired
     private JugadorRepository jugadorRepository;
 
+    @Autowired
+    private AuthService authService;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
     /**
      * Registra la URL del proveedor HTTP local para el contexto de Spring.
      */
@@ -59,6 +66,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         jugadorRepository.deleteAll();
+        usuarioRepository.deleteAll();
         providerStatus.set(200);
         providerBody.set(payload());
     }
@@ -77,11 +85,30 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      * Verifica que la consulta de catalogo sea publica y paginada.
      */
     @Test
-    void catalogShouldBePublicAndPaginated() throws Exception {
-        mockMvc.perform(get("/api/players").param("liga", "La Liga").param("page", "1").param("per_page", "10"))
-                .andExpect(status().isOk())
+    void searchShouldBeProtectedWithTokenAndReturnPaginated() throws Exception {
+        AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(get("/api/players").param("liga", "La Liga")
+                        .param("page", "1").param("per_page", "10")
+                        .header("Authorization", "Bearer "+result.token())
+                ).andExpect(status().isOk())
                 .andExpect(jsonPath("$.jugadores").isArray())
                 .andExpect(jsonPath("$.paginacion.total").isNumber());
+    }
+
+    @Test
+    void searchShouldBeProtectedAndReturnForbiddenStatusWithoutToken() throws Exception {
+        mockMvc.perform(get("/api/players").param("liga", "La Liga")
+                        .param("page", "1").param("per_page", "10")
+                        .header("Authorization", "Bearer saraza123456")
+                ).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void searchShouldBeProtectedAndReturnUnauthorizedStatusWhenTokenIsWrong() throws Exception {
+        mockMvc.perform(get("/api/players").param("liga", "La Liga")
+                .param("page", "1").param("per_page", "10")
+        ).andExpect(status().isForbidden());
     }
 
     /**
