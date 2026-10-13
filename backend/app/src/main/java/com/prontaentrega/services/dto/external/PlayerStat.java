@@ -7,7 +7,7 @@ import java.math.BigDecimal;
  * Fila de estadisticas de jugador devuelta por WhoScored dentro de playerTableStats.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record WhoScoredPlayerStat(
+public record PlayerStat(
         Integer height,
         Integer weight,
         Integer age,

@@ -137,9 +137,9 @@ class PlayerCatalogRefreshIntegrationTest extends AbstractIntegrationTest {
                 () -> playerCatalogService.refreshFromWhoScored()
         );
 
-        assertEquals("WHOSCORED_PAGINACION_INVALIDA", exception.getCode());
+        assertEquals("PAGINACION_INVALIDA", exception.getCode());
         assertEquals(
-                "No se pudo completar la actualizacion. WhoScored no informo correctamente la cantidad de paginas.",
+                "No se pudo completar la actualizacion. El proveedor no informo correctamente la cantidad de paginas.",
                 exception.getMessage()
         );
 
@@ -189,9 +189,9 @@ class PlayerCatalogRefreshIntegrationTest extends AbstractIntegrationTest {
                 () -> playerCatalogService.refreshFromWhoScored()
         );
 
-        assertEquals("WHOSCORED_SIN_DATOS_UTILES", exception.getCode());
+        assertEquals("SIN_DATOS_UTILES", exception.getCode());
         assertEquals(
-                "No se pudo completar la actualizacion. WhoScored no produjo registros utiles.",
+                "No se pudo completar la actualizacion. El proveedor no produjo registros utiles.",
                 exception.getMessage()
         );
 
