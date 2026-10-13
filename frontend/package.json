@@ -8,7 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "test": "node --test src/tests/*.test.js"
+    "test": "node --test src/tests/*.test.js",
+    "pretest:coverage": "node -e \"require('node:fs').mkdirSync('coverage', { recursive: true })\"",
+    "test:coverage": "node --test --experimental-test-coverage --test-coverage-exclude=\"src/tests/**\" --test-reporter=spec --test-reporter-destination=stdout --test-reporter=lcov --test-reporter-destination=coverage/lcov.info src/tests/*.test.js"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
