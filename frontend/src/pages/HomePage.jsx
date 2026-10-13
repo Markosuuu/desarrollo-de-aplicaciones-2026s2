@@ -13,7 +13,7 @@ import liga_en from "../assets/liga-en.png";
 const PAGE_SIZE = 20;
 
 export default function HomePage() {
-  const { user, token} = useAuth();
+  const { user, token } = useAuth();
   const [players, setPlayers] = useState([]);
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,7 +36,7 @@ export default function HomePage() {
       page,
       perPage: PAGE_SIZE,
       nombre: searchTerm.trim() || undefined,
-      token: token
+      token: token,
     })
       .then((response) => {
         if (!active) {
@@ -73,7 +73,7 @@ export default function HomePage() {
     return () => {
       active = false;
     };
-  }, [page, searchTerm]);
+  }, [page, searchTerm, token]);
 
   const filteredPlayers = useMemo(() => {
     const normalized = searchTerm.trim().toLowerCase();
