@@ -6,8 +6,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.repository.ApiKey.ApiKeyRepository;
 import com.prontaentrega.repository.JugadorRepository;
 import com.prontaentrega.repository.UsuarioRepository;
+import com.prontaentrega.services.ApiKeyService;
 import com.prontaentrega.services.AuthService;
 import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -50,6 +52,10 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     private AuthService authService;
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private ApiKeyService apiKeyService;
+    @Autowired
+    private ApiKeyRepository apiKeyRepository;
 
     /**
      * Registra la URL del proveedor HTTP local para el contexto de Spring.
@@ -67,8 +73,10 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     void cleanDatabase() {
         jugadorRepository.deleteAll();
         usuarioRepository.deleteAll();
+        apiKeyRepository.deleteAll();
         providerStatus.set(200);
         providerBody.set(payload());
+
     }
 
     /**
@@ -97,7 +105,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void searchShouldBeProtectedAndReturnForbiddenStatusWithoutToken() throws Exception {
+    void searchShouldBeProtectedAndReturnForbiddenStatusWithoutApiKey() throws Exception {
         mockMvc.perform(get("/api/players").param("liga", "La Liga")
                         .param("page", "1").param("per_page", "10")
                         .header("Authorization", "Bearer saraza123456")
@@ -115,8 +123,10 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      * Verifica que la actualizacion publica responda con el contrato exitoso.
      */
     @Test
-    void updateShouldBePublicAndReturnSuccessContract() throws Exception {
-        mockMvc.perform(post("/api/players/update"))
+    void updateShouldReturnSuccessContract() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
+
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Actualizacion completada correctamente"))
@@ -131,10 +141,12 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      */
     @Test
     void updateShouldReturnBadGatewayWhenProviderFails() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
+
         providerStatus.set(500);
         providerBody.set("{\"error\":\"fallo\"}");
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("No se pudo completar la actualizacion. Se conserva la informacion local vigente."))
@@ -149,13 +161,15 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      * */
     @Test
     void updateShouldReturnBadGatewayWhenPaginationIsInvalid() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
+
         providerBody.set("""
             {
               "playerTableStats": []
             }
             """);
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(
@@ -172,6 +186,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      */
     @Test
     void updateShouldReturnBadGatewayWhenProviderHasNoUsefulData() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
         providerBody.set("""
             {
               "playerTableStats": [],
@@ -186,7 +201,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
             }
             """);
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(
@@ -204,6 +219,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      */
     @Test
     void updateShouldReturnSkippedPlayersInResponse() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
         providerBody.set("""
             {
               "playerTableStats": [
@@ -244,7 +260,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
             }
             """);
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value(
@@ -262,6 +278,8 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     * */
     @Test
     void updateShouldReturnUpdatedPlayersInResponse() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
+
         jugadorRepository.save(
                 Jugador.desdeEstadisticas(
                         101,
@@ -285,7 +303,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 )
         );
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value(
