@@ -8,9 +8,9 @@ public record RefreshCatalogResponse(boolean success, String message, int create
     /**
      * Construye una respuesta exitosa con los contadores del proceso.
      */
-    public static RefreshCatalogResponse success(int created, int updated, int skipped) {
+    public static RefreshCatalogResponse success(int created, int updated, int skipped, String source) {
         return new RefreshCatalogResponse(true, "Actualizacion completada correctamente", created, updated,
-                skipped, "WhoScored");
+                skipped, source);
     }
 
     /**
