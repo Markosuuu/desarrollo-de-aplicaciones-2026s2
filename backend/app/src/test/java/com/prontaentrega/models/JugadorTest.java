@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class JugadorTest {
     @Test
     void actualizarEstadisticasShouldReplaceSportValues() {
-        Jugador jugador = Jugador.desdeEstadisticas(
+        BolsaDeJugador jugador = BolsaDeJugador.desdeEstadisticas(
                 101,
                 "Ana Gomez",
                 "Rojo FC",
@@ -51,19 +51,21 @@ class JugadorTest {
                 "WhoScored"
         );
 
-        assertEquals(21, jugador.getEdad());
-        assertEquals(171, jugador.getAltura());
-        assertEquals(61, jugador.getPeso());
-        assertEquals(Posicion.MIDFIELDER, jugador.getPosicion());
-        assertFalse(jugador.getActivo());
-        assertEquals(3, jugador.getGoles());
-        assertEquals(4, jugador.getAsistencias());
-        assertEquals(new BigDecimal("2.5"), jugador.getDisparosPorPartido());
-        assertEquals(new BigDecimal("2.0"), jugador.getKeyPassesPorPartido());
-        assertEquals(new BigDecimal("3.0"), jugador.getDribblesGanadosPorPartido());
-        assertEquals(new BigDecimal("1.0"), jugador.getFaltasCometidasPorPartido());
-        assertEquals(new BigDecimal("7.8"), jugador.getRating());
-        assertEquals(700, jugador.getMinutosJugados());
+        Jugador datosJugador = jugador.getEstadisticasDeportivas().getJugador();
+        EstadisticasDeportivas estadisticas = jugador.getEstadisticasDeportivas();
+        assertEquals(21, datosJugador.getEdad());
+        assertEquals(171, datosJugador.getAltura());
+        assertEquals(61, datosJugador.getPeso());
+        assertEquals(Posicion.MIDFIELDER, datosJugador.getPosicion());
+        assertFalse(estadisticas.getActivo());
+        assertEquals(3, estadisticas.getGoles());
+        assertEquals(4, estadisticas.getAsistencias());
+        assertEquals(new BigDecimal("2.5"), estadisticas.getDisparosPorPartido());
+        assertEquals(new BigDecimal("2.0"), estadisticas.getKeyPassesPorPartido());
+        assertEquals(new BigDecimal("3.0"), estadisticas.getDribblesGanadosPorPartido());
+        assertEquals(new BigDecimal("1.0"), estadisticas.getFaltasCometidasPorPartido());
+        assertEquals(new BigDecimal("7.8"), estadisticas.getRating());
+        assertEquals(700, estadisticas.getMinutosJugados());
 
         // Estos valores no deberían modificarse al actualizar estadísticas.
         assertEquals(new BigDecimal("1"), jugador.getCotizacionActual());
@@ -74,7 +76,7 @@ class JugadorTest {
     void desdeEstadisticasShouldRejectBlankIdentity() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> Jugador.desdeEstadisticas(
+                () -> BolsaDeJugador.desdeEstadisticas(
                         101,
                         " ",
                         "Rojo FC", Liga.PREMIER_LEAGUE, 20,
@@ -89,7 +91,7 @@ class JugadorTest {
     void desdeEstadisticasShouldRejectNegativeGoalsStats() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> Jugador.desdeEstadisticas(
+                () -> BolsaDeJugador.desdeEstadisticas(
                         101, "Ana Gomez", "Rojo FC", Liga.PREMIER_LEAGUE, 20,
                         170, 60, Posicion.FORWARD, true,
                         -1,
@@ -105,7 +107,7 @@ class JugadorTest {
 
     @Test
     void actualizarEstadisticasShouldReplaceAllStatValues() {
-        Jugador jugador = Jugador.desdeEstadisticas(101, "Ana Gomez",
+        BolsaDeJugador jugador = BolsaDeJugador.desdeEstadisticas(101, "Ana Gomez",
                 "Rojo FC", Liga.PREMIER_LEAGUE, 20, 170, 60, Posicion.FORWARD,
                 true, 1, 2, new BigDecimal("1.5"),
                 new BigDecimal("1.0"), new BigDecimal("2.0"), new BigDecimal("0.5"),
@@ -118,25 +120,27 @@ class JugadorTest {
                 1500, LocalDateTime.now(), "WhoScored"
         );
 
-        assertEquals(21, jugador.getEdad());
-        assertEquals(171, jugador.getAltura());
-        assertEquals(61, jugador.getPeso());
-        assertEquals(Posicion.MIDFIELDER, jugador.getPosicion());
-        assertFalse(jugador.getActivo());
+        Jugador datosJugador = jugador.getEstadisticasDeportivas().getJugador();
+        EstadisticasDeportivas estadisticas = jugador.getEstadisticasDeportivas();
+        assertEquals(21, datosJugador.getEdad());
+        assertEquals(171, datosJugador.getAltura());
+        assertEquals(61, datosJugador.getPeso());
+        assertEquals(Posicion.MIDFIELDER, datosJugador.getPosicion());
+        assertFalse(estadisticas.getActivo());
 
-        assertEquals(10, jugador.getGoles());
-        assertEquals(8, jugador.getAsistencias());
-        assertEquals(new BigDecimal("3.5"), jugador.getDisparosPorPartido());
-        assertEquals(new BigDecimal("2.5"), jugador.getKeyPassesPorPartido());
-        assertEquals(new BigDecimal("4.0"), jugador.getDribblesGanadosPorPartido());
-        assertEquals(new BigDecimal("1.5"), jugador.getFaltasCometidasPorPartido());
-        assertEquals(new BigDecimal("8.9"), jugador.getRating());
-        assertEquals(1500, jugador.getMinutosJugados());
+        assertEquals(10, estadisticas.getGoles());
+        assertEquals(8, estadisticas.getAsistencias());
+        assertEquals(new BigDecimal("3.5"), estadisticas.getDisparosPorPartido());
+        assertEquals(new BigDecimal("2.5"), estadisticas.getKeyPassesPorPartido());
+        assertEquals(new BigDecimal("4.0"), estadisticas.getDribblesGanadosPorPartido());
+        assertEquals(new BigDecimal("1.5"), estadisticas.getFaltasCometidasPorPartido());
+        assertEquals(new BigDecimal("8.9"), estadisticas.getRating());
+        assertEquals(1500, estadisticas.getMinutosJugados());
     }
 
     @Test
     void actualizarEstadisticasShouldPreserveMarketValues() {
-        Jugador jugador = Jugador.desdeEstadisticas(
+        BolsaDeJugador jugador = BolsaDeJugador.desdeEstadisticas(
                 101, "Ana Gomez", "Rojo FC", Liga.PREMIER_LEAGUE, 20, 170,
                 60, Posicion.FORWARD, true, 1, 2, BigDecimal.ONE, BigDecimal.ONE,
                 BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, 500, LocalDateTime.now()

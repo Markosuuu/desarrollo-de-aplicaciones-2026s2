@@ -1,6 +1,6 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.Liga;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Servicio de catalogo de jugadores.
  * Orquesta lectura local, obtencion de WhoScored y persistencia segura sin
- * ubicar reglas de dominio fuera de la entidad Jugador.
+ * mantener las reglas de dominio en sus componentes correspondientes.
  */
 @Service
 public class PlayerCatalogService {
@@ -47,10 +47,10 @@ public class PlayerCatalogService {
      * @param nombre Nombre del jugador
      * @param page Número de página
      * @param perPage Cantidad de resultados por página
-     * @return Page<Jugador> Página de jugadores encontrados
+     * @return Page<BolsaDeJugador> Página de jugadores encontrados con sus estadísticas y cotización
      */
     @Transactional(readOnly = true)
-    public Page<Jugador> search(Liga liga, String equipo, String nombre, int page, int perPage) {
+    public Page<BolsaDeJugador> search(Liga liga, String equipo, String nombre, int page, int perPage) {
         int safePage = Math.max(page, 1);
         int safePerPage = Math.clamp(perPage, 1, 50);
 
@@ -87,7 +87,6 @@ public class PlayerCatalogService {
             );
         }
         for (int page = 2; page <= totalPages; page++) {
-        //for (int page = 2; page <= 3; page++) {
             PlayerScrapperResponse response =
                     playerScrapper.fetchPlayerStatsPage(page, pageSize);
 
@@ -111,20 +110,20 @@ public class PlayerCatalogService {
                 continue;
             }
 
-            Optional<Jugador> existing = jugadorRepository.findByWhoscoredId(stat.playerId());
+            Optional<BolsaDeJugador> existing = jugadorRepository.findByWhoscoredId(stat.playerId());
 
             if (existing.isPresent()) {
-                Jugador jugador = existing.get();
-                scrappedPlayerMapper.updateJugador(
-                        jugador,
+                BolsaDeJugador bolsa = existing.get();
+                scrappedPlayerMapper.updateBolsaDeJugador(
+                        bolsa,
                         stat,
                         updatedAt
                 );
-                jugadorRepository.save(jugador);
+                jugadorRepository.save(bolsa);
                 updated++;
             } else {
                 jugadorRepository.save(
-                        scrappedPlayerMapper.toJugador(stat, updatedAt)
+                        scrappedPlayerMapper.toBolsaDeJugador(stat, updatedAt)
                 );
                 created++;
             }

@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.Liga;
 import com.prontaentrega.models.Posicion;
 import com.prontaentrega.persistence.repository.JugadorRepository;
@@ -110,11 +110,11 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
         assertEquals(0, second.skipped());
         assertEquals(2, jugadorRepository.count());
 
-        Jugador ana = jugadorRepository.findByWhoscoredId(101)
+        BolsaDeJugador ana = jugadorRepository.findByWhoscoredId(101)
                 .orElseThrow();
 
-        assertEquals(6, ana.getGoles());
-        assertEquals(new BigDecimal("8.10"), ana.getRating());
+        assertEquals(6, ana.getEstadisticasDeportivas().getGoles());
+        assertEquals(new BigDecimal("8.10"), ana.getEstadisticasDeportivas().getRating());
         assertTrue(second.success());
         assertEquals("Actualizacion completada correctamente", second.message());
         assertEquals(0, second.created());
@@ -206,7 +206,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
     @Test
     void refreshShouldPreserveCatalogWhenProviderFails() {
         jugadorRepository.save(
-                Jugador.desdeEstadisticas(
+                BolsaDeJugador.desdeEstadisticas(
                         999,
                         "Jugador Local",
                         "Equipo Local",
@@ -244,10 +244,10 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
 
         assertEquals(1, jugadorRepository.count());
 
-        Jugador jugador = jugadorRepository.findByWhoscoredId(999)
+        BolsaDeJugador jugador = jugadorRepository.findByWhoscoredId(999)
                 .orElseThrow();
 
-        assertEquals("Jugador Local", jugador.getNombre());
+        assertEquals("Jugador Local", jugador.getEstadisticasDeportivas().getJugador().getNombre());
     }
 
     /**

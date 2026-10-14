@@ -2,7 +2,7 @@ package com.prontaentrega.controllers;
 
 import com.prontaentrega.controllers.dtos.CatalogResponse;
 import com.prontaentrega.controllers.dtos.PlayerResponse;
-import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.Liga;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.PlayerCatalogService;
@@ -56,7 +56,7 @@ public class PlayerController {
             @RequestParam(defaultValue = "20") int perPage) {
 
         log.info("⌛ Buscando los jugadores");
-        Page<Jugador> jugadores = playerCatalogService.search(liga, equipo, nombre, page, perPage);
+        Page<BolsaDeJugador> jugadores = playerCatalogService.search(liga, equipo, nombre, page, perPage);
 
         List<PlayerResponse> players = jugadores.getContent().stream()
             .map(PlayerResponse::from)

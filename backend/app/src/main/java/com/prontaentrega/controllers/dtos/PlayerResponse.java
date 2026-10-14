@@ -1,6 +1,6 @@
 package com.prontaentrega.controllers.dtos;
 
-import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.Liga;
 import com.prontaentrega.models.Posicion;
 import java.math.BigDecimal;
@@ -37,7 +37,9 @@ public record PlayerResponse(
     /**
      * Construye la respuesta HTTP a partir de la entidad de dominio.
      */
-    public static PlayerResponse from(Jugador jugador) {
+    public static PlayerResponse from(BolsaDeJugador bolsa) {
+        var estadisticas = bolsa.getEstadisticasDeportivas();
+        var jugador = estadisticas.getJugador();
         return new PlayerResponse(
                 jugador.getId(),
                 jugador.getNombre(),
@@ -47,19 +49,19 @@ public record PlayerResponse(
                 jugador.getAltura(),
                 jugador.getPeso(),
                 jugador.getPosicion(),
-                jugador.getActivo(),
-                jugador.getGoles(),
-                jugador.getAsistencias(),
-                jugador.getDisparosPorPartido(),
-                jugador.getPorcentajePasesExitosos(),
-                jugador.getKeyPassesPorPartido(),
-                jugador.getDribblesGanadosPorPartido(),
-                jugador.getFaltasCometidasPorPartido(),
-                jugador.getRating(),
-                jugador.getMinutosJugados(),
-                jugador.getCotizacionActual(),
-                jugador.getFechaActualizacion(),
-                jugador.getTokensRestantes()
+                estadisticas.getActivo(),
+                estadisticas.getGoles(),
+                estadisticas.getAsistencias(),
+                estadisticas.getDisparosPorPartido(),
+                estadisticas.getPorcentajePasesExitosos(),
+                estadisticas.getKeyPassesPorPartido(),
+                estadisticas.getDribblesGanadosPorPartido(),
+                estadisticas.getFaltasCometidasPorPartido(),
+                estadisticas.getRating(),
+                estadisticas.getMinutosJugados(),
+                bolsa.getCotizacionActual(),
+                bolsa.getFechaActualizacion(),
+                bolsa.getTokensRestantes()
         );
     }
 }

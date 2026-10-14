@@ -1,6 +1,7 @@
 package com.prontaentrega.services.playerService;
 
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.Liga;
 import com.prontaentrega.models.Posicion;
 import com.prontaentrega.persistence.repository.JugadorRepository;
@@ -35,8 +36,8 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     /**
      ---> Metodo helper para no hacer setup tan largo antes de cada test <---
     **/
-    private Jugador saveJugador(Integer whoscoredId, String nombre, String equipo, Liga liga) {
-        Jugador jugador = Jugador.desdeEstadisticas(whoscoredId, nombre, equipo, liga,
+    private BolsaDeJugador saveJugador(Integer whoscoredId, String nombre, String equipo, Liga liga) {
+        BolsaDeJugador jugador = BolsaDeJugador.desdeEstadisticas(whoscoredId, nombre, equipo, liga,
                 25, 180, 75, Posicion.MIDFIELDER, true, 10, 5,
                 BigDecimal.valueOf(2.5), BigDecimal.valueOf(1.2), BigDecimal.valueOf(1.5),
                 BigDecimal.valueOf(0.5), BigDecimal.valueOf(7.5), 2000, LocalDateTime.now()
@@ -68,7 +69,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -86,7 +87,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 "Inter Miami",
                 null,
@@ -94,7 +95,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 10
         );
         assertEquals(1, response.getTotalElements());
-        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
+        assertEquals("Lionel Messi", response.stream().toList().getFirst().getEstadisticasDeportivas().getJugador().getNombre());
     }
 
     /** Se verifica que la búsqueda devuelva los jugadores que coinciden con el nombre indicado. */
@@ -103,7 +104,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 "Messi",
@@ -112,7 +113,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         );
 
         assertEquals(1, response.stream().count());
-        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
+        assertEquals("Lionel Messi", response.stream().toList().getFirst().getEstadisticasDeportivas().getJugador().getNombre());
     }
 
     /** Se verifica que la búsqueda devuelva los jugadores que coinciden con la liga indicada. */
@@ -121,7 +122,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 Liga.BUNDESLIGA,
                 null,
                 null,
@@ -130,7 +131,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         );
 
         assertEquals(1, response.stream().count());
-        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
+        assertEquals("Lionel Messi", response.stream().toList().getFirst().getEstadisticasDeportivas().getJugador().getNombre());
     }
 
     /** Se verifica que la búsqueda aplique correctamente múltiples filtros al mismo tiempo. */
@@ -140,7 +141,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(2, "Eder Aller", "Barcelona", Liga.LALIGA);
         saveJugador(3, "Luis Suarez", "Inter Miami", Liga.BUNDESLIGA);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 Liga.BUNDESLIGA,
                 "Inter Miami",
                 "Messi",
@@ -150,7 +151,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
 
         assertEquals(1, response.stream().count());
 
-        Jugador messi = response.stream().toList().getFirst();
+        Jugador messi = response.stream().toList().getFirst().getEstadisticasDeportivas().getJugador();
 
         assertEquals("Lionel Messi", messi.getNombre());
         assertEquals("Inter Miami", messi.getEquipo());
@@ -163,7 +164,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 Liga.BUNDESLIGA,
                 "  Inter Miami  ",
                 "  Messi  ",
@@ -172,7 +173,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         );
 
         assertEquals(1, response.stream().count());
-        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
+        assertEquals("Lionel Messi", response.stream().toList().getFirst().getEstadisticasDeportivas().getJugador().getNombre());
     }
 
     /** Se verifica que la búsqueda respete la cantidad de jugadores solicitada por página. */
@@ -180,7 +181,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldReturnRequestedPlayersPerPage() {
         saveManyJugadores(3);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -189,8 +190,8 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         );
 
         assertEquals(2, response.stream().count());
-        assertEquals("Jugador 1", response.stream().toList().getFirst().getNombre());
-        assertEquals("Jugador 2", response.stream().toList().get(1).getNombre());
+        assertEquals("Jugador 1", response.stream().toList().getFirst().getEstadisticasDeportivas().getJugador().getNombre());
+        assertEquals("Jugador 2", response.stream().toList().get(1).getEstadisticasDeportivas().getJugador().getNombre());
         assertEquals(2, response.getSize());
         assertEquals(3, response.getTotalElements());
         assertEquals(2, response.getTotalPages());
@@ -201,7 +202,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldReturnPlayersFromRequestedPage() {
         saveManyJugadores(3);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -210,7 +211,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         );
 
         assertEquals(1, response.getNumberOfElements());
-        assertEquals("Jugador 3", response.stream().toList().getFirst().getNombre());
+        assertEquals("Jugador 3", response.stream().toList().getFirst().getEstadisticasDeportivas().getJugador().getNombre());
         assertEquals(1, response.getNumber());
         assertEquals(1, response.getNumberOfElements());
         assertEquals(3, response.getTotalElements());
@@ -222,7 +223,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldReturnEmptyResponseWhenNoPlayersMatch() {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 "Jugador inexistente",
@@ -240,7 +241,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldUseFirstPageWhenPageIsLessThanOne() {
         saveManyJugadores(3);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -249,7 +250,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         );
 
         assertEquals(2, response.getNumberOfElements());
-        assertEquals("Jugador 1", response.getContent().getFirst().getNombre());
+        assertEquals("Jugador 1", response.getContent().getFirst().getEstadisticasDeportivas().getJugador().getNombre());
         assertEquals(0, response.getNumber());
     }
 
@@ -258,7 +259,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldLimitPerPageToFifty() {
         saveManyJugadores(51);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -277,7 +278,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchFiftyPerPageShouldReturnFifty() {
         saveManyJugadores(51);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -296,7 +297,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void search49PerPageShouldReturn49Elements() {
         saveManyJugadores(51);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,
@@ -315,7 +316,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldUseOneWhenPerPageIsLessThanOne() {
         saveManyJugadores(3);
 
-        Page<Jugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerCatalogService.search(
                 null,
                 null,
                 null,

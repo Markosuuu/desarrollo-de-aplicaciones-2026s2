@@ -5,7 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.Liga;
 import com.prontaentrega.models.Posicion;
 import com.prontaentrega.persistence.repository.JugadorRepository;
@@ -265,7 +265,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     @Test
     void updateShouldReturnUpdatedPlayersInResponse() throws Exception {
         jugadorRepository.save(
-                Jugador.desdeEstadisticas(
+                BolsaDeJugador.desdeEstadisticas(
                         101,
                         "Ana Gomez",
                         "Rojo FC",
