@@ -1,14 +1,12 @@
 package com.prontaentrega.controllers;
 
 import com.prontaentrega.controllers.dtos.CatalogResponse;
-import com.prontaentrega.controllers.exceptionHandler.ErrorResponse;
 import com.prontaentrega.controllers.dtos.PlayerResponse;
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.Liga;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.PlayerCatalogService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
@@ -51,7 +49,7 @@ public class PlayerController {
     })
     @GetMapping("/players")
     public ResponseEntity<CatalogResponse> getPlayers(
-            @RequestParam(required = false) String liga,
+            @RequestParam(required = false) Liga liga,
             @RequestParam(required = false) String equipo,
             @RequestParam(required = false) String nombre,
             @RequestParam(defaultValue = "1") int page,

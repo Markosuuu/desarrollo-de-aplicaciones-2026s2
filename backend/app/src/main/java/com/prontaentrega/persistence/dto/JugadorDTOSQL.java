@@ -1,6 +1,8 @@
 package com.prontaentrega.persistence.dto;
 
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.Posicion;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,7 +36,8 @@ public class JugadorDTOSQL {
     private String equipo;
 
     @Column(nullable = false)
-    private String liga;
+    @Convert(converter = LigaAttributeConverter.class)
+    private Liga liga;
 
     @Column(nullable = false)
     private Integer edad;
@@ -46,7 +49,8 @@ public class JugadorDTOSQL {
     private Integer peso;
 
     @Column
-    private String posicion;
+    @Convert(converter = PosicionAttributeConverter.class)
+    private Posicion posicion;
 
     @Column(nullable = false)
     private Boolean activo;
@@ -97,11 +101,11 @@ public class JugadorDTOSQL {
             Integer whoscoredId,
             String nombre,
             String equipo,
-            String liga,
+            Liga liga,
             Integer edad,
             Integer altura,
             Integer peso,
-            String posicion,
+            Posicion posicion,
             Boolean activo,
             Integer goles,
             Integer asistencias,
@@ -119,7 +123,7 @@ public class JugadorDTOSQL {
         this.whoscoredId = whoscoredId;
         this.nombre = nombre.trim();
         this.equipo = equipo.trim();
-        this.liga = liga.trim();
+        this.liga = liga;
 
         this.edad = edad;
         this.altura = altura;

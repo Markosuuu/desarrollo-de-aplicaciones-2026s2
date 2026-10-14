@@ -1,6 +1,7 @@
 package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.Liga;
 import com.prontaentrega.persistence.dto.JugadorDTOSQL;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;
@@ -45,7 +46,7 @@ public class JugadorRepositoryImpl implements JugadorRepository {
      * @return Una página con los jugadores encontrados
      */
     @Override
-    public Page<Jugador> search(String liga, String equipo, String nombre, Pageable pageable) {
+    public Page<Jugador> search(Liga liga, String equipo, String nombre, Pageable pageable) {
         Page<JugadorDTOSQL> pageDTO = daosql.search(liga, equipo, nombre, pageable);
 
         return pageDTO.map(JugadorDTOSQL::aJugador);

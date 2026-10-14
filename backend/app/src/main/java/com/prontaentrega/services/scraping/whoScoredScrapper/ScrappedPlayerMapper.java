@@ -1,6 +1,8 @@
 package com.prontaentrega.services.scraping.whoScoredScrapper;
 
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.Posicion;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
@@ -19,11 +21,11 @@ public class ScrappedPlayerMapper {
                 stat.playerId(),
                 stat.name(),
                 stat.teamName(),
-                stat.tournamentName(),
+                Liga.fromValue(stat.tournamentName()),
                 stat.age(),
                 stat.height(),
                 stat.weight(),
-                stat.positionText(),
+                Posicion.fromValue(stat.positionText()),
                 stat.isActive(),
                 stat.goal(),
                 stat.assistTotal(),
@@ -45,7 +47,7 @@ public class ScrappedPlayerMapper {
                 stat.age(),
                 stat.height(),
                 stat.weight(),
-                stat.positionText(),
+                Posicion.fromValue(stat.positionText()),
                 stat.isActive(),
                 stat.goal(),
                 stat.assistTotal(),

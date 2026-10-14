@@ -1,6 +1,7 @@
 package com.prontaentrega.services;
 
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.Liga;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.PlayerStat;
@@ -49,12 +50,12 @@ public class PlayerCatalogService {
      * @return Page<Jugador> Página de jugadores encontrados
      */
     @Transactional(readOnly = true)
-    public Page<Jugador> search(String liga, String equipo, String nombre, int page, int perPage) {
+    public Page<Jugador> search(Liga liga, String equipo, String nombre, int page, int perPage) {
         int safePage = Math.max(page, 1);
         int safePerPage = Math.clamp(perPage, 1, 50);
 
         Pageable pageable = PageRequest.of(safePage - 1, safePerPage);
-        return jugadorRepository.search(normalize(liga), normalize(equipo), normalize(nombre), pageable);
+        return jugadorRepository.search(liga, normalize(equipo), normalize(nombre), pageable);
     }
 
     /**

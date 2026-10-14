@@ -1,6 +1,8 @@
 package com.prontaentrega.services.playerService;
 
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.Posicion;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -33,9 +35,9 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     /**
      ---> Metodo helper para no hacer setup tan largo antes de cada test <---
     **/
-    private Jugador saveJugador(Integer whoscoredId, String nombre, String equipo, String liga) {
+    private Jugador saveJugador(Integer whoscoredId, String nombre, String equipo, Liga liga) {
         Jugador jugador = Jugador.desdeEstadisticas(whoscoredId, nombre, equipo, liga,
-                25, 180, 75, "MC", true, 10, 5,
+                25, 180, 75, Posicion.MIDFIELDER, true, 10, 5,
                 BigDecimal.valueOf(2.5), BigDecimal.valueOf(1.2), BigDecimal.valueOf(1.5),
                 BigDecimal.valueOf(0.5), BigDecimal.valueOf(7.5), 2000, LocalDateTime.now()
         );
@@ -51,7 +53,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                     i,
                     "Jugador " + i,
                     "Equipo " + i,
-                    "Liga " + i
+                    Liga.BUNDESLIGA
             );
         }
     }
@@ -63,8 +65,8 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     /** Se verifica que la búsqueda sin filtros devuelva todos los jugadores del catálogo. */
     @Test
     void searchShouldReturnAllPlayersWhenNoFiltersAreProvided() {
-        saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
-        saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
+        saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
+        saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
         Page<Jugador> response = playerCatalogService.search(
                 null,
@@ -81,8 +83,8 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     /** Se verifica que la búsqueda devuelva los jugadores que coinciden con el equipo indicado. */
     @Test
     void searchShouldReturnPlayersMatchingTeam() {
-        saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
-        saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
+        saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
+        saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
         Page<Jugador> response = playerCatalogService.search(
                 null,
@@ -98,8 +100,8 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     /** Se verifica que la búsqueda devuelva los jugadores que coinciden con el nombre indicado. */
     @Test
     void searchShouldReturnPlayersMatchingName() {
-        saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
-        saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
+        saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
+        saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
         Page<Jugador> response = playerCatalogService.search(
                 null,
@@ -116,11 +118,11 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     /** Se verifica que la búsqueda devuelva los jugadores que coinciden con la liga indicada. */
     @Test
     void searchShouldReturnPlayersMatchingLiga() {
-        saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
-        saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
+        saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
+        saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
         Page<Jugador> response = playerCatalogService.search(
-                "MLS    ",
+                Liga.BUNDESLIGA,
                 null,
                 null,
                 1,
@@ -134,12 +136,12 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     /** Se verifica que la búsqueda aplique correctamente múltiples filtros al mismo tiempo. */
     @Test
     void searchShouldReturnPlayersMatchingAllFilters() {
-        saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
-        saveJugador(2, "Eder Aller", "Barcelona", "La Liga");
-        saveJugador(3, "Luis Suarez", "Inter Miami", "MLS");
+        saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
+        saveJugador(2, "Eder Aller", "Barcelona", Liga.LALIGA);
+        saveJugador(3, "Luis Suarez", "Inter Miami", Liga.BUNDESLIGA);
 
         Page<Jugador> response = playerCatalogService.search(
-                "MLS",
+                Liga.BUNDESLIGA,
                 "Inter Miami",
                 "Messi",
                 1,
@@ -152,17 +154,17 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
 
         assertEquals("Lionel Messi", messi.getNombre());
         assertEquals("Inter Miami", messi.getEquipo());
-        assertEquals("MLS", messi.getLiga());
+        assertEquals(Liga.BUNDESLIGA, messi.getLiga());
     }
 
     /** Se verifica que la búsqueda normalice los filtros antes de consultar el catálogo. */
     @Test
     void searchShouldNormalizeFilters() {
-        saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
-        saveJugador(2, "Enzo Fernandez", "Chelsea", "Premier League");
+        saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
+        saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
         Page<Jugador> response = playerCatalogService.search(
-                "  MLS  ",
+                Liga.BUNDESLIGA,
                 "  Inter Miami  ",
                 "  Messi  ",
                 1,
@@ -218,7 +220,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     /** Se verifica que una búsqueda sin coincidencias devuelva una respuesta vacía sin generar un error. */
     @Test
     void searchShouldReturnEmptyResponseWhenNoPlayersMatch() {
-        saveJugador(1, "Lionel Messi", "Inter Miami", "MLS");
+        saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
 
         Page<Jugador> response = playerCatalogService.search(
                 null,

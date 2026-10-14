@@ -30,7 +30,7 @@ public class Jugador {
 
     private String equipo;
 
-    private String liga;
+    private Liga liga;
 
     private Integer edad;
 
@@ -38,7 +38,7 @@ public class Jugador {
 
     private Integer peso;
 
-    private String posicion;
+    private Posicion posicion;
 
     private Boolean activo;
 
@@ -78,11 +78,11 @@ public class Jugador {
             Integer whoscoredId,
             String nombre,
             String equipo,
-            String liga,
+            Liga liga,
             Integer edad,
             Integer altura,
             Integer peso,
-            String posicion,
+            Posicion posicion,
             Boolean activo,
             Integer goles,
             Integer asistencias,
@@ -101,7 +101,7 @@ public class Jugador {
        this.whoscoredId = whoscoredId;
        this.nombre = nombre.trim();
        this.equipo = equipo.trim();
-       this.liga = liga.trim();
+       this.liga = liga;
 
        this.edad = edad;
        this.altura = altura;
@@ -134,11 +134,11 @@ public class Jugador {
             Integer whoscoredId,
             String nombre,
             String equipo,
-            String liga,
+            Liga liga,
             Integer edad,
             Integer altura,
             Integer peso,
-            String posicion,
+            Posicion posicion,
             Boolean activo,
             Integer goles,
             Integer asistencias,
@@ -150,7 +150,7 @@ public class Jugador {
             Integer minutosJugados,
             LocalDateTime fecha) {
 
-        validarEstadisticas(edad, altura, peso, posicion, activo, goles,
+        validarEstadisticas(edad, altura, peso, activo, goles,
                 asistencias, disparosPorPartido, keyPassesPorPartido,
                 dribblesGanadosPorPartido, faltasCometidasPorPartido, rating,minutosJugados);
 
@@ -187,7 +187,7 @@ public class Jugador {
             Integer edad,
             Integer altura,
             Integer peso,
-            String posicion,
+            Posicion posicion,
             Boolean activo,
             Integer goles,
             Integer asistencias,
@@ -227,13 +227,15 @@ public class Jugador {
     /**
      * Validaciones de identidad
      * */
-    private static void validarIdentidad(Integer whoscoredId, String nombre, String equipo, String liga) {
+    private static void validarIdentidad(Integer whoscoredId, String nombre, String equipo, Liga liga) {
         if (whoscoredId == null) {
             throw new IllegalArgumentException("El ID de WhoScored es obligatorio");
         }
         validarTexto(nombre, "El nombre es obligatorio");
         validarTexto(equipo, "El equipo es obligatorio");
-        validarTexto(liga, "La liga es obligatoria");
+        if (liga == null) {
+            throw new IllegalArgumentException("La liga es obligatoria");
+        }
     }
 
     private static String validarTexto(String value, String message) {
@@ -250,7 +252,6 @@ public class Jugador {
             Integer edad,
             Integer altura,
             Integer peso,
-            String posicion,
             Boolean activo,
             Integer goles,
             Integer asistencias,

@@ -1,6 +1,8 @@
 package com.prontaentrega.controllers.dtos;
 
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.Posicion;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,11 +14,11 @@ public record PlayerResponse(
         UUID id,
         String nombre,
         String equipo,
-        String liga,
+        Liga liga,
         Integer edad,
         Integer altura,
         Integer peso,
-        String posicion,
+        Posicion posicion,
         Boolean activo,
         Integer goles,
         Integer asistencias,
