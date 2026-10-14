@@ -2,7 +2,6 @@ package com.prontaentrega.services;
 
 import com.prontaentrega.models.Jugador;
 import com.prontaentrega.persistence.repository.JugadorRepository;
-import com.prontaentrega.repository.CatalogSnapshotRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
@@ -32,7 +31,6 @@ public class PlayerCatalogService {
     private final ScrappedPlayerMapper scrappedPlayerMapper;
 
     public PlayerCatalogService(JugadorRepository jugadorRepository,
-                                CatalogSnapshotRepository catalogSnapshotRepository,
                                 PlayerScrapper playerScrapper,
                                 ScrappedPlayerMapper scrappedPlayerMapper) {
         this.jugadorRepository = jugadorRepository;
