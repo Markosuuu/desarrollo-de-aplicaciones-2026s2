@@ -1,12 +1,10 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.controllers.dtos.AuthResponse;
 import com.prontaentrega.controllers.dtos.LoginRequest;
-import com.prontaentrega.controllers.dtos.RegisterRequest;
 import com.prontaentrega.models.TokenEstado;
 import com.prontaentrega.models.Usuario;
+import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.repository.TokenEstadoRepository;
-import com.prontaentrega.repository.UsuarioRepository;
 import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.services.exceptions.DuplicateUserException;
 import com.prontaentrega.services.exceptions.ValidationException;

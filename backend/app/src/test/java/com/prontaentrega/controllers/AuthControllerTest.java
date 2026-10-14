@@ -4,8 +4,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.repository.TokenEstadoRepository;
-import com.prontaentrega.repository.UsuarioRepository;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

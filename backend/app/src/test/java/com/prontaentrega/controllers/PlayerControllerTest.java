@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.prontaentrega.models.Jugador;
 import com.prontaentrega.persistence.repository.JugadorRepository;
-import com.prontaentrega.repository.UsuarioRepository;
+import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.AuthService;
 import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.utils.AbstractIntegrationTest;
