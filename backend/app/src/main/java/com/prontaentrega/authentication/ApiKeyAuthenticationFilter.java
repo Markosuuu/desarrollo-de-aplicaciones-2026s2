@@ -21,12 +21,6 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         this.apiKeyService = apiKeyService;
     }
 
-    /*@Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !("POST".equals(request.getMethod())
-                && "/api/players/update".equals(request.getServletPath()));
-    }*/
-
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return !("POST".equals(request.getMethod())
@@ -35,16 +29,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
-        System.out.println("=== API KEY FILTER: doFilterInternal ===");
-        System.out.println("Método: " + request.getMethod());
-        System.out.println("Ruta: " + request.getServletPath());
-
         String apiKey = request.getHeader("X-API-Key");
-
-        System.out.println("ApiKeyAuthenticationFilter ejecutado");
-        System.out.println("API Key recibida: " + (apiKey != null));
-        System.out.println("API Key válida: " + apiKeyService.validar(apiKey));
 
         if (!apiKeyService.validar(apiKey)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
