@@ -1,11 +1,5 @@
 package com.prontaentrega.models;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -20,89 +14,62 @@ import lombok.Setter;
  * La entidad concentra las invariantes de identidad y estadisticas para que el
  * servicio solo orqueste el proceso de actualizacion y persistencia.
  */
-@Entity
-@Table(name = "jugadores")
 @Getter
 @Setter
 @NoArgsConstructor
 public class Jugador {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Setter(AccessLevel.NONE)
     private UUID id;
 
     /**
      * Identificador del jugador en WhoScored.
      * Es la identidad externa estable del jugador.
      */
-    @Column(name = "whoscored_id", nullable = false, unique = true)
     private Integer whoscoredId;
 
-    @Column(nullable = false)
     private String nombre;
 
-    @Column(nullable = false)
     private String equipo;
 
-    @Column(nullable = false)
     private String liga;
 
-    @Column(nullable = false)
     private Integer edad;
 
-    @Column
     private Integer altura;
 
-    @Column
     private Integer peso;
 
-    @Column
     private String posicion;
 
-    @Column(nullable = false)
     private Boolean activo;
 
-    @Column(nullable = false)
     private Integer goles;
 
-    @Column(nullable = false)
     private Integer asistencias;
 
-    @Column(name = "disparos_por_partido")
     private BigDecimal disparosPorPartido;
 
-    @Column(name = "porcentaje_pases_exitosos")
     private BigDecimal porcentajePasesExitosos;
 
-    @Column(name = "key_passes_por_partido")
     private BigDecimal keyPassesPorPartido;
 
-    @Column(name = "dribbles_ganados_por_partido")
     private BigDecimal dribblesGanadosPorPartido;
 
-    @Column(name = "faltas_cometidas_por_partido")
     private BigDecimal faltasCometidasPorPartido;
 
-    @Column
     private BigDecimal rating;
 
-    @Column(name = "minutos_jugados")
     private Integer minutosJugados;
 
     /*
      * Datos propios de nuestra aplicación.
      */
-    @Column(name = "cotizacion_actual", nullable = false)
     private BigDecimal cotizacionActual;
 
-    @Column(name = "fecha_actualizacion", nullable = false)
     private LocalDateTime fechaActualizacion;
 
-    @Column(nullable = false)
     private String fuente;
 
-    @Column(name = "tokens_restantes", nullable = false)
     private Integer tokensRestantes;
 
     /**

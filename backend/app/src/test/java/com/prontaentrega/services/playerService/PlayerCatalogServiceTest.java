@@ -1,7 +1,7 @@
 package com.prontaentrega.services.playerService;
 
 import com.prontaentrega.models.Jugador;
-import com.prontaentrega.repository.JugadorRepository;
+import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.springframework.data.domain.Page;
@@ -147,9 +147,12 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         );
 
         assertEquals(1, response.stream().count());
-        assertEquals("Lionel Messi", response.stream().toList().getFirst().getNombre());
-        assertEquals("Inter Miami", response.stream().toList().getFirst().getEquipo());
-        assertEquals("MLS", response.stream().toList().getFirst().getLiga());
+
+        Jugador messi = response.stream().toList().getFirst();
+
+        assertEquals("Lionel Messi", messi.getNombre());
+        assertEquals("Inter Miami", messi.getEquipo());
+        assertEquals("MLS", messi.getLiga());
     }
 
     /** Se verifica que la búsqueda normalice los filtros antes de consultar el catálogo. */

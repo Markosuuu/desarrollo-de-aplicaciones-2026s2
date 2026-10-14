@@ -1,8 +1,8 @@
 package com.prontaentrega.services;
 
 import com.prontaentrega.models.Jugador;
+import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.repository.CatalogSnapshotRepository;
-import com.prontaentrega.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
@@ -12,6 +12,8 @@ import com.prontaentrega.services.scraping.whoScoredScrapper.ScrappedPlayerMappe
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -110,14 +112,16 @@ public class PlayerCatalogService {
                 continue;
             }
 
-            var existing = jugadorRepository.findByWhoscoredId(stat.playerId());
+            Optional<Jugador> existing = jugadorRepository.findByWhoscoredId(stat.playerId());
 
             if (existing.isPresent()) {
+                Jugador jugador = existing.get();
                 scrappedPlayerMapper.updateJugador(
-                        existing.get(),
+                        jugador,
                         stat,
                         updatedAt
                 );
+                jugadorRepository.save(jugador);
                 updated++;
             } else {
                 jugadorRepository.save(

@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.prontaentrega.models.Jugador;
-import com.prontaentrega.repository.JugadorRepository;
+import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
