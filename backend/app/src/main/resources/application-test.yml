@@ -15,6 +15,13 @@ jwt:
   secret: test-secret-key-1234567890-abcdefghijklmnop
   expiration-ms: 3600000
 
+api-key:
+  master-secret: ${API_KEY_MASTER_SECRET:clave-secreta-de-ejemplo}
+
+logging:
+  level:
+    org.springframework.security: TRACE
+
 providers:
   whoscored:
     url: ${WHOSCORED_URL:http://localhost:18080/whoscored}
