@@ -5,9 +5,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.repository.JugadorRepository;
-import com.prontaentrega.repository.UsuarioRepository;
+import com.prontaentrega.models.BolsaDeJugador;
+import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.Posicion;
+import com.prontaentrega.persistence.repository.JugadorRepository;
+import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.AuthService;
 import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -88,7 +90,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     void searchShouldBeProtectedWithTokenAndReturnPaginated() throws Exception {
         AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
 
-        mockMvc.perform(get("/api/players").param("liga", "La Liga")
+        mockMvc.perform(get("/api/players").param("liga", "LaLiga")
                         .param("page", "1").param("per_page", "10")
                         .header("Authorization", "Bearer "+result.token())
                 ).andExpect(status().isOk())
@@ -98,7 +100,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
 
     @Test
     void searchShouldBeProtectedAndReturnForbiddenStatusWithoutToken() throws Exception {
-        mockMvc.perform(get("/api/players").param("liga", "La Liga")
+        mockMvc.perform(get("/api/players").param("liga", "LaLiga")
                         .param("page", "1").param("per_page", "10")
                         .header("Authorization", "Bearer saraza123456")
                 ).andExpect(status().isUnauthorized());
@@ -106,7 +108,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
 
     @Test
     void searchShouldBeProtectedAndReturnUnauthorizedStatusWhenTokenIsWrong() throws Exception {
-        mockMvc.perform(get("/api/players").param("liga", "La Liga")
+        mockMvc.perform(get("/api/players").param("liga", "LaLiga")
                 .param("page", "1").param("per_page", "10")
         ).andExpect(status().isForbidden());
     }
@@ -211,7 +213,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana Gomez",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,
@@ -230,7 +232,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                   "playerId": null,
                   "name": "Jugador Incompleto",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno"
+                  "tournamentName": "Premier League"
                 }
               ],
               "paging": {
@@ -263,15 +265,15 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     @Test
     void updateShouldReturnUpdatedPlayersInResponse() throws Exception {
         jugadorRepository.save(
-                Jugador.desdeEstadisticas(
+                BolsaDeJugador.desdeEstadisticas(
                         101,
                         "Ana Gomez",
                         "Rojo FC",
-                        "Liga Uno",
+                        Liga.PREMIER_LEAGUE,
                         24,
                         170,
                         60,
-                        "Forward",
+                        Posicion.FORWARD,
                         true,
                         1,
                         1,
@@ -327,7 +329,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana Gomez",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,
