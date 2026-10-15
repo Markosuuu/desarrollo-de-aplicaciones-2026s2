@@ -2,6 +2,9 @@ package com.prontaentrega.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.prontaentrega.models.exception.CampoFaltanteException;
+import com.prontaentrega.models.exception.ValorNegativoException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -75,7 +78,7 @@ class JugadorTest {
     @Test
     void desdeEstadisticasShouldRejectBlankIdentity() {
         assertThrows(
-                IllegalArgumentException.class,
+                CampoFaltanteException.class,
                 () -> BolsaDeJugador.desdeEstadisticas(
                         101,
                         " ",
@@ -90,7 +93,7 @@ class JugadorTest {
     @Test
     void desdeEstadisticasShouldRejectNegativeGoalsStats() {
         assertThrows(
-                IllegalArgumentException.class,
+                ValorNegativoException.class,
                 () -> BolsaDeJugador.desdeEstadisticas(
                         101, "Ana Gomez", "Rojo FC", Liga.PREMIER_LEAGUE, 20,
                         170, 60, Posicion.FORWARD, true,

@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Clase que representa el estado de un token en el sistema.
+ */
 @Getter
 @Setter
 @NoArgsConstructor

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
+
 public interface JugadorRepository {
     BolsaDeJugador save(BolsaDeJugador bolsa);
     Page<BolsaDeJugador> search(Liga liga, String equipo, String nombre, Pageable pageable);

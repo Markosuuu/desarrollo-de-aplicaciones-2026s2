@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Clase que representa un usuario en el sistema.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,8 +21,8 @@ public class Usuario {
 
     private String passwordHash;
 
-    // TODO: tiene sentido estos dos?
     private LocalDateTime creadoEn;
+
     private LocalDateTime actualizadoEn;
 
     public Usuario(String nombre, String correo, String passwordHash) {

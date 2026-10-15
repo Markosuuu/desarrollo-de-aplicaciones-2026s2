@@ -1,10 +1,12 @@
 package com.prontaentrega.models;
 
 import java.math.BigDecimal;
-import java.util.Objects;
 import java.util.UUID;
+
+import com.prontaentrega.models.exception.ValorNegativoException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
 @Getter
@@ -25,7 +27,7 @@ public class EstadisticasDeportivas {
     private Integer minutosJugados;
 
     public EstadisticasDeportivas(
-            Jugador jugador,
+            @NonNull Jugador jugador,
             Boolean activo,
             Integer goles,
             Integer asistencias,
@@ -36,17 +38,9 @@ public class EstadisticasDeportivas {
             BigDecimal faltasCometidasPorPartido,
             BigDecimal rating,
             Integer minutosJugados) {
-        // TODO: Mover a otro método las verificaciones
-        this.jugador = Objects.requireNonNull(jugador, "El jugador asociado es obligatorio");
-        validarNoNegativo(goles, "Los goles no pueden ser negativos");
-        validarNoNegativo(asistencias, "Las asistencias no pueden ser negativas");
-        validarNoNegativo(disparosPorPartido, "Los disparos por partido no pueden ser negativos");
-        validarNoNegativo(porcentajePasesExitosos, "El porcentaje de pases no puede ser negativo");
-        validarNoNegativo(keyPassesPorPartido, "Los key passes por partido no pueden ser negativos");
-        validarNoNegativo(dribblesGanadosPorPartido, "Los dribbles ganados por partido no pueden ser negativos");
-        validarNoNegativo(faltasCometidasPorPartido, "Las faltas cometidas por partido no pueden ser negativas");
-        validarNoNegativo(rating, "El rating no puede ser negativo");
-        validarNoNegativo(minutosJugados, "Los minutos jugados no pueden ser negativos");
+        validarConstruccion(goles, asistencias, disparosPorPartido, porcentajePasesExitosos, keyPassesPorPartido, dribblesGanadosPorPartido, faltasCometidasPorPartido, rating, minutosJugados);
+
+        this.jugador = jugador;
         this.activo = activo;
         this.goles = goles;
         this.asistencias = asistencias;
@@ -57,6 +51,26 @@ public class EstadisticasDeportivas {
         this.faltasCometidasPorPartido = faltasCometidasPorPartido;
         this.rating = rating;
         this.minutosJugados = minutosJugados;
+    }
+
+    private void validarConstruccion(Integer goles,
+                                     Integer asistencias,
+                                     BigDecimal disparosPorPartido,
+                                     BigDecimal porcentajePasesExitosos,
+                                     BigDecimal keyPassesPorPartido,
+                                     BigDecimal dribblesGanadosPorPartido,
+                                     BigDecimal faltasCometidasPorPartido,
+                                     BigDecimal rating,
+                                     Integer minutosJugados) {
+        validarNoNegativo(goles, "Los goles no pueden ser negativos");
+        validarNoNegativo(asistencias, "Las asistencias no pueden ser negativas");
+        validarNoNegativo(disparosPorPartido, "Los disparos por partido no pueden ser negativos");
+        validarNoNegativo(porcentajePasesExitosos, "El porcentaje de pases no puede ser negativo");
+        validarNoNegativo(keyPassesPorPartido, "Los key passes por partido no pueden ser negativos");
+        validarNoNegativo(dribblesGanadosPorPartido, "Los dribbles ganados por partido no pueden ser negativos");
+        validarNoNegativo(faltasCometidasPorPartido, "Las faltas cometidas por partido no pueden ser negativas");
+        validarNoNegativo(rating, "El rating no puede ser negativo");
+        validarNoNegativo(minutosJugados, "Los minutos jugados no pueden ser negativos");
     }
 
     public void actualizar(
@@ -82,13 +96,13 @@ public class EstadisticasDeportivas {
 
     private static void validarNoNegativo(Integer value, String message) {
         if (value != null && value < 0) {
-            throw new IllegalArgumentException(message);
+            throw new ValorNegativoException(message);
         }
     }
 
     private static void validarNoNegativo(BigDecimal value, String message) {
         if (value != null && value.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException(message);
+            throw new ValorNegativoException(message);
         }
     }
 }

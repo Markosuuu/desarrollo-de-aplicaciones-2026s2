@@ -2,12 +2,26 @@ package com.prontaentrega.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 import lombok.Setter;
 
+/**
+ * Clase que representa la bolsa de un jugador
+ * Esto sería datos de cotización, tokens restantes, información comercial vease.
+ * <br><br>
+ * Contiene las estadísticas deportivas de un jugador así poder recalcularse y/o acceder a un jugador también.
+ * <br><br>
+ * La nombré BolsaDeJugador porque era un concepto relacionado con el mercado,
+ * si existen mejores nombres, se aceptan sugerencias :)
+ *
+ * @author ProntaEntrega
+ * @version 1.0
+ * @since 2024-06-15
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,21 +33,25 @@ public class BolsaDeJugador {
     private String fuente;
     private Integer tokensRestantes;
 
+    /**
+     * Constructor de la clase BolsaDeJugador
+     * @param estadisticasDeportivas Las estadísticas deportivas del jugador
+     * @param cotizacionActual La cotización actual del jugador
+     * @param fechaActualizacion La fecha de actualización de la bolsa
+     * @param fuente La fuente de los datos
+     * @param tokensRestantes Los tokens restantes en la bolsa
+     */
     public BolsaDeJugador(
-            EstadisticasDeportivas estadisticasDeportivas,
-            BigDecimal cotizacionActual,
-            LocalDateTime fechaActualizacion,
-            String fuente,
-            Integer tokensRestantes) {
-        this.estadisticasDeportivas = Objects.requireNonNull(
-                estadisticasDeportivas, "Las estadisticas deportivas son obligatorias");
-        this.cotizacionActual = Objects.requireNonNull(
-                cotizacionActual, "La cotizacion es obligatoria");
-        this.fechaActualizacion = Objects.requireNonNull(
-                fechaActualizacion, "La fecha de actualizacion es obligatoria");
-        this.fuente = validarTexto(fuente, "La fuente es obligatoria");
-        this.tokensRestantes = Objects.requireNonNull(
-                tokensRestantes, "Los tokens restantes son obligatorios");
+            @NonNull EstadisticasDeportivas estadisticasDeportivas,
+            @NonNull BigDecimal cotizacionActual,
+            @NonNull LocalDateTime fechaActualizacion,
+            @NonNull String fuente,
+            @NonNull Integer tokensRestantes) {
+        this.estadisticasDeportivas = estadisticasDeportivas;
+        this.cotizacionActual = cotizacionActual;
+        this.fechaActualizacion = fechaActualizacion;
+        this.fuente = fuente;
+        this.tokensRestantes = tokensRestantes;
     }
 
     public static BolsaDeJugador desdeEstadisticas(
@@ -79,26 +97,14 @@ public class BolsaDeJugador {
             BigDecimal faltasCometidasPorPartido,
             BigDecimal rating,
             Integer minutosJugados,
-            LocalDateTime fecha,
-            String fuente) {
-        Jugador jugador = estadisticasDeportivas.getJugador();
-        jugador.setEdad(edad);
-        jugador.setAltura(altura);
-        jugador.setPeso(peso);
-        jugador.setPosicion(posicion);
+            @NonNull LocalDateTime fecha,
+            @NonNull String fuente) {
+        estadisticasDeportivas.getJugador().actualizar(edad, altura, peso, posicion);
         estadisticasDeportivas.actualizar(
                 activo, goles, asistencias,
                 disparosPorPartido, keyPassesPorPartido, dribblesGanadosPorPartido,
                 faltasCometidasPorPartido, rating, minutosJugados);
-        this.fechaActualizacion = Objects.requireNonNull(
-                fecha, "La fecha de actualizacion es obligatoria");
-        this.fuente = validarTexto(fuente, "La fuente es obligatoria");
-    }
-
-    private static String validarTexto(String value, String message) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(message);
-        }
-        return value.trim();
+        this.fechaActualizacion = fecha;
+        this.fuente = fuente;
     }
 }
