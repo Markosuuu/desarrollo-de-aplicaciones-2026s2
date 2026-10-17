@@ -40,4 +40,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+
+        return "/api/keys".equals(path)
+                || ("POST".equals(request.getMethod())
+                && "/api/players/update".equals(path));
+    }
 }
