@@ -1,9 +1,6 @@
 package com.prontaentrega.services.playerService;
 
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
-import com.prontaentrega.models.Posicion;
+import com.prontaentrega.models.*;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -37,12 +34,33 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
      ---> Metodo helper para no hacer setup tan largo antes de cada test <---
     **/
     private BolsaDeJugador saveJugador(Integer whoscoredId, String nombre, String equipo, Liga liga) {
-        BolsaDeJugador jugador = BolsaDeJugador.desdeEstadisticas(whoscoredId, nombre, equipo, liga,
-                25, 180, 75, Posicion.MIDFIELDER, true, 10, 5,
-                BigDecimal.valueOf(2.5), BigDecimal.valueOf(1.2), BigDecimal.valueOf(1.5),
-                BigDecimal.valueOf(0.5), BigDecimal.valueOf(7.5), 2000, LocalDateTime.now()
+        Jugador jugador = new Jugador(
+                whoscoredId,
+                nombre,
+                equipo,
+                liga,
+                Posicion.MIDFIELDER,
+                25,
+                180,
+                75
         );
-        return jugadorRepository.save(jugador);
+
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador,
+                true,
+                10,
+                5,
+                BigDecimal.valueOf(2.5),
+                BigDecimal.valueOf(1.2),
+                BigDecimal.valueOf(1.5),
+                BigDecimal.valueOf(0.5),
+                BigDecimal.valueOf(7.5),
+                2000
+        );
+
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+
+        return jugadorRepository.save(bolsaJugador);
     }
 
     /**

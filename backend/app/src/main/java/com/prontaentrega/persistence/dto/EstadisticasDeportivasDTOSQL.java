@@ -43,9 +43,6 @@ public class EstadisticasDeportivasDTOSQL {
     @Column(name = "disparos_por_partido")
     private BigDecimal disparosPorPartido;
 
-    @Column(name = "porcentaje_pases_exitosos")
-    private BigDecimal porcentajePasesExitosos;
-
     @Column(name = "key_passes_por_partido")
     private BigDecimal keyPassesPorPartido;
 
@@ -69,7 +66,6 @@ public class EstadisticasDeportivasDTOSQL {
         dto.goles = estadisticas.getGoles();
         dto.asistencias = estadisticas.getAsistencias();
         dto.disparosPorPartido = estadisticas.getDisparosPorPartido();
-        dto.porcentajePasesExitosos = estadisticas.getPorcentajePasesExitosos();
         dto.keyPassesPorPartido = estadisticas.getKeyPassesPorPartido();
         dto.dribblesGanadosPorPartido = estadisticas.getDribblesGanadosPorPartido();
         dto.faltasCometidasPorPartido = estadisticas.getFaltasCometidasPorPartido();
@@ -81,7 +77,7 @@ public class EstadisticasDeportivasDTOSQL {
     EstadisticasDeportivas aModelo() {
         EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
                 jugador.aJugador(), activo, goles, asistencias, disparosPorPartido,
-                porcentajePasesExitosos, keyPassesPorPartido, dribblesGanadosPorPartido,
+                keyPassesPorPartido, dribblesGanadosPorPartido,
                 faltasCometidasPorPartido, rating, minutosJugados);
         estadisticas.setId(id);
         return estadisticas;

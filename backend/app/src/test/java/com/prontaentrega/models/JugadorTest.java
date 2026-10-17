@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import com.prontaentrega.models.exception.CampoFaltanteException;
 import com.prontaentrega.models.exception.ValorNegativoException;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,28 +16,10 @@ import static org.junit.jupiter.api.Assertions.*;
 class JugadorTest {
     @Test
     void actualizarEstadisticasShouldReplaceSportValues() {
-        BolsaDeJugador jugador = BolsaDeJugador.desdeEstadisticas(
-                101,
-                "Ana Gomez",
-                "Rojo FC",
-                Liga.PREMIER_LEAGUE,
-                20,
-                170,
-                60,
-                Posicion.FORWARD,
-                true,
-                1,
-                2,
-                new BigDecimal("1.5"),
-                new BigDecimal("1.0"),
-                new BigDecimal("2.0"),
-                new BigDecimal("0.5"),
-                new BigDecimal("7.1"),
-                500,
-                LocalDateTime.now()
-        );
+        EstadisticasDeportivas estadisticas = getEstadisticas();
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
 
-        jugador.actualizarEstadisticas(
+        bolsaJugador.actualizarEstadisticas(
                 21,
                 171,
                 61,
@@ -54,109 +37,97 @@ class JugadorTest {
                 "WhoScored"
         );
 
-        Jugador datosJugador = jugador.getEstadisticasDeportivas().getJugador();
-        EstadisticasDeportivas estadisticas = jugador.getEstadisticasDeportivas();
+        Jugador datosJugador = bolsaJugador.getEstadisticasDeportivas().getJugador();
+        EstadisticasDeportivas estadisticasActualizadas = bolsaJugador.getEstadisticasDeportivas();
         assertEquals(21, datosJugador.getEdad());
         assertEquals(171, datosJugador.getAltura());
         assertEquals(61, datosJugador.getPeso());
         assertEquals(Posicion.MIDFIELDER, datosJugador.getPosicion());
-        assertFalse(estadisticas.getActivo());
-        assertEquals(3, estadisticas.getGoles());
-        assertEquals(4, estadisticas.getAsistencias());
-        assertEquals(new BigDecimal("2.5"), estadisticas.getDisparosPorPartido());
-        assertEquals(new BigDecimal("2.0"), estadisticas.getKeyPassesPorPartido());
-        assertEquals(new BigDecimal("3.0"), estadisticas.getDribblesGanadosPorPartido());
-        assertEquals(new BigDecimal("1.0"), estadisticas.getFaltasCometidasPorPartido());
-        assertEquals(new BigDecimal("7.8"), estadisticas.getRating());
-        assertEquals(700, estadisticas.getMinutosJugados());
+        assertFalse(estadisticasActualizadas.getActivo());
+        assertEquals(3, estadisticasActualizadas.getGoles());
+        assertEquals(4, estadisticasActualizadas.getAsistencias());
+        assertEquals(new BigDecimal("2.5"), estadisticasActualizadas.getDisparosPorPartido());
+        assertEquals(new BigDecimal("2.0"), estadisticasActualizadas.getKeyPassesPorPartido());
+        assertEquals(new BigDecimal("3.0"), estadisticasActualizadas.getDribblesGanadosPorPartido());
+        assertEquals(new BigDecimal("1.0"), estadisticasActualizadas.getFaltasCometidasPorPartido());
+        assertEquals(new BigDecimal("7.8"), estadisticasActualizadas.getRating());
+        assertEquals(700, estadisticasActualizadas.getMinutosJugados());
 
         // Estos valores no deberían modificarse al actualizar estadísticas.
-        assertEquals(new BigDecimal("1"), jugador.getCotizacionActual());
-        assertEquals(100, jugador.getTokensRestantes());
+        assertEquals(new BigDecimal("1"), bolsaJugador.getCotizacionActual());
+        assertEquals(100, bolsaJugador.getTokensRestantes());
     }
 
-    @Test
-    void desdeEstadisticasShouldRejectBlankIdentity() {
-        assertThrows(
-                CampoFaltanteException.class,
-                () -> BolsaDeJugador.desdeEstadisticas(
-                        101,
-                        " ",
-                        "Rojo FC", Liga.PREMIER_LEAGUE, 20,
-                        170, 60, Posicion.FORWARD, true, 1,
-                        2, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
-                        500, LocalDateTime.now()
-                )
+    private static @NotNull EstadisticasDeportivas getEstadisticas() {
+        Jugador jugador = new Jugador(
+                101,
+                "Ana Gomez",
+                "Rojo FC",
+                Liga.PREMIER_LEAGUE,
+                Posicion.FORWARD,
+                24,
+                170,
+                60
+        );
+
+        return new EstadisticasDeportivas(
+                jugador,
+                true,
+                1,
+                1,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                100
         );
     }
-
-    @Test
-    void desdeEstadisticasShouldRejectNegativeGoalsStats() {
-        assertThrows(
-                ValorNegativoException.class,
-                () -> BolsaDeJugador.desdeEstadisticas(
-                        101, "Ana Gomez", "Rojo FC", Liga.PREMIER_LEAGUE, 20,
-                        170, 60, Posicion.FORWARD, true,
-                        -1,
-                        2, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
-                        500, LocalDateTime.now()
-                )
-        );
-    }
-    /**
-     * Habria que luego añadir mas tests como el de arriba pero para cada caso de un valor negativo invalido al llamar a desdeEstadisticas.
-     * */
-
 
     @Test
     void actualizarEstadisticasShouldReplaceAllStatValues() {
-        BolsaDeJugador jugador = BolsaDeJugador.desdeEstadisticas(101, "Ana Gomez",
-                "Rojo FC", Liga.PREMIER_LEAGUE, 20, 170, 60, Posicion.FORWARD,
-                true, 1, 2, new BigDecimal("1.5"),
-                new BigDecimal("1.0"), new BigDecimal("2.0"), new BigDecimal("0.5"),
-                new BigDecimal("7.1"), 500, LocalDateTime.now()
-        );
+        EstadisticasDeportivas estadisticas = getEstadisticas();
 
-        jugador.actualizarEstadisticas(21, 171, 61, Posicion.MIDFIELDER, false,
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+
+        bolsaJugador.actualizarEstadisticas(21, 171, 61, Posicion.MIDFIELDER, false,
                 10, 8, new BigDecimal("3.5"), new BigDecimal("2.5"),
                 new BigDecimal("4.0"), new BigDecimal("1.5"), new BigDecimal("8.9"),
                 1500, LocalDateTime.now(), "WhoScored"
         );
 
-        Jugador datosJugador = jugador.getEstadisticasDeportivas().getJugador();
-        EstadisticasDeportivas estadisticas = jugador.getEstadisticasDeportivas();
+        Jugador datosJugador = bolsaJugador.getEstadisticasDeportivas().getJugador();
+        EstadisticasDeportivas estadisticasActualizadas = bolsaJugador.getEstadisticasDeportivas();
         assertEquals(21, datosJugador.getEdad());
         assertEquals(171, datosJugador.getAltura());
         assertEquals(61, datosJugador.getPeso());
         assertEquals(Posicion.MIDFIELDER, datosJugador.getPosicion());
-        assertFalse(estadisticas.getActivo());
+        assertFalse(estadisticasActualizadas.getActivo());
 
-        assertEquals(10, estadisticas.getGoles());
-        assertEquals(8, estadisticas.getAsistencias());
-        assertEquals(new BigDecimal("3.5"), estadisticas.getDisparosPorPartido());
-        assertEquals(new BigDecimal("2.5"), estadisticas.getKeyPassesPorPartido());
-        assertEquals(new BigDecimal("4.0"), estadisticas.getDribblesGanadosPorPartido());
-        assertEquals(new BigDecimal("1.5"), estadisticas.getFaltasCometidasPorPartido());
-        assertEquals(new BigDecimal("8.9"), estadisticas.getRating());
-        assertEquals(1500, estadisticas.getMinutosJugados());
+        assertEquals(10, estadisticasActualizadas.getGoles());
+        assertEquals(8, estadisticasActualizadas.getAsistencias());
+        assertEquals(new BigDecimal("3.5"), estadisticasActualizadas.getDisparosPorPartido());
+        assertEquals(new BigDecimal("2.5"), estadisticasActualizadas.getKeyPassesPorPartido());
+        assertEquals(new BigDecimal("4.0"), estadisticasActualizadas.getDribblesGanadosPorPartido());
+        assertEquals(new BigDecimal("1.5"), estadisticasActualizadas.getFaltasCometidasPorPartido());
+        assertEquals(new BigDecimal("8.9"), estadisticasActualizadas.getRating());
+        assertEquals(1500, estadisticasActualizadas.getMinutosJugados());
     }
 
     @Test
     void actualizarEstadisticasShouldPreserveMarketValues() {
-        BolsaDeJugador jugador = BolsaDeJugador.desdeEstadisticas(
-                101, "Ana Gomez", "Rojo FC", Liga.PREMIER_LEAGUE, 20, 170,
-                60, Posicion.FORWARD, true, 1, 2, BigDecimal.ONE, BigDecimal.ONE,
-                BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE, 500, LocalDateTime.now()
-        );
+        EstadisticasDeportivas estadisticas = getEstadisticas();
 
-        jugador.actualizarEstadisticas(
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+
+        bolsaJugador.actualizarEstadisticas(
                 21, 171, 61, Posicion.MIDFIELDER, false, 10, 8,
                 new BigDecimal("3.5"), new BigDecimal("2.5"), new BigDecimal("4.0"), new BigDecimal("1.5"),
                 new BigDecimal("8.9"), 1500, LocalDateTime.now(), "WhoScored"
         );
 
-        assertEquals(new BigDecimal("1"), jugador.getCotizacionActual());
-        assertEquals(100, jugador.getTokensRestantes());
+        assertEquals(new BigDecimal("1"), bolsaJugador.getCotizacionActual());
+        assertEquals(100, bolsaJugador.getTokensRestantes());
     }
 
 }

@@ -5,9 +5,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
-import com.prontaentrega.models.Posicion;
+import com.prontaentrega.models.*;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.AuthService;
@@ -22,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -264,25 +264,11 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     * */
     @Test
     void updateShouldReturnUpdatedPlayersInResponse() throws Exception {
+        EstadisticasDeportivas estadisticas = getEstadisticas();
+
         jugadorRepository.save(
                 BolsaDeJugador.desdeEstadisticas(
-                        101,
-                        "Ana Gomez",
-                        "Rojo FC",
-                        Liga.PREMIER_LEAGUE,
-                        24,
-                        170,
-                        60,
-                        Posicion.FORWARD,
-                        true,
-                        1,
-                        1,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        100,
+                        estadisticas,
                         LocalDateTime.now()
                 )
         );
@@ -297,6 +283,32 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.updated").value(1))
                 .andExpect(jsonPath("$.skipped").value(0))
                 .andExpect(jsonPath("$.source").value("WhoScored"));
+    }
+
+    private static @NotNull EstadisticasDeportivas getEstadisticas() {
+        Jugador jugador = new Jugador(
+                101,
+                "Ana Gomez",
+                "Rojo FC",
+                Liga.PREMIER_LEAGUE,
+                Posicion.FORWARD,
+                24,
+                170,
+                60
+        );
+
+        return new EstadisticasDeportivas(
+                jugador,
+                true,
+                1,
+                1,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                100
+        );
     }
 
 

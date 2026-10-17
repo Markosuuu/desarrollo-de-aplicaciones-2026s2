@@ -1,8 +1,6 @@
 package com.prontaentrega.services.scraping.whoScoredScrapper;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
-import com.prontaentrega.models.Posicion;
+import com.prontaentrega.models.*;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
@@ -17,15 +15,20 @@ public class ScrappedPlayerMapper {
      * Crea un jugador nuevo desde una fila de WhoScored.
      */
     public BolsaDeJugador toBolsaDeJugador(PlayerStat stat, LocalDateTime fecha) {
-        return BolsaDeJugador.desdeEstadisticas(
+
+        Jugador jugador = new Jugador(
                 stat.playerId(),
                 stat.name(),
                 stat.teamName(),
                 Liga.fromValue(stat.tournamentName()),
+                Posicion.fromValue(stat.positionText()),
                 stat.age(),
                 stat.height(),
-                stat.weight(),
-                Posicion.fromValue(stat.positionText()),
+                stat.weight()
+        );
+
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador,
                 stat.isActive(),
                 stat.goal(),
                 stat.assistTotal(),
@@ -34,9 +37,10 @@ public class ScrappedPlayerMapper {
                 stat.dribbleWonPerGame(),
                 stat.foulGivenPerGame(),
                 stat.rating(),
-                stat.minsPlayed(),
-                fecha
+                stat.minsPlayed()
         );
+
+        return BolsaDeJugador.desdeEstadisticas(estadisticas, fecha);
     }
 
     /**

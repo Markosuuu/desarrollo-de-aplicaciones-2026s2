@@ -55,32 +55,9 @@ public class BolsaDeJugador {
     }
 
     public static BolsaDeJugador desdeEstadisticas(
-            Integer whoscoredId,
-            String nombre,
-            String equipo,
-            Liga liga,
-            Integer edad,
-            Integer altura,
-            Integer peso,
-            Posicion posicion,
-            Boolean activo,
-            Integer goles,
-            Integer asistencias,
-            BigDecimal disparosPorPartido,
-            BigDecimal keyPassesPorPartido,
-            BigDecimal dribblesGanadosPorPartido,
-            BigDecimal faltasCometidasPorPartido,
-            BigDecimal rating,
-            Integer minutosJugados,
-            LocalDateTime fecha) {
-        Jugador jugador = new Jugador(
-                whoscoredId, nombre, equipo, liga, posicion, edad, altura, peso);
-        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
-                jugador, activo, goles, asistencias, disparosPorPartido, null,
-                keyPassesPorPartido, dribblesGanadosPorPartido,
-                faltasCometidasPorPartido, rating, minutosJugados);
-        return new BolsaDeJugador(
-                estadisticas, BigDecimal.ONE, fecha, "WhoScored", 100);
+            @NonNull EstadisticasDeportivas estadisticas,
+            @NonNull LocalDateTime fecha) {
+        return new BolsaDeJugador(estadisticas, BigDecimal.ONE, fecha, "WhoScored", 100);
     }
 
     public void actualizarEstadisticas(

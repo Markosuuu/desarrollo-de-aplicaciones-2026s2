@@ -4,9 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
-import com.prontaentrega.models.Posicion;
+import com.prontaentrega.models.*;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
@@ -205,28 +203,31 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
      * */
     @Test
     void refreshShouldPreserveCatalogWhenProviderFails() {
-        jugadorRepository.save(
-                BolsaDeJugador.desdeEstadisticas(
-                        999,
-                        "Jugador Local",
-                        "Equipo Local",
-                        Liga.BUNDESLIGA,
-                        30,
-                        180,
-                        75,
-                        Posicion.MIDFIELDER,
-                        true,
-                        1,
-                        1,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        90,
-                        LocalDateTime.now()
-                )
+        Jugador jugador = new Jugador(
+                999,
+                "Jugador Local",
+                "Equipo Local",
+                Liga.BUNDESLIGA,
+                Posicion.MIDFIELDER,
+                30,
+                180,
+                75
         );
+
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador,
+                true,
+                1,
+                1,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                90
+        );
+
+        jugadorRepository.save(BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now()));
 
         providerStatus.set(500);
         providerBody.set("{\"error\":\"fallo\"}");
@@ -244,10 +245,10 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
 
         assertEquals(1, jugadorRepository.count());
 
-        BolsaDeJugador jugador = jugadorRepository.findByWhoscoredId(999)
+        BolsaDeJugador jugadorActualizado = jugadorRepository.findByWhoscoredId(999)
                 .orElseThrow();
 
-        assertEquals("Jugador Local", jugador.getEstadisticasDeportivas().getJugador().getNombre());
+        assertEquals("Jugador Local", jugadorActualizado.getEstadisticasDeportivas().getJugador().getNombre());
     }
 
     /**
