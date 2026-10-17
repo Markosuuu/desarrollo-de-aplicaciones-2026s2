@@ -28,5 +28,3 @@ public interface JugadorDAOSQL extends JpaRepository<BolsaDeJugadorDTOSQL, UUID>
     Optional<BolsaDeJugadorDTOSQL> findBolsaByWhoscoredId(
             @Param("whoscoredId") Integer whoscoredId);
 }
-
-// TODO: Ta raro esto de EntityGraph, quizás si conviene crear el dao de bolsa

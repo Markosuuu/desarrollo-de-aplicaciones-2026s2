@@ -48,7 +48,6 @@ public class UsuarioDTOSQL {
         this.passwordHash = passwordHash;
     }
 
-    // TODO: Cambiar este mapeo
     public static UsuarioDTOSQL desdeUsuario(Usuario usuario) {
         return new UsuarioDTOSQL(usuario.getNombre(), usuario.getCorreo(), usuario.getPasswordHash());
     }
