@@ -53,7 +53,17 @@ public class EstadisticasDeportivas {
             BigDecimal faltasCometidasPorPartido,
             BigDecimal rating,
             Integer minutosJugados) {
-        validarConstruccion(goles, asistencias, disparosPorPartido, keyPassesPorPartido, dribblesGanadosPorPartido, faltasCometidasPorPartido, rating, minutosJugados);
+
+        // Dejo esto acá porque Sonar llora por el metodo que quiero generar
+        // Ya que son 8 parámetros y el límite son 7 :/
+        validarNoNegativo(goles, "Los goles no pueden ser negativos");
+        validarNoNegativo(asistencias, "Las asistencias no pueden ser negativas");
+        validarNoNegativo(disparosPorPartido, "Los disparos por partido no pueden ser negativos");
+        validarNoNegativo(keyPassesPorPartido, "Los key passes por partido no pueden ser negativos");
+        validarNoNegativo(dribblesGanadosPorPartido, "Los dribbles ganados por partido no pueden ser negativos");
+        validarNoNegativo(faltasCometidasPorPartido, "Las faltas cometidas por partido no pueden ser negativas");
+        validarNoNegativo(rating, "El rating no puede ser negativo");
+        validarNoNegativo(minutosJugados, "Los minutos jugados no pueden ser negativos");
 
         this.jugador = jugador;
         this.activo = activo;
@@ -65,24 +75,6 @@ public class EstadisticasDeportivas {
         this.faltasCometidasPorPartido = faltasCometidasPorPartido;
         this.rating = rating;
         this.minutosJugados = minutosJugados;
-    }
-
-    private void validarConstruccion(Integer goles,
-                                     Integer asistencias,
-                                     BigDecimal disparosPorPartido,
-                                     BigDecimal keyPassesPorPartido,
-                                     BigDecimal dribblesGanadosPorPartido,
-                                     BigDecimal faltasCometidasPorPartido,
-                                     BigDecimal rating,
-                                     Integer minutosJugados) {
-        validarNoNegativo(goles, "Los goles no pueden ser negativos");
-        validarNoNegativo(asistencias, "Las asistencias no pueden ser negativas");
-        validarNoNegativo(disparosPorPartido, "Los disparos por partido no pueden ser negativos");
-        validarNoNegativo(keyPassesPorPartido, "Los key passes por partido no pueden ser negativos");
-        validarNoNegativo(dribblesGanadosPorPartido, "Los dribbles ganados por partido no pueden ser negativos");
-        validarNoNegativo(faltasCometidasPorPartido, "Las faltas cometidas por partido no pueden ser negativas");
-        validarNoNegativo(rating, "El rating no puede ser negativo");
-        validarNoNegativo(minutosJugados, "Los minutos jugados no pueden ser negativos");
     }
 
     public void actualizar(
