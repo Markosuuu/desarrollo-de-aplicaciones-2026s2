@@ -23,6 +23,9 @@ jwt:
   secret: ${JWT_SECRET:prontaentrega-dev-secret-key-1234567890-abcdefghijklmnopqrstuvwxyz}
   expiration-ms: ${JWT_EXPIRATION_MS:3600000}
 
+api-key:
+  master-secret: ${API_KEY_MASTER_SECRET}
+
 logging:
   level:
     org.springframework.security: INFO
