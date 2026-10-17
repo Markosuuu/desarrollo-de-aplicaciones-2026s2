@@ -61,26 +61,10 @@ public class BolsaDeJugador {
     }
 
     public void actualizarEstadisticas(
-            Integer edad,
-            Integer altura,
-            Integer peso,
-            Posicion posicion,
-            Boolean activo,
-            Integer goles,
-            Integer asistencias,
-            BigDecimal disparosPorPartido,
-            BigDecimal keyPassesPorPartido,
-            BigDecimal dribblesGanadosPorPartido,
-            BigDecimal faltasCometidasPorPartido,
-            BigDecimal rating,
-            Integer minutosJugados,
+            @NonNull EstadisticasDeportivas estadisticas,
             @NonNull LocalDateTime fecha,
             @NonNull String fuente) {
-        estadisticasDeportivas.getJugador().actualizar(edad, altura, peso, posicion);
-        estadisticasDeportivas.actualizar(
-                activo, goles, asistencias,
-                disparosPorPartido, keyPassesPorPartido, dribblesGanadosPorPartido,
-                faltasCometidasPorPartido, rating, minutosJugados);
+        this.estadisticasDeportivas = estadisticas;
         this.fechaActualizacion = fecha;
         this.fuente = fuente;
     }

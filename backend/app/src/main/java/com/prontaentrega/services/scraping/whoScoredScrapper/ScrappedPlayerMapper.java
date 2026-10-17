@@ -47,11 +47,18 @@ public class ScrappedPlayerMapper {
      * Actualiza un jugador existente con los datos provenientes de WhoScored.
      */
     public void updateBolsaDeJugador(BolsaDeJugador bolsa, PlayerStat stat, LocalDateTime fecha) {
-        bolsa.actualizarEstadisticas(
+        EstadisticasDeportivas estadisticas = bolsa.getEstadisticasDeportivas();
+        Jugador jugador = estadisticas.getJugador();
+
+        jugador.actualizar(
                 stat.age(),
                 stat.height(),
                 stat.weight(),
-                Posicion.fromValue(stat.positionText()),
+                Posicion.fromValue(stat.positionText())
+        );
+
+        estadisticas.actualizar(
+                jugador,
                 stat.isActive(),
                 stat.goal(),
                 stat.assistTotal(),
@@ -60,9 +67,9 @@ public class ScrappedPlayerMapper {
                 stat.dribbleWonPerGame(),
                 stat.foulGivenPerGame(),
                 stat.rating(),
-                stat.minsPlayed(),
-                fecha,
-                "WhoScored"
+                stat.minsPlayed()
         );
+
+        bolsa.actualizarEstadisticas(estadisticas, fecha, "WhoScored");
     }
 }

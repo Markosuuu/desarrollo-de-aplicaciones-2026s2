@@ -86,6 +86,7 @@ public class EstadisticasDeportivas {
     }
 
     public void actualizar(
+            Jugador jugador,
             Boolean activo,
             Integer goles,
             Integer asistencias,
@@ -95,6 +96,7 @@ public class EstadisticasDeportivas {
             BigDecimal faltasCometidasPorPartido,
             BigDecimal rating,
             Integer minutosJugados) {
+        this.jugador = jugador;
         this.activo = activo;
         this.goles = goles;
         this.asistencias = asistencias;

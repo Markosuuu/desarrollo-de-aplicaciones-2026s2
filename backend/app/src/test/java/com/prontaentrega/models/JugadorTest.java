@@ -19,11 +19,15 @@ class JugadorTest {
         EstadisticasDeportivas estadisticas = getEstadisticas();
         BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
 
-        bolsaJugador.actualizarEstadisticas(
+        bolsaJugador.getEstadisticasDeportivas().getJugador().actualizar(
                 21,
                 171,
                 61,
-                Posicion.MIDFIELDER,
+                Posicion.MIDFIELDER
+        );
+
+        bolsaJugador.getEstadisticasDeportivas().actualizar(
+                bolsaJugador.getEstadisticasDeportivas().getJugador(),
                 false,
                 3,
                 4,
@@ -32,7 +36,11 @@ class JugadorTest {
                 new BigDecimal("3.0"),
                 new BigDecimal("1.0"),
                 new BigDecimal("7.8"),
-                700,
+                700
+        );
+
+        bolsaJugador.actualizarEstadisticas(
+                bolsaJugador.getEstadisticasDeportivas(),
                 LocalDateTime.now(),
                 "WhoScored"
         );
@@ -90,10 +98,30 @@ class JugadorTest {
 
         BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
 
-        bolsaJugador.actualizarEstadisticas(21, 171, 61, Posicion.MIDFIELDER, false,
-                10, 8, new BigDecimal("3.5"), new BigDecimal("2.5"),
-                new BigDecimal("4.0"), new BigDecimal("1.5"), new BigDecimal("8.9"),
-                1500, LocalDateTime.now(), "WhoScored"
+        bolsaJugador.getEstadisticasDeportivas().getJugador().actualizar(
+                21,
+                171,
+                61,
+                Posicion.MIDFIELDER
+        );
+
+        bolsaJugador.getEstadisticasDeportivas().actualizar(
+                bolsaJugador.getEstadisticasDeportivas().getJugador(),
+                false,
+                10,
+                8,
+                new BigDecimal("3.5"),
+                new BigDecimal("2.5"),
+                new BigDecimal("4.0"),
+                new BigDecimal("1.5"),
+                new BigDecimal("8.9"),
+                1500
+        );
+
+        bolsaJugador.actualizarEstadisticas(
+                bolsaJugador.getEstadisticasDeportivas(),
+                LocalDateTime.now(),
+                "WhoScored"
         );
 
         Jugador datosJugador = bolsaJugador.getEstadisticasDeportivas().getJugador();
@@ -120,10 +148,30 @@ class JugadorTest {
 
         BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
 
+        bolsaJugador.getEstadisticasDeportivas().getJugador().actualizar(
+                21,
+                171,
+                61,
+                Posicion.MIDFIELDER
+        );
+
+        bolsaJugador.getEstadisticasDeportivas().actualizar(
+                bolsaJugador.getEstadisticasDeportivas().getJugador(),
+                false,
+                10,
+                8,
+                new BigDecimal("3.5"),
+                new BigDecimal("2.5"),
+                new BigDecimal("4.0"),
+                new BigDecimal("1.5"),
+                new BigDecimal("8.9"),
+                1500
+        );
+
         bolsaJugador.actualizarEstadisticas(
-                21, 171, 61, Posicion.MIDFIELDER, false, 10, 8,
-                new BigDecimal("3.5"), new BigDecimal("2.5"), new BigDecimal("4.0"), new BigDecimal("1.5"),
-                new BigDecimal("8.9"), 1500, LocalDateTime.now(), "WhoScored"
+                bolsaJugador.getEstadisticasDeportivas(),
+                LocalDateTime.now(),
+                "WhoScored"
         );
 
         assertEquals(new BigDecimal("1"), bolsaJugador.getCotizacionActual());
