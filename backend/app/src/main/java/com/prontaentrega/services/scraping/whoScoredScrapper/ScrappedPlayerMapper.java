@@ -1,6 +1,7 @@
 package com.prontaentrega.services.scraping.whoScoredScrapper;
 
 import com.prontaentrega.models.*;
+import com.prontaentrega.models.builders.EstadisticasDeportivasDatos;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
@@ -57,18 +58,20 @@ public class ScrappedPlayerMapper {
                 Posicion.fromValue(stat.positionText())
         );
 
-        estadisticas.actualizar(
-                jugador,
-                stat.isActive(),
-                stat.goal(),
-                stat.assistTotal(),
-                stat.shotsPerGame(),
-                stat.keyPassPerGame(),
-                stat.dribbleWonPerGame(),
-                stat.foulGivenPerGame(),
-                stat.rating(),
-                stat.minsPlayed()
-        );
+        EstadisticasDeportivasDatos datos = EstadisticasDeportivasDatos.builder()
+                .jugador(jugador)
+                .activo(stat.isActive())
+                .goles(stat.goal())
+                .asistencias(stat.assistTotal())
+                .disparosPorPartido(stat.shotsPerGame())
+                .keyPassesPorPartido(stat.keyPassPerGame())
+                .dribblesGanadosPorPartido(stat.dribbleWonPerGame())
+                .faltasCometidasPorPartido(stat.foulGivenPerGame())
+                .rating(stat.rating())
+                .minutosJugados(stat.minsPlayed())
+                .build();
+
+        estadisticas.actualizar(datos);
 
         bolsa.actualizarEstadisticas(estadisticas, fecha, "WhoScored");
     }

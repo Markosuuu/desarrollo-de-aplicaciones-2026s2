@@ -3,6 +3,7 @@ package com.prontaentrega.models;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+import com.prontaentrega.models.builders.EstadisticasDeportivasDatos;
 import com.prontaentrega.models.exception.ValorNegativoException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -77,27 +78,29 @@ public class EstadisticasDeportivas {
         this.minutosJugados = minutosJugados;
     }
 
-    public void actualizar(
-            Jugador jugador,
-            Boolean activo,
-            Integer goles,
-            Integer asistencias,
-            BigDecimal disparosPorPartido,
-            BigDecimal keyPassesPorPartido,
-            BigDecimal dribblesGanadosPorPartido,
-            BigDecimal faltasCometidasPorPartido,
-            BigDecimal rating,
-            Integer minutosJugados) {
-        this.jugador = jugador;
-        this.activo = activo;
-        this.goles = goles;
-        this.asistencias = asistencias;
-        this.disparosPorPartido = disparosPorPartido;
-        this.keyPassesPorPartido = keyPassesPorPartido;
-        this.dribblesGanadosPorPartido = dribblesGanadosPorPartido;
-        this.faltasCometidasPorPartido = faltasCometidasPorPartido;
-        this.rating = rating;
-        this.minutosJugados = minutosJugados;
+    public void actualizar(EstadisticasDeportivasDatos datos) {
+        validar(datos);
+        this.jugador = datos.getJugador();
+        this.activo = datos.getActivo();
+        this.goles = datos.getGoles();
+        this.asistencias = datos.getAsistencias();
+        this.disparosPorPartido = datos.getDisparosPorPartido();
+        this.keyPassesPorPartido = datos.getKeyPassesPorPartido();
+        this.dribblesGanadosPorPartido = datos.getDribblesGanadosPorPartido();
+        this.faltasCometidasPorPartido = datos.getFaltasCometidasPorPartido();
+        this.rating = datos.getRating();
+        this.minutosJugados = datos.getMinutosJugados();
+    }
+
+    private static void validar(EstadisticasDeportivasDatos datos) {
+        validarNoNegativo(datos.getGoles(), "Los goles no pueden ser negativos");
+        validarNoNegativo(datos.getAsistencias(), "Las asistencias no pueden ser negativas");
+        validarNoNegativo(datos.getDisparosPorPartido(), "Los disparos por partido no pueden ser negativos");
+        validarNoNegativo(datos.getKeyPassesPorPartido(), "Los key passes por partido no pueden ser negativos");
+        validarNoNegativo(datos.getDribblesGanadosPorPartido(), "Los dribbles ganados por partido no pueden ser negativos");
+        validarNoNegativo(datos.getFaltasCometidasPorPartido(), "Las faltas cometidas por partido no pueden ser negativas");
+        validarNoNegativo(datos.getRating(), "El rating no puede ser negativo");
+        validarNoNegativo(datos.getMinutosJugados(), "Los minutos jugados no pueden ser negativos");
     }
 
     private static void validarNoNegativo(Integer value, String message) {

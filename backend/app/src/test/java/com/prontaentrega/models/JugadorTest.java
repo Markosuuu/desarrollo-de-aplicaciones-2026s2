@@ -3,6 +3,7 @@ package com.prontaentrega.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.prontaentrega.models.builders.EstadisticasDeportivasDatos;
 import com.prontaentrega.models.exception.CampoFaltanteException;
 import com.prontaentrega.models.exception.ValorNegativoException;
 import org.jetbrains.annotations.NotNull;
@@ -26,18 +27,20 @@ class JugadorTest {
                 Posicion.MIDFIELDER
         );
 
-        bolsaJugador.getEstadisticasDeportivas().actualizar(
-                bolsaJugador.getEstadisticasDeportivas().getJugador(),
-                false,
-                3,
-                4,
-                new BigDecimal("2.5"),
-                new BigDecimal("2.0"),
-                new BigDecimal("3.0"),
-                new BigDecimal("1.0"),
-                new BigDecimal("7.8"),
-                700
-        );
+        EstadisticasDeportivasDatos datos = EstadisticasDeportivasDatos.builder()
+                .jugador(bolsaJugador.getEstadisticasDeportivas().getJugador())
+                .activo(false)
+                .goles(3)
+                .asistencias(4)
+                .disparosPorPartido(new BigDecimal("2.5"))
+                .keyPassesPorPartido(new BigDecimal("2.0"))
+                .dribblesGanadosPorPartido(new BigDecimal("3.0"))
+                .faltasCometidasPorPartido(new BigDecimal("1.0"))
+                .rating(new BigDecimal("7.8"))
+                .minutosJugados(700)
+                .build();
+
+        bolsaJugador.getEstadisticasDeportivas().actualizar(datos);
 
         bolsaJugador.actualizarEstadisticas(
                 bolsaJugador.getEstadisticasDeportivas(),
@@ -105,18 +108,20 @@ class JugadorTest {
                 Posicion.MIDFIELDER
         );
 
-        bolsaJugador.getEstadisticasDeportivas().actualizar(
-                bolsaJugador.getEstadisticasDeportivas().getJugador(),
-                false,
-                10,
-                8,
-                new BigDecimal("3.5"),
-                new BigDecimal("2.5"),
-                new BigDecimal("4.0"),
-                new BigDecimal("1.5"),
-                new BigDecimal("8.9"),
-                1500
-        );
+        EstadisticasDeportivasDatos datos = EstadisticasDeportivasDatos.builder()
+                .jugador(bolsaJugador.getEstadisticasDeportivas().getJugador())
+                .activo(false)
+                .goles(10)
+                .asistencias(8)
+                .disparosPorPartido(new BigDecimal("3.5"))
+                .keyPassesPorPartido(new BigDecimal("2.5"))
+                .dribblesGanadosPorPartido(new BigDecimal("4.0"))
+                .faltasCometidasPorPartido(new BigDecimal("1.5"))
+                .rating(new BigDecimal("8.9"))
+                .minutosJugados(1500)
+                .build();
+
+        bolsaJugador.getEstadisticasDeportivas().actualizar(datos);
 
         bolsaJugador.actualizarEstadisticas(
                 bolsaJugador.getEstadisticasDeportivas(),
@@ -155,18 +160,19 @@ class JugadorTest {
                 Posicion.MIDFIELDER
         );
 
-        bolsaJugador.getEstadisticasDeportivas().actualizar(
-                bolsaJugador.getEstadisticasDeportivas().getJugador(),
-                false,
-                10,
-                8,
-                new BigDecimal("3.5"),
-                new BigDecimal("2.5"),
-                new BigDecimal("4.0"),
-                new BigDecimal("1.5"),
-                new BigDecimal("8.9"),
-                1500
-        );
+        EstadisticasDeportivasDatos datos = EstadisticasDeportivasDatos.builder()
+                .activo(false)
+                .goles(10)
+                .asistencias(8)
+                .disparosPorPartido(new BigDecimal("3.5"))
+                .keyPassesPorPartido(new BigDecimal("2.5"))
+                .dribblesGanadosPorPartido(new BigDecimal("4.0"))
+                .faltasCometidasPorPartido(new BigDecimal("1.5"))
+                .rating(new BigDecimal("8.9"))
+                .minutosJugados(1500)
+                .build();
+
+        bolsaJugador.getEstadisticasDeportivas().actualizar(datos);
 
         bolsaJugador.actualizarEstadisticas(
                 bolsaJugador.getEstadisticasDeportivas(),
