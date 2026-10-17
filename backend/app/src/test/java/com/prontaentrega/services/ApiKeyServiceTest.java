@@ -1,7 +1,7 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.repository.ApiKey.ApiKey;
-import com.prontaentrega.repository.ApiKey.ApiKeyRepository;
+import com.prontaentrega.persistence.dto.ApiKey;
+import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,11 +26,11 @@ class ApiKeyServiceTest extends AbstractIntegrationTest {
     private ApiKeyService apiKeyService;
 
     @Autowired
-    private ApiKeyRepository apiKeyRepository;
+    private ApiKeyDAO apiKeyDAO;
 
     @BeforeEach
     void setUp() {
-        apiKeyRepository.deleteAll();
+        apiKeyDAO.deleteAll();
     }
 
     /**
@@ -46,7 +46,7 @@ class ApiKeyServiceTest extends AbstractIntegrationTest {
 
         String hash = calcularHash(apiKey);
 
-        ApiKey guardada = apiKeyRepository.findByKeyHashAndActivaTrue(hash)
+        ApiKey guardada = apiKeyDAO.findByKeyHashAndActivaTrue(hash)
                 .orElseThrow();
 
         assertEquals("Sistema de prueba", guardada.getNombre());
@@ -64,7 +64,7 @@ class ApiKeyServiceTest extends AbstractIntegrationTest {
         String segunda = apiKeyService.generar("Sistema B");
 
         assertNotEquals(primera, segunda);
-        assertEquals(2, apiKeyRepository.count());
+        assertEquals(2, apiKeyDAO.count());
     }
 
     /**
@@ -108,12 +108,12 @@ class ApiKeyServiceTest extends AbstractIntegrationTest {
     void validar_conClaveRevocada_deberiaRetornarFalse() {
         String apiKey = apiKeyService.generar("Sistema de prueba");
 
-        ApiKey guardada = apiKeyRepository
+        ApiKey guardada = apiKeyDAO
                 .findByKeyHashAndActivaTrue(calcularHash(apiKey))
                 .orElseThrow();
 
         guardada.desactivar();
-        apiKeyRepository.saveAndFlush(guardada);
+        apiKeyDAO.saveAndFlush(guardada);
 
         assertFalse(apiKeyService.validar(apiKey));
     }

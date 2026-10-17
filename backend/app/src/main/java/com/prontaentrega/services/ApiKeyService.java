@@ -1,6 +1,6 @@
 package com.prontaentrega.services;
-import com.prontaentrega.repository.ApiKey.ApiKey;
-import com.prontaentrega.repository.ApiKey.ApiKeyRepository;
+import com.prontaentrega.persistence.dto.ApiKey;
+import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +14,11 @@ import java.util.HexFormat;
 @Service
 public class ApiKeyService {
 
-    private final ApiKeyRepository apiKeyRepository;
+    private final ApiKeyDAO apiKeyDAO;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public ApiKeyService(ApiKeyRepository apiKeyRepository) {
-        this.apiKeyRepository = apiKeyRepository;
+    public ApiKeyService(ApiKeyDAO apiKeyDAO) {
+        this.apiKeyDAO = apiKeyDAO;
     }
 
     @Transactional
@@ -37,7 +37,7 @@ public class ApiKeyService {
         String keyHash = calcularHash(apiKey);
 
         ApiKey entidad = new ApiKey(nombre.trim(), keyHash);
-        apiKeyRepository.save(entidad);
+        apiKeyDAO.save(entidad);
 
         return apiKey;
     }
@@ -50,7 +50,7 @@ public class ApiKeyService {
 
         String keyHash = calcularHash(apiKey);
 
-        return apiKeyRepository
+        return apiKeyDAO
                 .findByKeyHashAndActivaTrue(keyHash)
                 .isPresent();
     }

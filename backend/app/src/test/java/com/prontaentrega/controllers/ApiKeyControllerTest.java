@@ -1,6 +1,6 @@
 package com.prontaentrega.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prontaentrega.repository.ApiKey.ApiKeyRepository;
+import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
 import com.prontaentrega.services.ApiKeyService;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +27,7 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
-    private ApiKeyRepository apiKeyRepository;
+    private ApiKeyDAO apiKeyDAO;
 
     @Autowired
     private ApiKeyService apiKeyService;
@@ -37,7 +37,7 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        apiKeyRepository.deleteAll();
+        apiKeyDAO.deleteAll();
     }
 
     /**
@@ -65,7 +65,7 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
                 .asText();
 
         assertTrue(apiKeyService.validar(apiKey));
-        assertEquals(1, apiKeyRepository.count());
+        assertEquals(1, apiKeyDAO.count());
     }
 
     /**
@@ -84,7 +84,7 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
                                 """))
                 .andExpect(status().isForbidden());
 
-        assertEquals(0, apiKeyRepository.count());
+        assertEquals(0, apiKeyDAO.count());
     }
 
     /**
@@ -102,6 +102,6 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
                                 """))
                 .andExpect(status().isBadRequest());
 
-        assertEquals(0, apiKeyRepository.count());
+        assertEquals(0, apiKeyDAO.count());
     }
 }

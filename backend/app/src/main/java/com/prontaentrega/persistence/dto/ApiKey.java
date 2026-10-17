@@ -1,4 +1,4 @@
-package com.prontaentrega.repository.ApiKey;
+package com.prontaentrega.persistence.dto;
 
 import jakarta.persistence.*;
 import lombok.Getter;
