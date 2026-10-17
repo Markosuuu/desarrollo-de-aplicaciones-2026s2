@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.repository.JugadorRepository;
+import com.prontaentrega.models.*;
+import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
@@ -108,11 +108,11 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
         assertEquals(0, second.skipped());
         assertEquals(2, jugadorRepository.count());
 
-        Jugador ana = jugadorRepository.findByWhoscoredId(101)
+        BolsaDeJugador ana = jugadorRepository.findByWhoscoredId(101)
                 .orElseThrow();
 
-        assertEquals(6, ana.getGoles());
-        assertEquals(new BigDecimal("8.10"), ana.getRating());
+        assertEquals(6, ana.getEstadisticasDeportivas().getGoles());
+        assertEquals(new BigDecimal("8.10"), ana.getEstadisticasDeportivas().getRating());
         assertTrue(second.success());
         assertEquals("Actualizacion completada correctamente", second.message());
         assertEquals(0, second.created());
@@ -157,7 +157,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana",
                   "teamName": null,
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,
@@ -203,28 +203,31 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
      * */
     @Test
     void refreshShouldPreserveCatalogWhenProviderFails() {
-        jugadorRepository.save(
-                Jugador.desdeEstadisticas(
-                        999,
-                        "Jugador Local",
-                        "Equipo Local",
-                        "Liga Local",
-                        30,
-                        180,
-                        75,
-                        "Midfielder",
-                        true,
-                        1,
-                        1,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        90,
-                        LocalDateTime.now()
-                )
+        Jugador jugador = new Jugador(
+                999,
+                "Jugador Local",
+                "Equipo Local",
+                Liga.BUNDESLIGA,
+                Posicion.MIDFIELDER,
+                30,
+                180,
+                75
         );
+
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador,
+                true,
+                1,
+                1,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                90
+        );
+
+        jugadorRepository.save(BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now()));
 
         providerStatus.set(500);
         providerBody.set("{\"error\":\"fallo\"}");
@@ -242,10 +245,10 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
 
         assertEquals(1, jugadorRepository.count());
 
-        Jugador jugador = jugadorRepository.findByWhoscoredId(999)
+        BolsaDeJugador jugadorActualizado = jugadorRepository.findByWhoscoredId(999)
                 .orElseThrow();
 
-        assertEquals("Jugador Local", jugador.getNombre());
+        assertEquals("Jugador Local", jugadorActualizado.getEstadisticasDeportivas().getJugador().getNombre());
     }
 
     /**
@@ -261,7 +264,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana Gomez",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,
@@ -280,7 +283,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
                   "playerId": 102,
                   "name": "Luis Perez",
                   "teamName": "Azul FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 28,
                   "height": 180,
                   "weight": 75,
@@ -299,7 +302,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
                   "playerId": null,
                   "name": null,
                   "teamName": "Azul FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 22,
                   "goal": 1,
                   "assistTotal": 1,
@@ -364,7 +367,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana Gomez",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,
@@ -383,7 +386,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
                   "playerId": 102,
                   "name": "Luis Perez",
                   "teamName": "Azul FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 28,
                   "height": 180,
                   "weight": 75,
@@ -419,7 +422,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana Gomez",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,
@@ -438,7 +441,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
                   "playerId": 102,
                   "name": "Luis Perez",
                   "teamName": "Azul FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 28,
                   "height": 180,
                   "weight": 75,

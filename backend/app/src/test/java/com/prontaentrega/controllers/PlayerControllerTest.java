@@ -5,10 +5,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.repository.ApiKey.ApiKeyRepository;
-import com.prontaentrega.repository.JugadorRepository;
-import com.prontaentrega.repository.UsuarioRepository;
+import com.prontaentrega.models.*;
+import com.prontaentrega.persistence.repository.JugadorRepository;
+import com.prontaentrega.persistence.repository.UsuarioRepository;
+import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
 import com.prontaentrega.services.ApiKeyService;
 import com.prontaentrega.services.AuthService;
 import com.prontaentrega.services.dto.AuthResult;
@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,12 +52,15 @@ class PlayerControllerTest extends AbstractIntegrationTest {
 
     @Autowired
     private AuthService authService;
+
     @Autowired
     private UsuarioRepository usuarioRepository;
+
     @Autowired
     private ApiKeyService apiKeyService;
+
     @Autowired
-    private ApiKeyRepository apiKeyRepository;
+    private ApiKeyDAO apiKeyDao;
 
     /**
      * Registra la URL del proveedor HTTP local para el contexto de Spring.
@@ -73,10 +78,9 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     void cleanDatabase() {
         jugadorRepository.deleteAll();
         usuarioRepository.deleteAll();
-        apiKeyRepository.deleteAll();
+        apiKeyDao.deleteAll();
         providerStatus.set(200);
         providerBody.set(payload());
-
     }
 
     /**
@@ -96,7 +100,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     void searchShouldBeProtectedWithTokenAndReturnPaginated() throws Exception {
         AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
 
-        mockMvc.perform(get("/api/players").param("liga", "La Liga")
+        mockMvc.perform(get("/api/players").param("liga", "LaLiga")
                         .param("page", "1").param("per_page", "10")
                         .header("Authorization", "Bearer "+result.token())
                 ).andExpect(status().isOk())
@@ -106,7 +110,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
 
     @Test
     void searchShouldBeProtectedAndReturnForbiddenStatusWithoutApiKey() throws Exception {
-        mockMvc.perform(get("/api/players").param("liga", "La Liga")
+        mockMvc.perform(get("/api/players").param("liga", "LaLiga")
                         .param("page", "1").param("per_page", "10")
                         .header("Authorization", "Bearer saraza123456")
                 ).andExpect(status().isUnauthorized());
@@ -114,7 +118,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
 
     @Test
     void searchShouldBeProtectedAndReturnUnauthorizedStatusWhenTokenIsWrong() throws Exception {
-        mockMvc.perform(get("/api/players").param("liga", "La Liga")
+        mockMvc.perform(get("/api/players").param("liga", "LaLiga")
                 .param("page", "1").param("per_page", "10")
         ).andExpect(status().isForbidden());
     }
@@ -227,7 +231,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana Gomez",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,
@@ -246,7 +250,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                   "playerId": null,
                   "name": "Jugador Incompleto",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno"
+                  "tournamentName": "Premier League"
                 }
               ],
               "paging": {
@@ -280,25 +284,11 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     void updateShouldReturnUpdatedPlayersInResponse() throws Exception {
         String apiKey = apiKeyService.generar("Prueba");
 
+        EstadisticasDeportivas estadisticas = getEstadisticas();
+
         jugadorRepository.save(
-                Jugador.desdeEstadisticas(
-                        101,
-                        "Ana Gomez",
-                        "Rojo FC",
-                        "Liga Uno",
-                        24,
-                        170,
-                        60,
-                        "Forward",
-                        true,
-                        1,
-                        1,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        100,
+                BolsaDeJugador.desdeEstadisticas(
+                        estadisticas,
                         LocalDateTime.now()
                 )
         );
@@ -313,6 +303,32 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.updated").value(1))
                 .andExpect(jsonPath("$.skipped").value(0))
                 .andExpect(jsonPath("$.source").value("WhoScored"));
+    }
+
+    private static @NotNull EstadisticasDeportivas getEstadisticas() {
+        Jugador jugador = new Jugador(
+                101,
+                "Ana Gomez",
+                "Rojo FC",
+                Liga.PREMIER_LEAGUE,
+                Posicion.FORWARD,
+                24,
+                170,
+                60
+        );
+
+        return new EstadisticasDeportivas(
+                jugador,
+                true,
+                1,
+                1,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                100
+        );
     }
 
 
@@ -345,7 +361,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana Gomez",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,

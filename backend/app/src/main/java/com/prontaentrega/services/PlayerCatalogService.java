@@ -1,8 +1,8 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.repository.CatalogSnapshotRepository;
-import com.prontaentrega.repository.JugadorRepository;
+import com.prontaentrega.models.BolsaDeJugador;
+import com.prontaentrega.models.Liga;
+import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
@@ -12,6 +12,8 @@ import com.prontaentrega.services.scraping.whoScoredScrapper.ScrappedPlayerMappe
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Servicio de catalogo de jugadores.
  * Orquesta lectura local, obtencion de WhoScored y persistencia segura sin
- * ubicar reglas de dominio fuera de la entidad Jugador.
+ * mantener las reglas de dominio en sus componentes correspondientes.
  */
 @Service
 public class PlayerCatalogService {
@@ -30,7 +32,6 @@ public class PlayerCatalogService {
     private final ScrappedPlayerMapper scrappedPlayerMapper;
 
     public PlayerCatalogService(JugadorRepository jugadorRepository,
-                                CatalogSnapshotRepository catalogSnapshotRepository,
                                 PlayerScrapper playerScrapper,
                                 ScrappedPlayerMapper scrappedPlayerMapper) {
         this.jugadorRepository = jugadorRepository;
@@ -46,15 +47,15 @@ public class PlayerCatalogService {
      * @param nombre Nombre del jugador
      * @param page Número de página
      * @param perPage Cantidad de resultados por página
-     * @return Page<Jugador> Página de jugadores encontrados
+     * @return Page<BolsaDeJugador> Página de jugadores encontrados con sus estadísticas y cotización
      */
     @Transactional(readOnly = true)
-    public Page<Jugador> search(String liga, String equipo, String nombre, int page, int perPage) {
+    public Page<BolsaDeJugador> search(Liga liga, String equipo, String nombre, int page, int perPage) {
         int safePage = Math.max(page, 1);
         int safePerPage = Math.clamp(perPage, 1, 50);
 
         Pageable pageable = PageRequest.of(safePage - 1, safePerPage);
-        return jugadorRepository.search(normalize(liga), normalize(equipo), normalize(nombre), pageable);
+        return jugadorRepository.search(liga, normalize(equipo), normalize(nombre), pageable);
     }
 
     /**
@@ -86,7 +87,6 @@ public class PlayerCatalogService {
             );
         }
         for (int page = 2; page <= totalPages; page++) {
-        //for (int page = 2; page <= 3; page++) {
             PlayerScrapperResponse response =
                     playerScrapper.fetchPlayerStatsPage(page, pageSize);
 
@@ -110,18 +110,20 @@ public class PlayerCatalogService {
                 continue;
             }
 
-            var existing = jugadorRepository.findByWhoscoredId(stat.playerId());
+            Optional<BolsaDeJugador> existing = jugadorRepository.findByWhoscoredId(stat.playerId());
 
             if (existing.isPresent()) {
-                scrappedPlayerMapper.updateJugador(
-                        existing.get(),
+                BolsaDeJugador bolsa = existing.get();
+                scrappedPlayerMapper.updateBolsaDeJugador(
+                        bolsa,
                         stat,
                         updatedAt
                 );
+                jugadorRepository.save(bolsa);
                 updated++;
             } else {
                 jugadorRepository.save(
-                        scrappedPlayerMapper.toJugador(stat, updatedAt)
+                        scrappedPlayerMapper.toBolsaDeJugador(stat, updatedAt)
                 );
                 created++;
             }
