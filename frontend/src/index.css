@@ -92,11 +92,37 @@ button {
   height: 100vh;
   padding: 1rem;
   background: none;
+
+  /* Reemplazamos el borde sólido */
+  border-right: none;
+
+  /* Necesario para posicionar el pseudo-elemento */
+  position: sticky;
+
   transition:
     width 0.2s ease,
     flex-basis 0.2s ease;
 }
 
+.sidebar::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 2px;
+  height: 100%;
+
+  background: linear-gradient(
+    to bottom,
+    #29a8e0,
+    #29e0d7,
+    #f7e928,
+    #f7ab28,
+    #ff6666,
+    #e6007e,
+    #c0006a
+  );
+}
 .app-layout--collapsed .sidebar {
   flex-basis: 76px;
   width: 76px;
