@@ -95,7 +95,6 @@ public class WhoScoredClient implements PlayerScrapper {
             return response;
 
         } catch (ProviderUnavailableException ex) {
-            //Este catch es raro, habria que mejorarlo :P
             throw ex;
         } catch (JsonProcessingException ex) {
             throw new ProviderUnavailableException(
