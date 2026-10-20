@@ -12,6 +12,8 @@ import io.jsonwebtoken.Claims;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
+import java.util.regex.Pattern;
+
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -112,8 +114,11 @@ public class AuthService {
         }
     }
 
+    private static final Pattern EMAIL_PATTERN =
+            Pattern.compile("^[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9-]{1,63}\\.){1,10}[A-Za-z]{2,63}$");
+
     private void validateCorreo(String correo) {
-        if (correo == null || !correo.matches("^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$")) {
+        if (correo == null || correo.length() > 254 || !EMAIL_PATTERN.matcher(correo).matches()) {
             throw new ValidationException("VALIDACION_INVALIDA", "Correo invalido");
         }
     }
