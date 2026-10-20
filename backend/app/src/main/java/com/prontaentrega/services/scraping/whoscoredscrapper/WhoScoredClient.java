@@ -1,4 +1,4 @@
-package com.prontaentrega.services.scraping.whoScoredScrapper;
+package com.prontaentrega.services.scraping.whoscoredscrapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

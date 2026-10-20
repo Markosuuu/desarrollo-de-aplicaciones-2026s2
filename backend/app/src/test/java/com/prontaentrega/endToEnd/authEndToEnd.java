@@ -4,7 +4,7 @@ package com.prontaentrega.endToEnd;
 import com.prontaentrega.controllers.dtos.AuthResponse;
 import com.prontaentrega.controllers.dtos.LoginRequest;
 import com.prontaentrega.controllers.dtos.RegisterRequest;
-import com.prontaentrega.controllers.exceptionHandler.ErrorResponse;
+import com.prontaentrega.controllers.exceptionhandler.ErrorResponse;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;

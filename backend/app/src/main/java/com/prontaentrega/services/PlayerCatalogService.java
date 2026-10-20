@@ -8,10 +8,9 @@ import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
 import com.prontaentrega.services.scraping.PlayerScrapper;
-import com.prontaentrega.services.scraping.whoScoredScrapper.ScrappedPlayerMapper;
+import com.prontaentrega.services.scraping.whoscoredscrapper.ScrappedPlayerMapper;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
@@ -69,7 +68,7 @@ public class PlayerCatalogService {
      */
     @Transactional
     public RefreshCatalogResponse refreshFromWhoScored() {
-        LocalDateTime updatedAt = LocalDateTime.now();
+        LocalDateTime updatedAt = LocalDateTime.now(ZoneId.systemDefault());
         final int pageSize = 20;
 
         // 1. Descargar la primera página para obtener la paginación.

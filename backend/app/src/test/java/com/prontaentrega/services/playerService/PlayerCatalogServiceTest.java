@@ -77,10 +77,11 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         }
     }
 
-    /** -------------------------------------------------------------------------------**/
-    /** ------------------------------- TESTS DE SEARCH -------------------------------**/
-    /** -------------------------------------------------------------------------------**/
+    // -------------------------------------------------------------------------------
+    // ------------------------------- TESTS DE SEARCH -------------------------------
+    // -------------------------------------------------------------------------------
 
+    
     /** Se verifica que la búsqueda sin filtros devuelva todos los jugadores del catálogo. */
     @Test
     void searchShouldReturnAllPlayersWhenNoFiltersAreProvided() {

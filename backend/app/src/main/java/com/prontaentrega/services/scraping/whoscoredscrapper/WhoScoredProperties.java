@@ -1,4 +1,4 @@
-package com.prontaentrega.services.scraping.whoScoredScrapper;
+package com.prontaentrega.services.scraping.whoscoredscrapper;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

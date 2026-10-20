@@ -82,7 +82,6 @@ button {
 }
 
 .sidebar {
-  position: sticky;
   top: 0;
   display: flex;
   flex: 0 0 240px;
