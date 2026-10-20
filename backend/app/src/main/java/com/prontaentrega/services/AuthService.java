@@ -10,6 +10,7 @@ import com.prontaentrega.services.exceptions.DuplicateUserException;
 import com.prontaentrega.services.exceptions.ValidationException;
 import io.jsonwebtoken.Claims;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -100,8 +101,8 @@ public class AuthService {
         tokenEstado.setUsuarioId(usuarioId);
         tokenEstado.setJtiVigente(UUID.fromString(claims.getId()));
         tokenEstado.setVersionToken((tokenEstado.getVersionToken() == null ? 0 : tokenEstado.getVersionToken()) + 1);
-        tokenEstado.setEmitidaEn(LocalDateTime.now());
-        tokenEstado.setExpiraEn(LocalDateTime.now().plusMinutes(60));
+        tokenEstado.setEmitidaEn(LocalDateTime.now(ZoneId.systemDefault()));
+        tokenEstado.setExpiraEn(LocalDateTime.now(ZoneId.systemDefault()).plusMinutes(60));
         tokenEstadoRepository.save(tokenEstado);
     }
 
