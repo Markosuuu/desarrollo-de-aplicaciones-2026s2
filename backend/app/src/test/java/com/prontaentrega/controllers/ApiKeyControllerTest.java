@@ -82,7 +82,7 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
                                     "nombre": "Sistema de prueba"
                                 }
                                 """))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
 
         assertEquals(0, apiKeyDAO.count());
     }
@@ -100,7 +100,7 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
                                     "nombre": "Sistema de prueba"
                                 }
                                 """))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnauthorized());
 
         assertEquals(0, apiKeyDAO.count());
     }

@@ -2,6 +2,7 @@ package com.prontaentrega.config;
 
 import com.prontaentrega.authentication.ApiKeyAuthenticationFilter;
 import com.prontaentrega.authentication.JwtAuthenticationFilter;
+import com.prontaentrega.authentication.MasterKeyAuthenticationFilter;
 import java.util.List;
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -30,7 +31,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain( HttpSecurity http,
                                                     JwtAuthenticationFilter jwtAuthenticationFilter,
-                                                    ApiKeyAuthenticationFilter apiKeyAuthenticationFilter
+                                                    ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
+                                                    MasterKeyAuthenticationFilter masterKeyAuthenticationFilter
     ) throws Exception {
         http
                 .cors(Customizer.withDefaults())
@@ -44,9 +46,20 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST,
+                                "/quotes/recalculate", "/api/quotes/recalculate")
+                        .authenticated()
+                        .requestMatchers(HttpMethod.PUT,
+                                "/quotes/strategy", "/api/quotes/strategy",
+                                "/quotes/strategies/*/config", "/api/quotes/strategies/*/config")
+                        .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/players/update")
                         .authenticated()
                         .anyRequest().authenticated())
+                .addFilterBefore(
+                        masterKeyAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
                 .addFilterBefore(
                         apiKeyAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class
@@ -95,6 +108,16 @@ public class SecurityConfig {
                 new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
         return registration;
+    }
+
+    /** Evita registrar el filtro maestro fuera de la cadena Spring Security. */
+    @Bean public FilterRegistrationBean<MasterKeyAuthenticationFilter> masterKeyFilterRegistration(
+                        MasterKeyAuthenticationFilter filter) {
+          FilterRegistrationBean<MasterKeyAuthenticationFilter> registration =
+                  new FilterRegistrationBean<>(filter);
+
+          registration.setEnabled(false);
+          return registration;
     }
 
     /**
