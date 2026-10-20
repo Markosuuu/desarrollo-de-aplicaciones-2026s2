@@ -36,7 +36,7 @@ export default function AuthView({
       await schema.validate(values, { abortEarly: false });
       await onSubmit(values);
       toast.success(successMessage);
-      navigate("/");
+      void navigate("/");
     } catch (error) {
       const message =
         error?.inner?.[0]?.message || error?.message || errorMessage;
