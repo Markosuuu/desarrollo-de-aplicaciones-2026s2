@@ -112,13 +112,15 @@ public class AuthService {
     }
 
     private void validateCorreo(String correo) {
-        if (correo == null || !correo.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+        if (correo == null || !correo.matches("^[A-Za-z0-9._%+-]+@(?:[A-Za-z0-9-]+\\.)+[A-Za-z]{2,}$")) {
             throw new ValidationException("VALIDACION_INVALIDA", "Correo invalido");
         }
     }
 
     private void validatePassword(String password) {
-        if (password == null || password.length() < 8 || !password.matches(".*[A-Za-z].*") || !password.matches(".*\\d.*")) {
+        if (password == null || password.length() < 8 || password.length() > 72
+                || password.chars().noneMatch(Character::isLetter)
+                || password.chars().noneMatch(Character::isDigit)) {
             throw new ValidationException("VALIDACION_INVALIDA", "Password invalido");
         }
     }

@@ -3,7 +3,6 @@ package com.prontaentrega.controllers;
 import com.prontaentrega.controllers.dtos.AuthResponse;
 import com.prontaentrega.controllers.dtos.LoginRequest;
 import com.prontaentrega.controllers.dtos.RegisterRequest;
-import com.prontaentrega.controllers.dtos.UsuarioResponse;
 import com.prontaentrega.controllers.exceptionHandler.ErrorResponse;
 import com.prontaentrega.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
