@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class PlayerCatalogService {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final JugadorRepository jugadorRepository;
     private final PlayerScrapper playerScrapper;
     private final ScrappedPlayerMapper scrappedPlayerMapper;
@@ -65,15 +70,11 @@ public class PlayerCatalogService {
     @Transactional
     public RefreshCatalogResponse refreshFromWhoScored() {
         LocalDateTime updatedAt = LocalDateTime.now();
-
         final int pageSize = 20;
 
-        // 1. Descargar todas las paginas antes de modificar la base.
+        // 1. Descargar la primera página para obtener la paginación.
         PlayerScrapperResponse firstPage =
                 playerScrapper.fetchPlayerStatsPage(1, pageSize);
-
-        List<PlayerStat> stats =
-                new ArrayList<>(firstPage.stats());
 
         int totalPages = firstPage.paging() != null
                 && firstPage.paging().totalPages() != null
@@ -86,47 +87,24 @@ public class PlayerCatalogService {
                     "No se pudo completar la actualizacion. El proveedor no informo correctamente la cantidad de paginas."
             );
         }
-        for (int page = 2; page <= totalPages; page++) {
-            PlayerScrapperResponse response =
-                    playerScrapper.fetchPlayerStatsPage(page, pageSize);
-
-            stats.addAll(response.stats());
-        }
 
         int created = 0;
         int updated = 0;
         int skipped = 0;
 
-        for (PlayerStat stat : stats) {
+        for (int page = 1; page <= totalPages; page++) {
+            PlayerScrapperResponse response = page == 1
+                    ? firstPage
+                    : playerScrapper.fetchPlayerStatsPage(page, pageSize);
 
-            if (stat.playerId() == null
-                    || stat.name() == null
-                    || stat.name().isBlank()
-                    || stat.teamName() == null
-                    || stat.teamName().isBlank()
-                    || stat.tournamentName() == null
-                    || stat.tournamentName().isBlank()) {
-                skipped++;
-                continue;
-            }
+            int[] pageResults = processPage(response, updatedAt);
 
-            Optional<BolsaDeJugador> existing = jugadorRepository.findByWhoscoredId(stat.playerId());
+            created += pageResults[0];
+            updated += pageResults[1];
+            skipped += pageResults[2];
 
-            if (existing.isPresent()) {
-                BolsaDeJugador bolsa = existing.get();
-                scrappedPlayerMapper.updateBolsaDeJugador(
-                        bolsa,
-                        stat,
-                        updatedAt
-                );
-                jugadorRepository.save(bolsa);
-                updated++;
-            } else {
-                jugadorRepository.save(
-                        scrappedPlayerMapper.toBolsaDeJugador(stat, updatedAt)
-                );
-                created++;
-            }
+            entityManager.flush();
+            entityManager.clear();
         }
 
         if (created + updated == 0) {
@@ -142,6 +120,60 @@ public class PlayerCatalogService {
                 skipped,
                 playerScrapper.source()
         );
+    }
+
+    /**
+     * Procesa los jugadores de una página y contabiliza los resultados.
+     *
+     * @return arreglo con la cantidad de jugadores creados, actualizados y omitidos.
+     */
+    private int[] processPage(
+            PlayerScrapperResponse response,
+            LocalDateTime updatedAt
+    ) {
+        int created = 0;
+        int updated = 0;
+        int skipped = 0;
+
+        for (PlayerStat stat : response.stats()) {
+
+            if (stat.playerId() == null
+                    || stat.name() == null
+                    || stat.name().isBlank()
+                    || stat.teamName() == null
+                    || stat.teamName().isBlank()
+                    || stat.tournamentName() == null
+                    || stat.tournamentName().isBlank()) {
+                skipped++;
+                continue;
+            }
+
+            Optional<BolsaDeJugador> existing =
+                    jugadorRepository.findByWhoscoredId(stat.playerId());
+
+            if (existing.isPresent()) {
+                BolsaDeJugador bolsa = existing.get();
+
+                scrappedPlayerMapper.updateBolsaDeJugador(
+                        bolsa,
+                        stat,
+                        updatedAt
+                );
+
+                jugadorRepository.save(bolsa);
+                updated++;
+            } else {
+                jugadorRepository.save(
+                        scrappedPlayerMapper.toBolsaDeJugador(
+                                stat,
+                                updatedAt
+                        )
+                );
+                created++;
+            }
+        }
+
+        return new int[]{created, updated, skipped};
     }
 
     private String normalize(String value) {
