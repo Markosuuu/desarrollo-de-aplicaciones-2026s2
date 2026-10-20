@@ -8,11 +8,9 @@ import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
 import com.prontaentrega.services.scraping.PlayerScrapper;
-import com.prontaentrega.services.scraping.whoScoredScrapper.ScrappedPlayerMapper;
+import com.prontaentrega.services.scraping.whoscoredscrapper.ScrappedPlayerMapper;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import jakarta.persistence.EntityManager;
