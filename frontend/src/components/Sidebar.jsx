@@ -16,7 +16,7 @@ export default function Sidebar({ children }) {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    void navigate("/login");
   };
 
   return (
