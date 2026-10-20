@@ -1,4 +1,4 @@
-name: Backend-Continuous-Integration
+name: Backend - CI - Build & Test
 
 on:
   push:
@@ -47,9 +47,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@ed408507eac070d1f99cc633dbcf757c94c7933a #v4
 
-      - name: Run tests
+      - name: Build and test
         env:
           DB_URL: jdbc:postgresql://localhost:5432/pronta_entrega_db
           DB_USERNAME: postgres
           DB_PASSWORD: "${{ secrets.DB_PASSWORD }}"
-        run: ./gradlew test
+        run: ./gradlew build

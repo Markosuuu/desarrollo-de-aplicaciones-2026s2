@@ -1,12 +1,10 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.controllers.dtos.AuthResponse;
 import com.prontaentrega.controllers.dtos.LoginRequest;
-import com.prontaentrega.controllers.dtos.RegisterRequest;
 import com.prontaentrega.models.TokenEstado;
 import com.prontaentrega.models.Usuario;
-import com.prontaentrega.repository.TokenEstadoRepository;
-import com.prontaentrega.repository.UsuarioRepository;
+import com.prontaentrega.persistence.repository.TokenEstadoRepository;
+import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.services.exceptions.DuplicateUserException;
 import com.prontaentrega.services.exceptions.ValidationException;
@@ -42,10 +40,10 @@ public class AuthServiceTest extends AbstractIntegrationTest {
         usuarioRepository.deleteAll();
     }
 
+    //-------------------------------------------------------------------------------
+    //------------------------------ TESTS DE REGISTER ------------------------------
+    //-------------------------------------------------------------------------------
 
-    /** -------------------------------------------------------------------------------**/
-    /** ------------------------------ TESTS DE REGISTER ------------------------------**/
-    /** -------------------------------------------------------------------------------**/
 
     /** Se verifica que al registrar un usuario se devuelva correctamente su información y un token.*/
     @Test
@@ -211,9 +209,10 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     }
 
 
-    /** ----------------------------------------------------------------------------**/
-    /** ------------------------------ TESTS DE LOGIN ------------------------------**/
-    /** ----------------------------------------------------------------------------**/
+    // ----------------------------------------------------------------------------
+    // ------------------------------ TESTS DE LOGIN ------------------------------
+    // ----------------------------------------------------------------------------
+
 
     /** Se verifica que un usuario pueda iniciar sesión con credenciales válidas y obtener un token. */
     @Test
@@ -257,9 +256,7 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     @Test
     void loginShouldNormalizeEmail() {
         authService.register("Ana", "ana@example.com", "clave123");
-
-        LoginRequest loginRequest = new LoginRequest(" ANA@EXAMPLE.COM ", "clave123");
-
+        
         AuthResult response = authService.login(" ANA@EXAMPLE.COM ", "clave123");
 
         assertNotNull(response);

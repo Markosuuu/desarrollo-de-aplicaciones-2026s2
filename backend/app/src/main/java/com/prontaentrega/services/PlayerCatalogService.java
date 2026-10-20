@@ -1,17 +1,20 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.repository.CatalogSnapshotRepository;
-import com.prontaentrega.repository.JugadorRepository;
+import com.prontaentrega.models.BolsaDeJugador;
+import com.prontaentrega.models.Liga;
+import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
-import com.prontaentrega.services.dto.external.WhoScoredPlayerStat;
-import com.prontaentrega.services.dto.external.WhoScoredResponse;
+import com.prontaentrega.services.dto.external.PlayerStat;
+import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
-import com.prontaentrega.services.scraping.WhoScoredClient;
-import com.prontaentrega.services.scraping.WhoScoredPlayerMapper;
+import com.prontaentrega.services.scraping.PlayerScrapper;
+import com.prontaentrega.services.scraping.whoscoredscrapper.ScrappedPlayerMapper;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.ZoneId;
+import java.util.Optional;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,21 +24,23 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Servicio de catalogo de jugadores.
  * Orquesta lectura local, obtencion de WhoScored y persistencia segura sin
- * ubicar reglas de dominio fuera de la entidad Jugador.
+ * mantener las reglas de dominio en sus componentes correspondientes.
  */
 @Service
 public class PlayerCatalogService {
+    @PersistenceContext
+    private EntityManager entityManager;
+
     private final JugadorRepository jugadorRepository;
-    private final WhoScoredClient whoScoredClient;
-    private final WhoScoredPlayerMapper whoScoredPlayerMapper;
+    private final PlayerScrapper playerScrapper;
+    private final ScrappedPlayerMapper scrappedPlayerMapper;
 
     public PlayerCatalogService(JugadorRepository jugadorRepository,
-                                CatalogSnapshotRepository catalogSnapshotRepository,
-                                WhoScoredClient whoScoredClient,
-                                WhoScoredPlayerMapper whoScoredPlayerMapper) {
+                                PlayerScrapper playerScrapper,
+                                ScrappedPlayerMapper scrappedPlayerMapper) {
         this.jugadorRepository = jugadorRepository;
-        this.whoScoredClient = whoScoredClient;
-        this.whoScoredPlayerMapper = whoScoredPlayerMapper;
+        this.playerScrapper = playerScrapper;
+        this.scrappedPlayerMapper = scrappedPlayerMapper;
     }
 
     /**
@@ -46,15 +51,15 @@ public class PlayerCatalogService {
      * @param nombre Nombre del jugador
      * @param page Número de página
      * @param perPage Cantidad de resultados por página
-     * @return Page<Jugador> Página de jugadores encontrados
+     * @return Page<BolsaDeJugador> Página de jugadores encontrados con sus estadísticas y cotización
      */
     @Transactional(readOnly = true)
-    public Page<Jugador> search(String liga, String equipo, String nombre, int page, int perPage) {
+    public Page<BolsaDeJugador> search(Liga liga, String equipo, String nombre, int page, int perPage) {
         int safePage = Math.max(page, 1);
         int safePerPage = Math.clamp(perPage, 1, 50);
 
         Pageable pageable = PageRequest.of(safePage - 1, safePerPage);
-        return jugadorRepository.search(normalize(liga), normalize(equipo), normalize(nombre), pageable);
+        return jugadorRepository.search(liga, normalize(equipo), normalize(nombre), pageable);
     }
 
     /**
@@ -63,16 +68,12 @@ public class PlayerCatalogService {
      */
     @Transactional
     public RefreshCatalogResponse refreshFromWhoScored() {
-        LocalDateTime updatedAt = LocalDateTime.now();
-
+        LocalDateTime updatedAt = LocalDateTime.now(ZoneId.systemDefault());
         final int pageSize = 20;
 
-        // 1. Descargar todas las paginas antes de modificar la base.
-        WhoScoredResponse firstPage =
-                whoScoredClient.fetchPlayerStatsPage(1, pageSize);
-
-        List<WhoScoredPlayerStat> stats =
-                new ArrayList<>(firstPage.stats());
+        // 1. Descargar la primera página para obtener la paginación.
+        PlayerScrapperResponse firstPage =
+                playerScrapper.fetchPlayerStatsPage(1, pageSize);
 
         int totalPages = firstPage.paging() != null
                 && firstPage.paging().totalPages() != null
@@ -81,25 +82,59 @@ public class PlayerCatalogService {
 
         if (totalPages <= 0) {
             throw new ProviderUnavailableException(
-                    "WHOSCORED_PAGINACION_INVALIDA",
-                    "No se pudo completar la actualizacion. WhoScored no informo correctamente la cantidad de paginas."
+                    "PAGINACION_INVALIDA",
+                    "No se pudo completar la actualizacion. El proveedor no informo correctamente la cantidad de paginas."
             );
         }
-        //COMENTO ESTO PARA PROBAR CON ALGO MAS CHICO
-        for (int page = 2; page <= totalPages; page++) {
-        //for (int page = 2; page <= 3; page++) {
-            WhoScoredResponse response =
-                    whoScoredClient.fetchPlayerStatsPage(page, pageSize);
 
-            stats.addAll(response.stats());
-        }
-
-        // 2. Si llegamos hasta aca, WhoScored entrego todas las paginas.
         int created = 0;
         int updated = 0;
         int skipped = 0;
 
-        for (WhoScoredPlayerStat stat : stats) {
+        for (int page = 1; page <= totalPages; page++) {
+            PlayerScrapperResponse response = page == 1
+                    ? firstPage
+                    : playerScrapper.fetchPlayerStatsPage(page, pageSize);
+
+            int[] pageResults = processPage(response, updatedAt);
+
+            created += pageResults[0];
+            updated += pageResults[1];
+            skipped += pageResults[2];
+
+            entityManager.flush();
+            entityManager.clear();
+        }
+
+        if (created + updated == 0) {
+            throw new ProviderUnavailableException(
+                    "SIN_DATOS_UTILES",
+                    "No se pudo completar la actualizacion. El proveedor no produjo registros utiles."
+            );
+        }
+
+        return RefreshCatalogResponse.success(
+                created,
+                updated,
+                skipped,
+                playerScrapper.source()
+        );
+    }
+
+    /**
+     * Procesa los jugadores de una página y contabiliza los resultados.
+     *
+     * @return arreglo con la cantidad de jugadores creados, actualizados y omitidos.
+     */
+    private int[] processPage(
+            PlayerScrapperResponse response,
+            LocalDateTime updatedAt
+    ) {
+        int created = 0;
+        int updated = 0;
+        int skipped = 0;
+
+        for (PlayerStat stat : response.stats()) {
 
             if (stat.playerId() == null
                     || stat.name() == null
@@ -112,35 +147,32 @@ public class PlayerCatalogService {
                 continue;
             }
 
-            var existing = jugadorRepository.findByWhoscoredId(stat.playerId());
+            Optional<BolsaDeJugador> existing =
+                    jugadorRepository.findByWhoscoredId(stat.playerId());
 
             if (existing.isPresent()) {
-                whoScoredPlayerMapper.updateJugador(
-                        existing.get(),
+                BolsaDeJugador bolsa = existing.get();
+
+                scrappedPlayerMapper.updateBolsaDeJugador(
+                        bolsa,
                         stat,
                         updatedAt
                 );
+
+                jugadorRepository.save(bolsa);
                 updated++;
             } else {
                 jugadorRepository.save(
-                        whoScoredPlayerMapper.toJugador(stat, updatedAt)
+                        scrappedPlayerMapper.toBolsaDeJugador(
+                                stat,
+                                updatedAt
+                        )
                 );
                 created++;
             }
         }
 
-        if (created + updated == 0) {
-            throw new ProviderUnavailableException(
-                    "WHOSCORED_SIN_DATOS_UTILES",
-                    "No se pudo completar la actualizacion. WhoScored no produjo registros utiles."
-            );
-        }
-
-        return RefreshCatalogResponse.success(
-                created,
-                updated,
-                skipped
-        );
+        return new int[]{created, updated, skipped};
     }
 
     private String normalize(String value) {

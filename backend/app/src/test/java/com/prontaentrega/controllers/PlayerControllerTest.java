@@ -5,8 +5,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.repository.JugadorRepository;
+import com.prontaentrega.models.*;
+import com.prontaentrega.persistence.repository.JugadorRepository;
+import com.prontaentrega.persistence.repository.UsuarioRepository;
+import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
+import com.prontaentrega.services.ApiKeyService;
+import com.prontaentrega.services.AuthService;
+import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -17,13 +22,14 @@ import java.time.LocalDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -44,6 +50,18 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     @Autowired
     private JugadorRepository jugadorRepository;
 
+    @Autowired
+    private AuthService authService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ApiKeyService apiKeyService;
+
+    @Autowired
+    private ApiKeyDAO apiKeyDao;
+
     /**
      * Registra la URL del proveedor HTTP local para el contexto de Spring.
      */
@@ -59,6 +77,8 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         jugadorRepository.deleteAll();
+        usuarioRepository.deleteAll();
+        apiKeyDao.deleteAll();
         providerStatus.set(200);
         providerBody.set(payload());
     }
@@ -77,19 +97,40 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      * Verifica que la consulta de catalogo sea publica y paginada.
      */
     @Test
-    void catalogShouldBePublicAndPaginated() throws Exception {
-        mockMvc.perform(get("/api/players").param("liga", "La Liga").param("page", "1").param("per_page", "10"))
-                .andExpect(status().isOk())
+    void searchShouldBeProtectedWithTokenAndReturnPaginated() throws Exception {
+        AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(get("/api/players").param("liga", "LaLiga")
+                        .param("page", "1").param("per_page", "10")
+                        .header("Authorization", "Bearer "+result.token())
+                ).andExpect(status().isOk())
                 .andExpect(jsonPath("$.jugadores").isArray())
                 .andExpect(jsonPath("$.paginacion.total").isNumber());
+    }
+
+    @Test
+    void searchShouldBeProtectedAndReturnForbiddenStatusWithoutApiKey() throws Exception {
+        mockMvc.perform(get("/api/players").param("liga", "LaLiga")
+                        .param("page", "1").param("per_page", "10")
+                        .header("Authorization", "Bearer saraza123456")
+                ).andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void searchShouldBeProtectedAndReturnUnauthorizedStatusWhenTokenIsWrong() throws Exception {
+        mockMvc.perform(get("/api/players").param("liga", "LaLiga")
+                .param("page", "1").param("per_page", "10")
+        ).andExpect(status().isForbidden());
     }
 
     /**
      * Verifica que la actualizacion publica responda con el contrato exitoso.
      */
     @Test
-    void updateShouldBePublicAndReturnSuccessContract() throws Exception {
-        mockMvc.perform(post("/api/players/update"))
+    void updateShouldReturnSuccessContract() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
+
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Actualizacion completada correctamente"))
@@ -104,10 +145,12 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      */
     @Test
     void updateShouldReturnBadGatewayWhenProviderFails() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
+
         providerStatus.set(500);
         providerBody.set("{\"error\":\"fallo\"}");
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("No se pudo completar la actualizacion. Se conserva la informacion local vigente."))
@@ -122,17 +165,19 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      * */
     @Test
     void updateShouldReturnBadGatewayWhenPaginationIsInvalid() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
+
         providerBody.set("""
             {
               "playerTableStats": []
             }
             """);
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(
-                        "No se pudo completar la actualizacion. WhoScored no informo correctamente la cantidad de paginas."
+                        "No se pudo completar la actualizacion. El proveedor no informo correctamente la cantidad de paginas."
                 ))
                 .andExpect(jsonPath("$.created").value(0))
                 .andExpect(jsonPath("$.updated").value(0))
@@ -145,6 +190,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      */
     @Test
     void updateShouldReturnBadGatewayWhenProviderHasNoUsefulData() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
         providerBody.set("""
             {
               "playerTableStats": [],
@@ -159,11 +205,11 @@ class PlayerControllerTest extends AbstractIntegrationTest {
             }
             """);
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isBadGateway())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value(
-                        "No se pudo completar la actualizacion. WhoScored no produjo registros utiles."
+                        "No se pudo completar la actualizacion. El proveedor no produjo registros utiles."
                 ))
                 .andExpect(jsonPath("$.created").value(0))
                 .andExpect(jsonPath("$.updated").value(0))
@@ -177,6 +223,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      */
     @Test
     void updateShouldReturnSkippedPlayersInResponse() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
         providerBody.set("""
             {
               "playerTableStats": [
@@ -184,7 +231,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana Gomez",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,
@@ -203,7 +250,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                   "playerId": null,
                   "name": "Jugador Incompleto",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno"
+                  "tournamentName": "Premier League"
                 }
               ],
               "paging": {
@@ -217,7 +264,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
             }
             """);
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value(
@@ -235,30 +282,18 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     * */
     @Test
     void updateShouldReturnUpdatedPlayersInResponse() throws Exception {
+        String apiKey = apiKeyService.generar("Prueba");
+
+        EstadisticasDeportivas estadisticas = getEstadisticas();
+
         jugadorRepository.save(
-                Jugador.desdeEstadisticas(
-                        101,
-                        "Ana Gomez",
-                        "Rojo FC",
-                        "Liga Uno",
-                        24,
-                        170,
-                        60,
-                        "Forward",
-                        true,
-                        1,
-                        1,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        BigDecimal.ONE,
-                        100,
+                BolsaDeJugador.desdeEstadisticas(
+                        estadisticas,
                         LocalDateTime.now()
                 )
         );
 
-        mockMvc.perform(post("/api/players/update"))
+        mockMvc.perform(post("/api/players/update").header("X-API-Key", apiKey))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value(
@@ -268,6 +303,32 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.updated").value(1))
                 .andExpect(jsonPath("$.skipped").value(0))
                 .andExpect(jsonPath("$.source").value("WhoScored"));
+    }
+
+    private static @NotNull EstadisticasDeportivas getEstadisticas() {
+        Jugador jugador = new Jugador(
+                101,
+                "Ana Gomez",
+                "Rojo FC",
+                Liga.PREMIER_LEAGUE,
+                Posicion.FORWARD,
+                24,
+                170,
+                60
+        );
+
+        return new EstadisticasDeportivas(
+                jugador,
+                true,
+                1,
+                1,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                BigDecimal.ONE,
+                100
+        );
     }
 
 
@@ -300,7 +361,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                   "playerId": 101,
                   "name": "Ana Gomez",
                   "teamName": "Rojo FC",
-                  "tournamentName": "Liga Uno",
+                  "tournamentName": "Premier League",
                   "age": 24,
                   "height": 170,
                   "weight": 60,
