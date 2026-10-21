@@ -1,4 +1,4 @@
-package com.prontaentrega.controllers.exceptionHandler;
+package com.prontaentrega.controllers.exceptionhandler;
 
 import com.prontaentrega.services.exceptions.CatalogUnavailableException;
 import com.prontaentrega.services.exceptions.DuplicateUserException;

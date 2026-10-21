@@ -1,4 +1,4 @@
-package com.prontaentrega.services.scraping.whoScoredScrapper;
+package com.prontaentrega.services.scraping.whoscoredscrapper;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,7 +95,6 @@ public class WhoScoredClient implements PlayerScrapper {
             return response;
 
         } catch (ProviderUnavailableException ex) {
-            //Este catch es raro, habria que mejorarlo :P
             throw ex;
         } catch (JsonProcessingException ex) {
             throw new ProviderUnavailableException(
