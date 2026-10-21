@@ -14,28 +14,14 @@ import java.security.MessageDigest;
 public class ApiKeyController {
 
     private final ApiKeyService apiKeyService;
-    private final String masterSecret;
-
     public ApiKeyController(
-            ApiKeyService apiKeyService,
-            @Value("${api-key.master-secret}") String masterSecret) {
+            ApiKeyService apiKeyService) {
         this.apiKeyService = apiKeyService;
-        this.masterSecret = masterSecret;
     }
 
     @PostMapping
-    public ResponseEntity<?> generar(
-            @RequestHeader("X-Master-Key") String masterKey,
-            @RequestBody CreateApiKeyRequest request) {
-
-        if (!MessageDigest.isEqual(
-                masterSecret.getBytes(StandardCharsets.UTF_8),
-                masterKey.getBytes(StandardCharsets.UTF_8))) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    public ResponseEntity<?> generar(@RequestBody CreateApiKeyRequest request) {
         String apiKey = apiKeyService.generar(request.nombre());
-
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new CreateApiKeyResponse(apiKey));
     }

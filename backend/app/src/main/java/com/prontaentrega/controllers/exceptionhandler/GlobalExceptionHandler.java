@@ -5,6 +5,9 @@ import com.prontaentrega.services.exceptions.DuplicateUserException;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
 import com.prontaentrega.services.exceptions.ValidationException;
+import com.prontaentrega.controllers.dtos.QuoteErrorResponse;
+import com.prontaentrega.models.exception.CotizacionInvalidaException;
+import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +60,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<ErrorResponse> handleJwt(JwtException ex) {
         return error(HttpStatus.UNAUTHORIZED, "JWT_INVALIDO", "JWT invalido");
+    }
+
+    /** Maneja conflictos funcionales de estado/configuración de cotizaciones. */
+    @ExceptionHandler(QuoteOperationConflictException.class)
+    public ResponseEntity<QuoteErrorResponse> handleQuoteConflict(QuoteOperationConflictException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new QuoteErrorResponse("RECOTIZACION_NO_DISPONIBLE", ex.getMessage()));
+    }
+
+    /** Maneja un resultado que incumple la invariante de cotización del mercado. */
+    @ExceptionHandler(CotizacionInvalidaException.class)
+    public ResponseEntity<QuoteErrorResponse> handleInvalidQuote(CotizacionInvalidaException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new QuoteErrorResponse("COTIZACION_INVALIDA", ex.getMessage()));
     }
 
     /**
