@@ -135,7 +135,7 @@ public class QuoteRecalculationService {
             try {
                 BigDecimal cotizacion = strategy.calcular(datos, configuracion);
                 updates.add(new ActualizacionCotizacion(datos.bolsaId(), cotizacion));
-            } catch (DatosValoracionInvalidaException exception) {
+            } catch (DatosValoracionInvalidaException ignored) {
 
             }
         }
