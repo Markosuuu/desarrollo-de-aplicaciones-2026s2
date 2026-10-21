@@ -2,7 +2,7 @@ package com.prontaentrega.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.prontaentrega.controllers.exceptionHandler.QuoteApiExceptionHandler;
+import com.prontaentrega.controllers.exceptionhandler.QuoteApiExceptionHandler;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.PessimisticLockingFailureException;

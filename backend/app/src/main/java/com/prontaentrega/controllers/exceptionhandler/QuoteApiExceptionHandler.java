@@ -1,4 +1,4 @@
-package com.prontaentrega.controllers.exceptionHandler;
+package com.prontaentrega.controllers.exceptionhandler;
 
 import com.prontaentrega.controllers.QuoteController;
 import com.prontaentrega.controllers.dtos.QuoteErrorResponse;
