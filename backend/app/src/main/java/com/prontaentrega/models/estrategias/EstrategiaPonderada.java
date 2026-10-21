@@ -38,9 +38,7 @@ public class EstrategiaPonderada implements EstrategiaCotizacion {
             throw new IllegalArgumentException("La configuración no corresponde a la estrategia ponderada");
         }
 
-        validar(datos, datos.goles(), datos.asistencias(), datos.disparosPorPartido(),
-                datos.keyPassesPorPartido(), datos.dribblesGanadosPorPartido(),
-                datos.faltasCometidasPorPartido(), datos.rating());
+        validar(datos);
 
         BigDecimal score = pesos.pesoGoles().multiply(BigDecimal.valueOf(datos.goles()))
                 .add(pesos.pesoAsistencias().multiply(BigDecimal.valueOf(datos.asistencias())))
@@ -55,17 +53,23 @@ public class EstrategiaPonderada implements EstrategiaCotizacion {
     }
 
     /** Rechaza datos nulos o negativos para que el servicio omita esta bolsa. */
-    private void validar(DatosValoracion datos, Integer goles, Integer asistencias,
-                         BigDecimal disparos, BigDecimal pasesClave, BigDecimal regates,
-                         BigDecimal faltas, BigDecimal rating) {
+    private void validar(DatosValoracion datos) {
 
-        if (datos == null || datos.cotizacionVigente() == null || goles == null
-                || asistencias == null || disparos == null || pasesClave == null
-                || regates == null || faltas == null || rating == null) {
+        if (datos == null || datos.cotizacionVigente() == null || datos.goles() == null
+                || datos.asistencias() == null || datos.disparosPorPartido() == null || datos.keyPassesPorPartido() == null
+                || datos.dribblesGanadosPorPartido() == null || datos.faltasCometidasPorPartido() == null || datos.rating() == null) {
             throw new DatosValoracionInvalidaException("Faltan métricas requeridas para valorar al jugador");
         }
-        if (goles < 0 || asistencias < 0 || List.of(disparos, pasesClave, regates, faltas, rating)
-                .stream().anyMatch(valor -> valor.compareTo(BigDecimal.ZERO) < 0)) {
+        if (datos.goles() < 0 || datos.asistencias() < 0) {
+            throw new DatosValoracionInvalidaException("Las métricas del jugador contienen valores inválidos");
+        }
+
+        List<BigDecimal> list = List.of(
+                datos.disparosPorPartido(), datos.keyPassesPorPartido(), datos.dribblesGanadosPorPartido(),
+                datos.faltasCometidasPorPartido(), datos.rating()
+        );
+
+        if  (list.stream().anyMatch(valor -> valor.compareTo(BigDecimal.ZERO) < 0)) {
             throw new DatosValoracionInvalidaException("Las métricas del jugador contienen valores inválidos");
         }
     }
