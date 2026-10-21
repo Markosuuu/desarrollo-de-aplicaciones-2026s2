@@ -3,6 +3,7 @@ package com.prontaentrega.models.estrategias;
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
 import com.prontaentrega.models.ConfiguracionEstrategiaPonderadaPenalizacion;
 import com.prontaentrega.models.DatosValoracion;
+import com.prontaentrega.models.exception.ConfiguracionNoCorrespondiente;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
 import java.math.BigDecimal;
@@ -35,7 +36,7 @@ public class EstrategiaPonderadaConPenalizacion implements EstrategiaCotizacion 
     public BigDecimal calcular(DatosValoracion datos,
                                ConfiguracionEstrategiaCotizacion configuracion) {
         if (!(configuracion instanceof ConfiguracionEstrategiaPonderadaPenalizacion pesos)) {
-            throw new IllegalArgumentException(
+            throw new ConfiguracionNoCorrespondiente(
                     "La configuración no corresponde a la estrategia ponderada con penalización");
         }
         validar(datos);

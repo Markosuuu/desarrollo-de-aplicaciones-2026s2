@@ -2,10 +2,13 @@ package com.prontaentrega.models.estrategias;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.ConfiguracionEstrategiaPonderadaPenalizacion;
 import com.prontaentrega.models.DatosValoracion;
+import com.prontaentrega.models.exception.ConfiguracionNoCorrespondiente;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
 import java.math.BigDecimal;
@@ -13,10 +16,15 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 /** Verifica las fórmulas del dominio sin servicios ni persistencia. */
-class EstrategiasCotizacionTest {
+class EstrategiasPonderadaTest {
     private final EstrategiaPonderada estrategiaPonderada = new EstrategiaPonderada();
-    private final EstrategiaPonderadaConPenalizacion estrategiaPenalizada =
-            new EstrategiaPonderadaConPenalizacion();
+
+
+    @Test
+    void unaEstrategiaSabeRetornarSuIDYSuNombre() {
+        assertEquals("ponderada", estrategiaPonderada.estrategiaId());
+        assertEquals("Métricas ponderadas", estrategiaPonderada.nombreEstrategia());
+    }
 
     /** La estrategia ponderada usa la cotización vigente y factor de escala. */
     @Test
@@ -28,28 +36,6 @@ class EstrategiasCotizacionTest {
                 "3", "4", "5"), configuracion);
 
         assertThat(cotizacion).isEqualByComparingTo("16");
-    }
-
-    /** La penalización se aplica solo cuando los regates quedan debajo del umbral. */
-    @Test
-    void aplicaUmbralYPenalizacionEnEstrategiaPenalizada() {
-        ConfiguracionEstrategiaPonderadaPenalizacion configuracion = configuracionPenalizada(
-                "1", "0", "0", "0", "0", "0.5", "0.25");
-
-        BigDecimal cotizacion = estrategiaPenalizada.calcular(datos("10", 2, 0, "1", null,
-                "0.4", "1", "5"), configuracion);
-
-        assertThat(cotizacion).isEqualByComparingTo("11.75");
-    }
-
-    /** Las métricas no usadas por una estrategia no impiden su cálculo. */
-    @Test
-    void estrategiaPenalizadaNoRequierePasesClave() {
-        ConfiguracionEstrategiaPonderadaPenalizacion configuracion = configuracionPenalizada(
-                "1", "0", "0", "0", "0", "0.5", "0.25");
-
-        assertThat(estrategiaPenalizada.calcular(datos("10", 2, 0, "1", null,
-                "0.8", "1", "5"), configuracion)).isEqualByComparingTo("12");
     }
 
     /** Una métrica requerida ausente provoca que el servicio pueda omitir el jugador. */
@@ -88,12 +74,24 @@ class EstrategiasCotizacionTest {
     /** Rechaza coeficientes negativos o cuya suma difiere de uno. */
     @Test
     void rechazaConfiguracionPonderadaInvalida() {
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> configuracionPonderada(
+        assertThatThrownBy(() -> configuracionPonderada(
                 "-0.1", "0.2", "0.2", "0.2", "0.2", "0.2", "0.1", "1"))
                 .isInstanceOf(IllegalArgumentException.class);
-        org.assertj.core.api.Assertions.assertThatThrownBy(() -> configuracionPonderada(
+        assertThatThrownBy(() -> configuracionPonderada(
                 "0.1", "0.1", "0.1", "0.1", "0.1", "0.1", "0.1", "1"))
                 .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void rechazaConfiguracionDeOtraEstrategia() {
+        ConfiguracionEstrategiaPonderadaPenalizacion config = new ConfiguracionEstrategiaPonderadaPenalizacion(
+                BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO
+        );
+        ConfiguracionNoCorrespondiente e = assertThrows(ConfiguracionNoCorrespondiente.class, () ->
+                estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "1", "2",
+                "3", "4", "5"), config)
+        );
     }
 
     /** Crea una proyección de jugador con las métricas indicadas para cada caso unitario. */
@@ -105,7 +103,7 @@ class EstrategiasCotizacionTest {
                 decimal(faltas), decimal(rating));
     }
 
-        /** Construye configuración válida o inválida de la estrategia ponderada para los tests. */
+    /** Construye configuración válida o inválida de la estrategia ponderada para los tests. */
     private ConfiguracionEstrategiaPonderada configuracionPonderada(
             String goles, String asistencias, String disparos, String pases,
             String regates, String faltas, String rating, String escala) {
@@ -115,16 +113,7 @@ class EstrategiasCotizacionTest {
                 new BigDecimal(escala));
     }
 
-        /** Construye configuración de la estrategia penalizada para los tests. */
-    private ConfiguracionEstrategiaPonderadaPenalizacion configuracionPenalizada(
-            String goles, String asistencias, String disparos, String rating,
-            String faltas, String umbral, String escala) {
-        return new ConfiguracionEstrategiaPonderadaPenalizacion(new BigDecimal(goles),
-                new BigDecimal(asistencias), new BigDecimal(disparos), new BigDecimal(rating),
-                new BigDecimal(faltas), new BigDecimal(umbral), new BigDecimal(escala));
-    }
-
-        /** Convierte valores de fixture opcionales a BigDecimal. */
+    /** Convierte valores de fixture opcionales a BigDecimal. */
     private BigDecimal decimal(String valor) {
         return valor == null ? null : new BigDecimal(valor);
     }

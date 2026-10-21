@@ -1,6 +1,7 @@
 package com.prontaentrega.models.estrategias;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
 import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
@@ -118,4 +119,22 @@ class ConfiguracionEstrategiaCotizacionTest {
 
                 assertThat(request.isConfiguracionValida()).isFalse();
         }
+
+    /** Rechaza coeficientes negativos o cuya suma difiere de uno. */
+    @Test
+    void rechazaConfiguracionPonderadaInvalida() {
+        assertThatThrownBy(() -> configuracionPonderada(
+                "-0.1", "0.2", "0.2", "0.2", "0.2", "0.2", "0.1", "1"))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    /** Construye configuración válida o inválida de la estrategia ponderada para los tests. */
+    private ConfiguracionEstrategiaPonderada configuracionPonderada(
+            String goles, String asistencias, String disparos, String pases,
+            String regates, String faltas, String rating, String escala) {
+        return new ConfiguracionEstrategiaPonderada(new BigDecimal(goles),
+                new BigDecimal(asistencias), new BigDecimal(disparos), new BigDecimal(pases),
+                new BigDecimal(regates), new BigDecimal(faltas), new BigDecimal(rating),
+                new BigDecimal(escala));
+    }
 }
