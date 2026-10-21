@@ -1,6 +1,7 @@
 package com.prontaentrega.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -10,14 +11,16 @@ import static org.mockito.Mockito.when;
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
 import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.models.estrategias.EstrategiaCotizacion;
 import com.prontaentrega.models.estrategias.EstrategiaPonderada;
 import com.prontaentrega.models.estrategias.EstrategiaPonderadaConPenalizacion;
 import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+
+import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,6 +100,46 @@ class QuoteStrategyAdministrationServiceTest {
         verify(strategyRepository, never()).guardarEstado(
                 new EstadoEstrategiaCotizacion("ponderada"));
         verify(recalculationService, never()).recalcularEstrategiaActiva();
+    }
+
+    @Test
+    void consultarActivaSinConfigurarArrojaExcepcion() {
+        QuoteOperationConflictException error = assertThrows(QuoteOperationConflictException.class,
+                () -> administrationService.consultarActiva());
+        assertEquals(error.getMessage(),"No hay una estrategia activa configurada");
+    }
+
+    @Test
+    void consultarActivaConEstrategiaActivaNoDisponibleArrojaExcepcion() {
+        when(strategyRepository.buscarEstado()).thenReturn(
+                Optional.of(new EstadoEstrategiaCotizacion("estrategia inexistente"))
+        );
+        QuoteOperationConflictException error = assertThrows(QuoteOperationConflictException.class,
+                () -> administrationService.consultarActiva());
+        assertEquals(error.getMessage(),"La estrategia activa no está disponible");
+    }
+
+    @Test
+    void consultarActivaDevuelveEstrategiaActiva() {
+        when(strategyRepository.buscarEstado()).thenReturn(
+                Optional.of(new EstadoEstrategiaCotizacion("ponderada"))
+        );
+        when(strategyRepository.buscarConfiguracion("ponderada")).thenReturn(
+                Optional.of(configuracionPonderada())
+        );
+        QuoteStrategyAdministrationService.QuoteStrategyView response = administrationService.consultarActiva();
+
+        assertEquals(response.strategyId(), "ponderada");
+        assertTrue(response.active());
+    }
+
+    @Test
+    void listarEstrategiasRetornaLasEstrategiasPersistidas() {
+        List<QuoteStrategyAdministrationService.QuoteStrategyView> lista = administrationService.listarEstrategias();
+        assertTrue(!lista.isEmpty());
+        assertEquals(lista.size(), 2);
+        assertTrue(lista.stream().anyMatch(str -> Objects.equals(str.strategyId(), "ponderada")));
+        assertTrue(lista.stream().anyMatch(str -> Objects.equals(str.strategyId(), "ponderada-con-penalizacion")));
     }
 
     private ConfiguracionEstrategiaPonderada configuracionPonderada() {
