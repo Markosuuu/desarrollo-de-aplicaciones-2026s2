@@ -92,6 +92,7 @@ class EstrategiasPonderadaTest {
                         datos("10", 3, 0, "1", "2",
                 "3", "4", "5"), config)
         );
+        assertEquals("La configuración no corresponde a la estrategia ponderada con penalización", e.getMessage());
     }
 
     /** Crea una proyección de jugador con las métricas indicadas para cada caso unitario. */
