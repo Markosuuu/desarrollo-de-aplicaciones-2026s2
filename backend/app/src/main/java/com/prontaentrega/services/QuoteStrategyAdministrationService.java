@@ -98,7 +98,7 @@ public class QuoteStrategyAdministrationService {
         EstrategiaCotizacion strategy = buscarEstrategia(strategyId);
         strategyRepository.bloquearEstado().orElseThrow(() ->
                 new QuoteOperationConflictException("El estado de estrategias no está inicializado"));
-        ConfiguracionEstrategiaCotizacion configuracion = buscarConfiguracion(strategy);
+        buscarConfiguracion(strategy);
         strategyRepository.guardarEstado(new EstadoEstrategiaCotizacion(strategy.estrategiaId()));
         return recalculationService.recalcularEstrategiaActiva();
     }
