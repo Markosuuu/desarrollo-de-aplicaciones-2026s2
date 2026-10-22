@@ -1,0 +1,15 @@
+.playerPage-container {
+    margin: 1%;
+}
+.playerPage-stats {
+    width: 100%;
+    display: flex;
+}
+
+.playerPage-titulo {
+    width: fit-content;
+}
+
+h4 {
+    font-style: italic;
+}

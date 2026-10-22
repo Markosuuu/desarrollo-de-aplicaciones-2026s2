@@ -6,12 +6,14 @@ import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
+import com.prontaentrega.services.exceptions.PlayerNotFoundException;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
 import com.prontaentrega.services.scraping.PlayerScrapper;
 import com.prontaentrega.services.scraping.whoscoredscrapper.ScrappedPlayerMapper;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -119,6 +121,17 @@ public class PlayerCatalogService {
                 skipped,
                 playerScrapper.source()
         );
+    }
+
+    @Transactional
+    public BolsaDeJugador searchById(UUID id) {
+        BolsaDeJugador response = jugadorRepository.findById(id);
+        if (response != null) {
+            return response;
+        }
+        else {
+            throw new PlayerNotFoundException("No se encontro un jugador con el id dado.");
+        }
     }
 
     /**
