@@ -6,8 +6,8 @@ export default function PlayerRadar({ disparos, pases, regates, faltas, goles, a
 
     return (
         <RadarChart
-            height={300}
-            width={400}
+            height={235}
+            width={300}
             shape="sharp"
             fillArea="true"
             colors={[isDark ? "#61b4f8" : "#d21969"]}
