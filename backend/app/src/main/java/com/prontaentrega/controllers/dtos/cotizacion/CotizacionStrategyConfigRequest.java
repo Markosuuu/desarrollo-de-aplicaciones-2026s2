@@ -1,9 +1,9 @@
-package com.prontaentrega.controllers.dto.quotes;
+package com.prontaentrega.controllers.dtos.cotizacion;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderadaPenalizacion;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
 import jakarta.validation.constraints.AssertTrue;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +14,7 @@ import java.util.Map;
 /** Body validado de configuración para una de las estrategias quote disponibles. */
 @Getter
 @Setter
-public class QuoteStrategyConfigRequest {
+public class CotizacionStrategyConfigRequest {
     private BigDecimal pesoGoles;
     private BigDecimal pesoAsistencias;
     private BigDecimal pesoDisparosPorPartido;

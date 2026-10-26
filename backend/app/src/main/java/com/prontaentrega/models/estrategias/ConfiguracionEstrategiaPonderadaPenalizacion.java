@@ -1,4 +1,6 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.estrategias;
+
+import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
 
 import java.math.BigDecimal;
 

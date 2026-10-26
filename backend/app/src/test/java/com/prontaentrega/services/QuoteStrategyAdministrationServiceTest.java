@@ -9,8 +9,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
 import com.prontaentrega.models.estrategias.EstrategiaPonderada;
 import com.prontaentrega.models.estrategias.EstrategiaPonderadaConPenalizacion;
 import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
@@ -46,7 +47,7 @@ class QuoteStrategyAdministrationServiceTest {
                 .thenReturn(java.util.Set.of("ponderada", "ponderada-con-penalizacion"));
         doReturn(ConfiguracionEstrategiaPonderada.class)
                 .when(strategyRepository).tipoConfiguracion("ponderada");
-        doReturn(com.prontaentrega.models.ConfiguracionEstrategiaPonderadaPenalizacion.class)
+        doReturn(ConfiguracionEstrategiaPonderadaPenalizacion.class)
                 .when(strategyRepository).tipoConfiguracion("ponderada-con-penalizacion");
         when(strategyRepository.estrategiaIdsConfigurables())
                 .thenReturn(java.util.Set.of("ponderada", "ponderada-con-penalizacion"));

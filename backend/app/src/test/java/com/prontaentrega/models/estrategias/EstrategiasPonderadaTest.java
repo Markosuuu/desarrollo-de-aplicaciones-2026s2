@@ -5,8 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderadaPenalizacion;
 import com.prontaentrega.models.DatosValoracion;
 import com.prontaentrega.models.exception.ConfiguracionNoCorrespondiente;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;

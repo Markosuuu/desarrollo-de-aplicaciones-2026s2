@@ -2,7 +2,7 @@ package com.prontaentrega.services;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.models.estrategias.EstrategiaCotizacion;
+import com.prontaentrega.models.EstrategiaCotizacion;
 import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import com.prontaentrega.services.exceptions.QuoteOperationConflictException;

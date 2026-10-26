@@ -6,10 +6,10 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.DatosValoracion;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.models.estrategias.EstrategiaCotizacion;
+import com.prontaentrega.models.EstrategiaCotizacion;
 import com.prontaentrega.models.estrategias.EstrategiaPonderada;
 import com.prontaentrega.persistence.repository.QuoteRecalculationRepository;
 import com.prontaentrega.persistence.repository.QuoteStrategyRepository;

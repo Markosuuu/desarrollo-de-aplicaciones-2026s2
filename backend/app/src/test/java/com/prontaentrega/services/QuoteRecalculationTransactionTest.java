@@ -3,7 +3,7 @@ package com.prontaentrega.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
 import com.prontaentrega.utils.AbstractIntegrationTest;

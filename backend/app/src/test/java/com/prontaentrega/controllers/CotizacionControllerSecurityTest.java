@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.services.QuoteRecalculationService;
 import com.prontaentrega.services.QuoteStrategyAdministrationService;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
@@ -27,7 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 /** Comprueba aislamiento de las operaciones administrativas con clave maestra. */
 @SpringBootTest
 @AutoConfigureMockMvc
-class QuoteControllerSecurityTest extends AbstractIntegrationTest {
+class CotizacionControllerSecurityTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -92,13 +92,13 @@ class QuoteControllerSecurityTest extends AbstractIntegrationTest {
         when(administrationService.activarEstrategia("ponderada"))
                 .thenReturn(new ResultadoRecotizacion("ponderada", 1, 0));
 
-        mockMvc.perform(post("/quotes/recalculate").header("X-Master-Key", masterSecret))
+        mockMvc.perform(post("/api/quotes/recalculate").header("X-Master-Key", masterSecret))
                 .andExpect(status().isOk());
-        mockMvc.perform(put("/quotes/strategies/ponderada/config")
+        mockMvc.perform(put("/api/quotes/strategies/ponderada/config")
                         .header("X-Master-Key", masterSecret)
                         .contentType(MediaType.APPLICATION_JSON).content(configuracionJson()))
                 .andExpect(status().isOk());
-        mockMvc.perform(put("/quotes/strategy").header("X-Master-Key", masterSecret)
+        mockMvc.perform(put("/api/quotes/strategy").header("X-Master-Key", masterSecret)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"strategyId\":\"ponderada\"}"))
                 .andExpect(status().isOk());

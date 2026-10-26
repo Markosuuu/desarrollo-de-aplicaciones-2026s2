@@ -4,7 +4,7 @@ import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
 import com.prontaentrega.models.DatosValoracion;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
-import com.prontaentrega.models.estrategias.EstrategiaCotizacion;
+import com.prontaentrega.models.EstrategiaCotizacion;
 import com.prontaentrega.persistence.repository.QuoteRecalculationRepository;
 import com.prontaentrega.persistence.repository.QuoteRecalculationRepository.ActualizacionCotizacion;
 import com.prontaentrega.persistence.repository.QuoteStrategyRepository;

@@ -1,4 +1,4 @@
-package com.prontaentrega.controllers.dtos;
+package com.prontaentrega.controllers.dtos.jugadores;
 
 import java.util.List;
 

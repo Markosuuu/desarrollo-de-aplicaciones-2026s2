@@ -1,11 +1,10 @@
-package com.prontaentrega.controllers.exceptionhandler;
+package com.prontaentrega.controllers.exceptions;
 
 import com.prontaentrega.services.exceptions.CatalogUnavailableException;
 import com.prontaentrega.services.exceptions.DuplicateUserException;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
 import com.prontaentrega.services.exceptions.ValidationException;
-import com.prontaentrega.controllers.dtos.QuoteErrorResponse;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
 import io.jsonwebtoken.JwtException;
@@ -64,16 +63,16 @@ public class GlobalExceptionHandler {
 
     /** Maneja conflictos funcionales de estado/configuración de cotizaciones. */
     @ExceptionHandler(QuoteOperationConflictException.class)
-    public ResponseEntity<QuoteErrorResponse> handleQuoteConflict(QuoteOperationConflictException ex) {
+    public ResponseEntity<CotizacionErrorResponse> handleQuoteConflict(QuoteOperationConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new QuoteErrorResponse("RECOTIZACION_NO_DISPONIBLE", ex.getMessage()));
+                .body(new CotizacionErrorResponse("RECOTIZACION_NO_DISPONIBLE", ex.getMessage()));
     }
 
     /** Maneja un resultado que incumple la invariante de cotización del mercado. */
     @ExceptionHandler(CotizacionInvalidaException.class)
-    public ResponseEntity<QuoteErrorResponse> handleInvalidQuote(CotizacionInvalidaException ex) {
+    public ResponseEntity<CotizacionErrorResponse> handleInvalidQuote(CotizacionInvalidaException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new QuoteErrorResponse("COTIZACION_INVALIDA", ex.getMessage()));
+                .body(new CotizacionErrorResponse("COTIZACION_INVALIDA", ex.getMessage()));
     }
 
     /**

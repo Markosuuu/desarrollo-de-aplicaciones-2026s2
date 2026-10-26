@@ -14,7 +14,7 @@ import com.prontaentrega.services.QuoteStrategyAdministrationService;
 import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
 import com.prontaentrega.services.exceptions.QuoteStrategyNotFoundException;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.services.QuoteStrategyAdministrationService.QuoteStrategyView;
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,7 +31,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 /** Verifica el contrato y la clave maestra del endpoint manual de recotización. */
 @SpringBootTest
 @AutoConfigureMockMvc
-class QuoteControllerTest extends AbstractIntegrationTest {
+class CotizacionControllerTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -133,7 +133,7 @@ class QuoteControllerTest extends AbstractIntegrationTest {
     /** Mapea configuración inválida, estrategia inexistente y estado no disponible al contrato. */
     @Test
     void devuelveErroresQuotePlanosConCodigoHttpCorrecto() throws Exception {
-        mockMvc.perform(put("/quotes/strategies/ponderada/config")
+        mockMvc.perform(put("/api/quotes/strategies/ponderada/config")
                         .header("X-Master-Key", masterSecret)
                         .contentType("application/json")
                         .content(configuracionJson().replace("\"factorEscala\":1", "\"factorEscala\":1,\"extra\":1")))
@@ -142,14 +142,14 @@ class QuoteControllerTest extends AbstractIntegrationTest {
 
         when(administrationService.activarEstrategia("missing"))
                 .thenThrow(new QuoteStrategyNotFoundException("La estrategia solicitada no existe"));
-        mockMvc.perform(put("/quotes/strategy").header("X-Master-Key", masterSecret)
+        mockMvc.perform(put("/api/quotes/strategy").header("X-Master-Key", masterSecret)
                         .contentType("application/json").content("{\"strategyId\":\"missing\"}"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("ESTRATEGIA_NO_ENCONTRADA"));
 
         when(administrationService.consultarActiva())
                 .thenThrow(new QuoteOperationConflictException("No hay una estrategia activa configurada"));
-        mockMvc.perform(get("/quotes/strategy").with(
+        mockMvc.perform(get("/api/quotes/strategy").with(
                         org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("tester")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").exists());

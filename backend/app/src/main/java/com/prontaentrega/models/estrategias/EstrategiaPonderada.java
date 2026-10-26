@@ -1,8 +1,8 @@
 package com.prontaentrega.models.estrategias;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.DatosValoracion;
+import com.prontaentrega.models.EstrategiaCotizacion;
 import com.prontaentrega.models.exception.ConfiguracionNoCorrespondiente;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
@@ -35,22 +35,26 @@ public class EstrategiaPonderada implements EstrategiaCotizacion {
     @Override
     public BigDecimal calcular(DatosValoracion datos,
                                ConfiguracionEstrategiaCotizacion configuracion) {
-        if (!(configuracion instanceof ConfiguracionEstrategiaPonderada pesos)) {
+        if (!(configuracion instanceof ConfiguracionEstrategiaPonderada(
+                BigDecimal pesoGoles, BigDecimal pesoAsistencias, BigDecimal pesoDisparosPorPartido,
+                BigDecimal pesoPasesClavePorPartido, BigDecimal pesoRegatesGanadosPorPartido,
+                BigDecimal pesoFaltasCometidasPorPartido, BigDecimal pesoRating, BigDecimal factorEscala
+        ))) {
             throw new ConfiguracionNoCorrespondiente("La configuración no corresponde a la estrategia ponderada");
         }
 
         validar(datos);
 
-        BigDecimal score = pesos.pesoGoles().multiply(BigDecimal.valueOf(datos.goles()))
-                .add(pesos.pesoAsistencias().multiply(BigDecimal.valueOf(datos.asistencias())))
-                .add(pesos.pesoDisparosPorPartido().multiply(datos.disparosPorPartido()))
-                .add(pesos.pesoPasesClavePorPartido().multiply(datos.keyPassesPorPartido()))
-                .add(pesos.pesoRegatesGanadosPorPartido().multiply(datos.dribblesGanadosPorPartido()))
-                .add(pesos.pesoFaltasCometidasPorPartido().multiply(datos.faltasCometidasPorPartido()))
-                .add(pesos.pesoRating().multiply(datos.rating()));
+        BigDecimal score = pesoGoles.multiply(BigDecimal.valueOf(datos.goles()))
+                .add(pesoAsistencias.multiply(BigDecimal.valueOf(datos.asistencias())))
+                .add(pesoDisparosPorPartido.multiply(datos.disparosPorPartido()))
+                .add(pesoPasesClavePorPartido.multiply(datos.keyPassesPorPartido()))
+                .add(pesoRegatesGanadosPorPartido.multiply(datos.dribblesGanadosPorPartido()))
+                .add(pesoFaltasCometidasPorPartido.multiply(datos.faltasCometidasPorPartido()))
+                .add(pesoRating.multiply(datos.rating()));
 
         return validarCotizacion(datos.cotizacionVigente()
-                .add(score.multiply(pesos.factorEscala())));
+                .add(score.multiply(factorEscala)));
     }
 
     /** Rechaza datos nulos o negativos para que el servicio omita esta bolsa. */

@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.persistence.dto.ConfiguracionEstrategiaPonderadaDTOSQL;
 import com.prontaentrega.persistence.repository.ConfiguracionEstrategiaProvider;
 import com.prontaentrega.persistence.repository.dao.ConfiguracionEstrategiaPonderadaDAOSQL;

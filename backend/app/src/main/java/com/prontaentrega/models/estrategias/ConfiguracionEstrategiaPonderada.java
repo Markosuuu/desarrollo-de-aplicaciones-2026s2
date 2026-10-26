@@ -1,4 +1,6 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.estrategias;
+
+import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
 
 import java.math.BigDecimal;
 
@@ -26,9 +28,11 @@ public record ConfiguracionEstrategiaPonderada(
             }
             suma = suma.add(peso);
         }
+
         if (suma.compareTo(BigDecimal.ONE) != 0) {
             throw new IllegalArgumentException("La suma de los pesos debe ser igual a 1");
         }
+
         if (factorEscala == null) {
             throw new IllegalArgumentException("El factor de escala es obligatorio");
         }

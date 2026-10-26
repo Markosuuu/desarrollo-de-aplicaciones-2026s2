@@ -4,9 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderadaPenalizacion;
-import com.prontaentrega.controllers.dto.quotes.QuoteStrategyConfigRequest;
+import com.prontaentrega.controllers.dtos.cotizacion.CotizacionStrategyConfigRequest;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import org.junit.jupiter.api.Test;
@@ -50,7 +48,7 @@ class ConfiguracionEstrategiaCotizacionTest {
         /** Valida la forma exacta del request ponderado y su suma unitaria de coeficientes. */
         @Test
         void validaRequestDeEstrategiaPonderada() {
-                QuoteStrategyConfigRequest request = new QuoteStrategyConfigRequest();
+                CotizacionStrategyConfigRequest request = new CotizacionStrategyConfigRequest();
                 request.setPesoGoles(BigDecimal.ONE);
                 request.setPesoAsistencias(BigDecimal.ZERO);
                 request.setPesoDisparosPorPartido(BigDecimal.ZERO);
@@ -70,7 +68,7 @@ class ConfiguracionEstrategiaCotizacionTest {
         /** Valida que el umbral penalizado no se confunda con un coeficiente de la suma. */
         @Test
         void validaRequestPenalizadoConUmbralSeparado() {
-                QuoteStrategyConfigRequest request = new QuoteStrategyConfigRequest();
+                CotizacionStrategyConfigRequest request = new CotizacionStrategyConfigRequest();
                 request.setPesoGoles(BigDecimal.ONE);
                 request.setPesoAsistencias(BigDecimal.ZERO);
                 request.setPesoDisparosPorPartido(BigDecimal.ZERO);
@@ -90,7 +88,7 @@ class ConfiguracionEstrategiaCotizacionTest {
         /** Rechaza pesos negativos, sumas incorrectas y cualquier campo JSON no reconocido. */
         @Test
         void rechazaPesosInvalidosYCamposDesconocidosEnRequest() {
-                QuoteStrategyConfigRequest request = new QuoteStrategyConfigRequest();
+                CotizacionStrategyConfigRequest request = new CotizacionStrategyConfigRequest();
                 request.setPesoGoles(new BigDecimal("0.5"));
                 request.setPesoAsistencias(new BigDecimal("0.5"));
                 request.setPesoDisparosPorPartido(BigDecimal.ZERO);
@@ -107,7 +105,7 @@ class ConfiguracionEstrategiaCotizacionTest {
         /** Rechaza precisión que la columna NUMERIC(18,8) alteraría al persistir. */
         @Test
         void rechazaFactorEscalaQueRequiereRedondeoDeBaseDeDatos() {
-                QuoteStrategyConfigRequest request = new QuoteStrategyConfigRequest();
+                CotizacionStrategyConfigRequest request = new CotizacionStrategyConfigRequest();
                 request.setPesoGoles(BigDecimal.ONE);
                 request.setPesoAsistencias(BigDecimal.ZERO);
                 request.setPesoDisparosPorPartido(BigDecimal.ZERO);

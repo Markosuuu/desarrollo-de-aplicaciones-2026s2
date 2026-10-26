@@ -1,8 +1,8 @@
 package com.prontaentrega.models.estrategias;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.ConfiguracionEstrategiaPonderadaPenalizacion;
 import com.prontaentrega.models.DatosValoracion;
+import com.prontaentrega.models.EstrategiaCotizacion;
 import com.prontaentrega.models.exception.ConfiguracionNoCorrespondiente;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
@@ -35,22 +35,26 @@ public class EstrategiaPonderadaConPenalizacion implements EstrategiaCotizacion 
     @Override
     public BigDecimal calcular(DatosValoracion datos,
                                ConfiguracionEstrategiaCotizacion configuracion) {
-        if (!(configuracion instanceof ConfiguracionEstrategiaPonderadaPenalizacion pesos)) {
+        if (!(configuracion instanceof ConfiguracionEstrategiaPonderadaPenalizacion(
+                BigDecimal pesoGoles, BigDecimal pesoAsistencias, BigDecimal pesoDisparosPorPartido,
+                BigDecimal pesoRating, BigDecimal pesoFaltasCometidasPorPartido,
+                BigDecimal umbralRegatesGanadosPorPartido, BigDecimal factorEscala
+        ))) {
             throw new ConfiguracionNoCorrespondiente(
                     "La configuración no corresponde a la estrategia ponderada con penalización");
         }
         validar(datos);
 
-        BigDecimal score = pesos.pesoGoles().multiply(BigDecimal.valueOf(datos.goles()))
-                .add(pesos.pesoAsistencias().multiply(BigDecimal.valueOf(datos.asistencias())))
-                .add(pesos.pesoDisparosPorPartido().multiply(datos.disparosPorPartido()))
-                .add(pesos.pesoRating().multiply(datos.rating()))
-                .subtract(pesos.pesoFaltasCometidasPorPartido()
+        BigDecimal score = pesoGoles.multiply(BigDecimal.valueOf(datos.goles()))
+                .add(pesoAsistencias.multiply(BigDecimal.valueOf(datos.asistencias())))
+                .add(pesoDisparosPorPartido.multiply(datos.disparosPorPartido()))
+                .add(pesoRating.multiply(datos.rating()))
+                .subtract(pesoFaltasCometidasPorPartido
                         .multiply(datos.faltasCometidasPorPartido()));
 
         if (datos.dribblesGanadosPorPartido()
-                .compareTo(pesos.umbralRegatesGanadosPorPartido()) < 0) {
-            score = score.subtract(pesos.factorEscala());
+                .compareTo(umbralRegatesGanadosPorPartido) < 0) {
+            score = score.subtract(factorEscala);
         }
 
         BigDecimal cotizacion = datos.cotizacionVigente().add(score);
