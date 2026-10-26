@@ -10,8 +10,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.services.QuoteRecalculationService;
-import com.prontaentrega.services.QuoteStrategyAdministrationService;
+import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
@@ -32,10 +31,7 @@ class CotizacionControllerSecurityTest extends AbstractIntegrationTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private QuoteRecalculationService recalculationService;
-
-    @MockBean
-    private QuoteStrategyAdministrationService administrationService;
+    private CotizacionService administrationService;
 
     @Value("${api-key.master-secret}")
     private String masterSecret;
@@ -61,7 +57,7 @@ class CotizacionControllerSecurityTest extends AbstractIntegrationTest {
                         .content("{\"strategyId\":\"ponderada\"}"))
                 .andExpect(status().isUnauthorized());
 
-        verify(recalculationService, never()).recalcularEstrategiaActiva();
+        verify(administrationService, never()).recalcularEstrategiaActiva();
         verify(administrationService, never()).activarEstrategia(anyString());
         verify(administrationService, never()).actualizarConfiguracion(anyString(), any());
     }
@@ -76,14 +72,14 @@ class CotizacionControllerSecurityTest extends AbstractIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"strategyId\":\"ponderada\"}"))
                 .andExpect(status().isUnauthorized());
-        verify(recalculationService, never()).recalcularEstrategiaActiva();
+        verify(administrationService, never()).recalcularEstrategiaActiva();
         verify(administrationService, never()).activarEstrategia(anyString());
     }
 
     /** La clave válida permite recotización, actualización y activación. */
     @Test
     void permiteLasTresEscriturasConClaveMaestra() throws Exception {
-        when(recalculationService.recalcularEstrategiaActiva())
+        when(administrationService.recalcularEstrategiaActiva())
                 .thenReturn(new ResultadoRecotizacion("ponderada", 1, 0));
         when(administrationService.actualizarConfiguracion(anyString(), any()))
                 .thenReturn(new ConfiguracionEstrategiaPonderada(BigDecimal.ONE, BigDecimal.ZERO,

@@ -25,7 +25,7 @@ class QuoteRecalculationTransactionTest extends AbstractIntegrationTest {
     private static final UUID LAST_QUOTE_ID = new UUID(2, 201);
 
     @Autowired
-    private QuoteRecalculationService recalculationService;
+    private CotizacionService administrationService;
 
     @Autowired
     private QuoteStrategyRepository strategyRepository;
@@ -42,7 +42,7 @@ class QuoteRecalculationTransactionTest extends AbstractIntegrationTest {
         instalarTriggerFallaTardia();
 
         try {
-            assertThatThrownBy(() -> recalculationService.recalcularEstrategiaActiva())
+            assertThatThrownBy(() -> administrationService.recalcularEstrategiaActiva())
                     .isInstanceOf(DataAccessException.class);
 
             assertThat(cotizacion(FIRST_QUOTE_ID)).isEqualByComparingTo("10.00");

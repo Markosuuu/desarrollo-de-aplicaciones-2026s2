@@ -9,13 +9,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.prontaentrega.services.QuoteRecalculationService;
-import com.prontaentrega.services.QuoteStrategyAdministrationService;
+import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
 import com.prontaentrega.services.exceptions.QuoteStrategyNotFoundException;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.services.QuoteStrategyAdministrationService.QuoteStrategyView;
+import com.prontaentrega.services.CotizacionService.QuoteStrategyView;
 import java.math.BigDecimal;
 import java.util.List;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -36,10 +35,7 @@ class CotizacionControllerTest extends AbstractIntegrationTest {
     private MockMvc mockMvc;
 
     @MockBean
-    private QuoteRecalculationService recalculationService;
-
-        @MockBean
-        private QuoteStrategyAdministrationService administrationService;
+    private CotizacionService administrationService;
 
     @Value("${api-key.master-secret}")
     private String masterSecret;
@@ -47,7 +43,7 @@ class CotizacionControllerTest extends AbstractIntegrationTest {
     /** Acepta clave válida, no requiere cuerpo y devuelve conteos del servicio común. */
     @Test
     void recotizaSinParametrosConClaveMaestraValida() throws Exception {
-        when(recalculationService.recalcularEstrategiaActiva())
+        when(administrationService.recalcularEstrategiaActiva())
                 .thenReturn(new ResultadoRecotizacion("ponderada", 4, 1));
 
         mockMvc.perform(post("/api/quotes/recalculate").header("X-Master-Key", masterSecret))
@@ -56,7 +52,7 @@ class CotizacionControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.processedPlayers").value(4))
                 .andExpect(jsonPath("$.skippedPlayers").value(1));
 
-        verify(recalculationService).recalcularEstrategiaActiva();
+        verify(administrationService).recalcularEstrategiaActiva();
     }
 
     /** Rechaza claves ausentes o incorrectas sin iniciar una recotización. */
@@ -69,7 +65,7 @@ class CotizacionControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").exists());
 
-        verify(recalculationService, never()).recalcularEstrategiaActiva();
+        verify(administrationService, never()).recalcularEstrategiaActiva();
     }
 
     /** Devuelve estrategia activa y catálogo con sus configuraciones persistidas. */
@@ -111,7 +107,7 @@ class CotizacionControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.strategyId").value("ponderada"))
                 .andExpect(jsonPath("$.config.pesoGoles").value(1.0));
 
-        verify(recalculationService, never()).recalcularEstrategiaActiva();
+        verify(administrationService, never()).recalcularEstrategiaActiva();
     }
 
     /** La activación devuelve el resultado solo después de que el servicio concluye. */

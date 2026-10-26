@@ -24,7 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @SpringBootTest
 class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
     @Autowired
-    private QuoteRecalculationService recalculationService;
+    private CotizacionService administrationService;
 
     @Autowired
     private QuoteStrategyRepository strategyRepository;
@@ -49,7 +49,7 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
         UUID bolsaOmitida = insertarJugador(jugadorOmitido, 910002, "20.00", null);
 
         try {
-            ResultadoRecotizacion result = recalculationService.recalcularEstrategiaActiva();
+            ResultadoRecotizacion result = administrationService.recalcularEstrategiaActiva();
 
             assertThat(result).isEqualTo(new ResultadoRecotizacion("ponderada", 1, 1));
             assertThat(cotizacion(bolsaValida)).isEqualByComparingTo("16.00");
@@ -81,7 +81,7 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
         UUID bolsaOmitida = insertarJugador(jugadorOmitido, 910012, "20.00", null);
 
         try {
-            ResultadoRecotizacion resultadoManual = recalculationService.recalcularEstrategiaActiva();
+            ResultadoRecotizacion resultadoManual = administrationService.recalcularEstrategiaActiva();
             BigDecimal cotizacionManual = cotizacion(bolsaValida);
             jdbcTemplate.update("UPDATE bolsas_de_jugadores SET cotizacion_actual = ? WHERE id = ?",
                     new BigDecimal("10.00"), bolsaValida);
@@ -119,7 +119,7 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
         UUID bolsaOmitida = insertarJugador(jugadorOmitido, 910012, "20.00", null);
 
         try {
-            ResultadoRecotizacion manual = recalculationService.recalcularEstrategiaActiva();
+            ResultadoRecotizacion manual = administrationService.recalcularEstrategiaActiva();
             BigDecimal cotizacionManual = cotizacion(bolsaValida);
             jdbcTemplate.update("UPDATE bolsas_de_jugadores SET cotizacion_actual = ? WHERE id = ?",
                     new BigDecimal("10.00"), bolsaValida);
@@ -155,7 +155,7 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
 
         try {
             org.assertj.core.api.Assertions.assertThatThrownBy(
-                    () -> recalculationService.recalcularEstrategiaActiva())
+                    () -> administrationService.recalcularEstrategiaActiva())
                     .isInstanceOf(CotizacionInvalidaException.class);
             assertThat(cotizacion(new UUID(2, 1))).isEqualByComparingTo("10.00");
             assertThat(cotizacion(new UUID(2, 201))).isEqualByComparingTo("1.00");

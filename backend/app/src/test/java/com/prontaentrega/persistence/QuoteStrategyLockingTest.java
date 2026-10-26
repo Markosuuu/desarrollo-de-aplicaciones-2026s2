@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.prontaentrega.persistence.repository.dao.EstadoEstrategiaCotizacionDAOSQL;
-import com.prontaentrega.services.QuoteRecalculationService;
+import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -69,7 +69,7 @@ class QuoteStrategyLockingTest extends AbstractIntegrationTest {
     /** El recálculo conserva un snapshot consistente a través de las páginas keyset. */
     @Test
     void recalculoUsaRepeatableRead() throws Exception {
-        Transactional transactional = QuoteRecalculationService.class
+        Transactional transactional = CotizacionService.class
                 .getMethod("recalcularEstrategiaActiva")
                 .getAnnotation(Transactional.class);
 

@@ -2,7 +2,7 @@ package com.prontaentrega.schedulers;
 
 import static org.mockito.Mockito.verify;
 
-import com.prontaentrega.services.QuoteRecalculationService;
+import com.prontaentrega.services.CotizacionService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -12,16 +12,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class QuoteRecalculationSchedulerTest {
     @Mock
-    private QuoteRecalculationService recalculationService;
+    private CotizacionService administrationService;
 
     /** Invoca el servicio común sin duplicar cálculo en el scheduler. */
     @Test
     void delegaRecotizacionAlServicioComun() {
         QuoteRecalculationScheduler scheduler =
-                new QuoteRecalculationScheduler(recalculationService);
+                new QuoteRecalculationScheduler(administrationService);
 
         scheduler.recalcularCotizacionesSemanalmente();
 
-        verify(recalculationService).recalcularEstrategiaActiva();
+        verify(administrationService).recalcularEstrategiaActiva();
     }
 }

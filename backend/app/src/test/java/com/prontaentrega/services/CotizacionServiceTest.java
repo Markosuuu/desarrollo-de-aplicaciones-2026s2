@@ -14,6 +14,7 @@ import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
 import com.prontaentrega.models.estrategias.EstrategiaPonderada;
 import com.prontaentrega.models.estrategias.EstrategiaPonderadaConPenalizacion;
+import com.prontaentrega.persistence.repository.QuoteRecalculationRepository;
 import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import java.math.BigDecimal;
@@ -31,14 +32,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /** Verifica la coordinación administrativa sin cargar base de datos. */
 @ExtendWith(MockitoExtension.class)
-class QuoteStrategyAdministrationServiceTest {
+class CotizacionServiceTest {
     @Mock
     private QuoteStrategyRepository strategyRepository;
 
     @Mock
-    private QuoteRecalculationService recalculationService;
+    private QuoteRecalculationRepository quoteRepository;
 
-    private QuoteStrategyAdministrationService administrationService;
+    private CotizacionService administrationService;
 
     /** Registra las dos estrategias y valida su asociación tipada con los providers. */
     @BeforeEach
@@ -51,8 +52,8 @@ class QuoteStrategyAdministrationServiceTest {
                 .when(strategyRepository).tipoConfiguracion("ponderada-con-penalizacion");
         when(strategyRepository.estrategiaIdsConfigurables())
                 .thenReturn(java.util.Set.of("ponderada", "ponderada-con-penalizacion"));
-        administrationService = new QuoteStrategyAdministrationService(strategyRepository,
-                recalculationService,
+        administrationService = new CotizacionService(strategyRepository,
+                quoteRepository,
                 List.of(new EstrategiaPonderada(), new EstrategiaPonderadaConPenalizacion()));
     }
 
@@ -68,24 +69,27 @@ class QuoteStrategyAdministrationServiceTest {
 
         assertThat(guardada).isSameAs(config);
         verify(strategyRepository).guardarConfiguracion("ponderada", config);
-        verify(recalculationService, never()).recalcularEstrategiaActiva();
+        verify(quoteRepository, never()).buscarPagina(null, 200);
     }
 
-    /** Activar persiste primero la selección y delega el cálculo al servicio compartido. */
+    /** Activar persiste primero la selección y luego recotiza con la estrategia seleccionada. */
     @Test
     void activaEstrategiaYRecotizaEnElMismoFlujo() {
         ConfiguracionEstrategiaPonderada config = configuracionPonderada();
         when(strategyRepository.bloquearEstado())
                 .thenReturn(Optional.of(new EstadoEstrategiaCotizacion(null)));
         when(strategyRepository.buscarConfiguracion("ponderada")).thenReturn(Optional.of(config));
-        ResultadoRecotizacion resultado = new ResultadoRecotizacion("ponderada", 2, 1);
-        when(recalculationService.recalcularEstrategiaActiva()).thenReturn(resultado);
+        when(strategyRepository.bloquearEstado())
+                .thenReturn(Optional.of(new EstadoEstrategiaCotizacion(null)))
+                .thenReturn(Optional.of(new EstadoEstrategiaCotizacion("ponderada")));
+        when(quoteRepository.buscarPagina(null, 200)).thenReturn(List.of());
+        ResultadoRecotizacion resultado = new ResultadoRecotizacion("ponderada", 0, 0);
 
         assertThat(administrationService.activarEstrategia("ponderada")).isEqualTo(resultado);
 
-        InOrder orden = inOrder(strategyRepository, recalculationService);
+        InOrder orden = inOrder(strategyRepository, quoteRepository);
         orden.verify(strategyRepository).guardarEstado(new EstadoEstrategiaCotizacion("ponderada"));
-        orden.verify(recalculationService).recalcularEstrategiaActiva();
+        orden.verify(quoteRepository).buscarPagina(null, 200);
     }
 
     /** Una estrategia registrada sin configuración completa no puede activarse. */
@@ -100,7 +104,7 @@ class QuoteStrategyAdministrationServiceTest {
                 .isInstanceOf(com.prontaentrega.services.exceptions.QuoteOperationConflictException.class);
         verify(strategyRepository, never()).guardarEstado(
                 new EstadoEstrategiaCotizacion("ponderada"));
-        verify(recalculationService, never()).recalcularEstrategiaActiva();
+        verify(quoteRepository, never()).buscarPagina(null, 200);
     }
 
     @Test
@@ -128,7 +132,7 @@ class QuoteStrategyAdministrationServiceTest {
         when(strategyRepository.buscarConfiguracion("ponderada")).thenReturn(
                 Optional.of(configuracionPonderada())
         );
-        QuoteStrategyAdministrationService.QuoteStrategyView response = administrationService.consultarActiva();
+        CotizacionService.QuoteStrategyView response = administrationService.consultarActiva();
 
         assertEquals(response.strategyId(), "ponderada");
         assertTrue(response.active());
@@ -136,7 +140,7 @@ class QuoteStrategyAdministrationServiceTest {
 
     @Test
     void listarEstrategiasRetornaLasEstrategiasPersistidas() {
-        List<QuoteStrategyAdministrationService.QuoteStrategyView> lista = administrationService.listarEstrategias();
+        List<CotizacionService.QuoteStrategyView> lista = administrationService.listarEstrategias();
         assertTrue(!lista.isEmpty());
         assertEquals(lista.size(), 2);
         assertTrue(lista.stream().anyMatch(str -> Objects.equals(str.strategyId(), "ponderada")));

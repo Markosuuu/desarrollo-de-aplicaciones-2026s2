@@ -21,7 +21,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 @SpringBootTest
 class QuoteStrategyActivationTransactionTest extends AbstractIntegrationTest {
     @Autowired
-    private QuoteStrategyAdministrationService administrationService;
+    private CotizacionService administrationService;
 
     @Autowired
     private QuoteStrategyRepository strategyRepository;

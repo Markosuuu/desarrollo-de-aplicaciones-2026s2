@@ -1,7 +1,6 @@
 package com.prontaentrega.controllers;
 
-import com.prontaentrega.services.QuoteRecalculationService;
-import com.prontaentrega.services.QuoteStrategyAdministrationService;
+import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import com.prontaentrega.controllers.dtos.cotizacion.CotizacionStrategiesResponse;
 import com.prontaentrega.controllers.dtos.cotizacion.CotizacionStrategyConfigRequest;
@@ -28,13 +27,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping({"/api/quotes"})
 public class CotizacionController {
-    private final QuoteRecalculationService recalculationService;
-    private final QuoteStrategyAdministrationService administrationService;
+    private final CotizacionService cotizacionService;
 
-    public CotizacionController(QuoteRecalculationService recalculationService,
-                                QuoteStrategyAdministrationService administrationService) {
-        this.recalculationService = recalculationService;
-        this.administrationService = administrationService;
+    public CotizacionController(CotizacionService cotizacionService) {
+        this.cotizacionService = cotizacionService;
     }
 
     @Operation(
@@ -52,7 +48,7 @@ public class CotizacionController {
     })
     @PostMapping("/recalculate")
     public ResponseEntity<ResultadoRecotizacion> recalcularMercado() {
-        return ResponseEntity.ok(recalculationService.recalcularEstrategiaActiva());
+        return ResponseEntity.ok(cotizacionService.recalcularEstrategiaActiva());
     }
 
     @Operation(
@@ -70,7 +66,7 @@ public class CotizacionController {
     })
     @GetMapping("/strategy")
     public ResponseEntity<CotizacionStrategyResponse> consultarEstrategiaActiva() {
-        var estrategia = administrationService.consultarActiva();
+        var estrategia = cotizacionService.consultarActiva();
         return ResponseEntity.ok(new CotizacionStrategyResponse(estrategia.strategyId(),
                 estrategia.strategyName(), estrategia.active(), estrategia.config()));
     }
@@ -87,7 +83,7 @@ public class CotizacionController {
     })
     @GetMapping("/strategies")
     public ResponseEntity<CotizacionStrategiesResponse> consultarEstrategias() {
-        List<CotizacionStrategyResponse> estrategias = administrationService.listarEstrategias()
+        List<CotizacionStrategyResponse> estrategias = cotizacionService.listarEstrategias()
                 .stream()
                 .map(estrategia -> new CotizacionStrategyResponse(estrategia.strategyId(),
                         estrategia.strategyName(), estrategia.active(), estrategia.config()))
@@ -118,7 +114,7 @@ public class CotizacionController {
     public ResponseEntity<CotizacionStrategyConfigResponse> actualizarConfiguracion(
             @PathVariable String strategyId,
             @Valid @RequestBody CotizacionStrategyConfigRequest request) {
-        var configuracion = administrationService.actualizarConfiguracion(
+        var configuracion = cotizacionService.actualizarConfiguracion(
                 strategyId, request.aConfiguracion());
         return ResponseEntity.ok(new CotizacionStrategyConfigResponse(strategyId, configuracion));
     }
@@ -145,6 +141,6 @@ public class CotizacionController {
     @PutMapping("/strategy")
     public ResponseEntity<ResultadoRecotizacion> activarEstrategia(
             @Valid @RequestBody CotizacionStrategySelectionRequest request) {
-        return ResponseEntity.ok(administrationService.activarEstrategia(request.strategyId()));
+        return ResponseEntity.ok(cotizacionService.activarEstrategia(request.strategyId()));
     }
 }

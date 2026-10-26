@@ -36,7 +36,10 @@ class QuoteRecalculationServiceTest {
     @Test
     void recalculaElegiblesYOmiteMetricasInvalidas() {
         EstrategiaCotizacion strategy = new EstrategiaPonderada();
-        QuoteRecalculationService recalculationService = new QuoteRecalculationService(
+        when(strategyRepository.estrategiaIdsConfigurables()).thenReturn(java.util.Set.of("ponderada"));
+        org.mockito.Mockito.doReturn(ConfiguracionEstrategiaPonderada.class)
+                .when(strategyRepository).tipoConfiguracion("ponderada");
+        CotizacionService recalculationService = new CotizacionService(
                 strategyRepository, quoteRepository, List.of(strategy));
         ConfiguracionEstrategiaPonderada config = new ConfiguracionEstrategiaPonderada(
                 BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
