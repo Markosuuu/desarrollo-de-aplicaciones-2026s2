@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class authEndToEnd extends AbstractIntegrationTest {
+public class AuthEndToEndTest extends AbstractIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired
