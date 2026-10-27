@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
+import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,7 +28,7 @@ class QuoteRecalculationTransactionTest extends AbstractIntegrationTest {
     private CotizacionService administrationService;
 
     @Autowired
-    private QuoteStrategyRepository strategyRepository;
+    private CotizacionRepository strategyRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

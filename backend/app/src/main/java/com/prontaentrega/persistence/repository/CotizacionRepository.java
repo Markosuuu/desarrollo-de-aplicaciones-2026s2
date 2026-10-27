@@ -1,12 +1,16 @@
 package com.prontaentrega.persistence.repository;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.DatosValoracion;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
-/** Frontera de persistencia para selección activa y configuraciones de estrategia. */
-public interface QuoteStrategyRepository {
+/** Frontera de persistencia para estrategias y operaciones de cotización. */
+public interface CotizacionRepository {
     /** Recupera con lock la selección global. */
     Optional<EstadoEstrategiaCotizacion> bloquearEstado();
 
@@ -27,4 +31,14 @@ public interface QuoteStrategyRepository {
 
     /** Persiste configuración mediante el proveedor registrado para su ID. */
     void guardarConfiguracion(String estrategiaId, ConfiguracionEstrategiaCotizacion configuracion);
+
+    /** Recupera una página ordenada por UUID después del cursor indicado. */
+    List<DatosValoracion> buscarPagina(UUID cursorExclusivo, int limite);
+
+    /** Actualiza por lote las cotizaciones calculadas por el dominio. */
+    int actualizarCotizaciones(List<ActualizacionCotizacion> actualizaciones);
+
+    /** Pareja ID/cotización usada únicamente para persistir el resultado ya validado. */
+    record ActualizacionCotizacion(UUID bolsaId, BigDecimal cotizacionCalculada) {
+    }
 }

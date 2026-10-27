@@ -1,29 +1,36 @@
 package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.DatosValoracion;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.persistence.dto.EstadoEstrategiaCotizacionDTOSQL;
 import com.prontaentrega.persistence.repository.ConfiguracionEstrategiaProvider;
-import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
+import com.prontaentrega.persistence.repository.CotizacionRepository;
+import com.prontaentrega.persistence.repository.dao.QuoteRecalculationDAOSQL;
 import com.prontaentrega.persistence.repository.dao.EstadoEstrategiaCotizacionDAOSQL;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import org.springframework.stereotype.Repository;
 
 /** Adapta las entidades SQL al modelo de configuración de estrategias. */
 @Repository
-public class QuoteStrategyRepositoryImpl implements QuoteStrategyRepository {
+public class CotizacionRepositoryImpl implements CotizacionRepository {
     private final EstadoEstrategiaCotizacionDAOSQL estadoDAO;
+    private final QuoteRecalculationDAOSQL recalculationDAO;
     private final Map<String, ConfiguracionEstrategiaProvider> configuracionesPorEstrategia;
 
     /** Construye el adaptador con sus DAOs relacionales. */
-    public QuoteStrategyRepositoryImpl(
+    public CotizacionRepositoryImpl(
             EstadoEstrategiaCotizacionDAOSQL estadoDAO,
+            QuoteRecalculationDAOSQL recalculationDAO,
             List<ConfiguracionEstrategiaProvider> providers) {
         this.estadoDAO = estadoDAO;
+        this.recalculationDAO = recalculationDAO;
         this.configuracionesPorEstrategia = new HashMap<>();
         for (ConfiguracionEstrategiaProvider provider : providers) {
             ConfiguracionEstrategiaProvider previo =
@@ -83,6 +90,18 @@ public class QuoteStrategyRepositoryImpl implements QuoteStrategyRepository {
     public void guardarConfiguracion(String estrategiaId,
                                      ConfiguracionEstrategiaCotizacion configuracion) {
         proveedor(estrategiaId).guardar(configuracion);
+    }
+
+    /** Recupera una página keyset de valoraciones para el recálculo. */
+    @Override
+    public List<DatosValoracion> buscarPagina(UUID cursorExclusivo, int limite) {
+        return recalculationDAO.buscarPagina(cursorExclusivo, limite);
+    }
+
+    /** Actualiza en lote las cotizaciones calculadas. */
+    @Override
+    public int actualizarCotizaciones(List<ActualizacionCotizacion> actualizaciones) {
+        return recalculationDAO.actualizarCotizaciones(actualizaciones);
     }
 
     /** Resuelve el provider tipado o rechaza un ID que no fue registrado. */

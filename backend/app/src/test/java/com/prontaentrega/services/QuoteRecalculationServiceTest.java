@@ -6,13 +6,12 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.DatosValoracion;
+import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.models.EstrategiaCotizacion;
 import com.prontaentrega.models.estrategias.EstrategiaPonderada;
-import com.prontaentrega.persistence.repository.QuoteRecalculationRepository;
-import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
+import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import java.math.BigDecimal;
 import java.util.List;
@@ -27,10 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class QuoteRecalculationServiceTest {
     @Mock
-    private QuoteStrategyRepository strategyRepository;
-
-    @Mock
-    private QuoteRecalculationRepository quoteRepository;
+    private CotizacionRepository strategyRepository;
 
     /** Usa la configuración activa, actualiza cotización vigente y cuenta jugadores omitidos. */
     @Test
@@ -40,7 +36,7 @@ class QuoteRecalculationServiceTest {
         org.mockito.Mockito.doReturn(ConfiguracionEstrategiaPonderada.class)
                 .when(strategyRepository).tipoConfiguracion("ponderada");
         CotizacionService recalculationService = new CotizacionService(
-                strategyRepository, quoteRepository, List.of(strategy));
+                strategyRepository, List.of(strategy));
         ConfiguracionEstrategiaPonderada config = new ConfiguracionEstrategiaPonderada(
                 BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("2"));
@@ -52,15 +48,15 @@ class QuoteRecalculationServiceTest {
         when(strategyRepository.bloquearEstado())
                 .thenReturn(Optional.of(new EstadoEstrategiaCotizacion("ponderada")));
         when(strategyRepository.buscarConfiguracion("ponderada")).thenReturn(Optional.of(config));
-        when(quoteRepository.buscarPagina(null, 200)).thenReturn(List.of(valid, invalid));
-        when(quoteRepository.buscarPagina(invalid.bolsaId(), 200)).thenReturn(List.of());
-        when(quoteRepository.actualizarCotizaciones(anyList())).thenAnswer(invocation ->
+        when(strategyRepository.buscarPagina(null, 200)).thenReturn(List.of(valid, invalid));
+        when(strategyRepository.buscarPagina(invalid.bolsaId(), 200)).thenReturn(List.of());
+        when(strategyRepository.actualizarCotizaciones(anyList())).thenAnswer(invocation ->
                 ((List<?>) invocation.getArgument(0)).size());
 
         ResultadoRecotizacion result = recalculationService.recalcularEstrategiaActiva();
 
         assertThat(result).isEqualTo(new ResultadoRecotizacion("ponderada", 1, 1));
-        verify(quoteRepository).actualizarCotizaciones(argThat(updates -> updates.size() == 1
+        verify(strategyRepository).actualizarCotizaciones(argThat(updates -> updates.size() == 1
                 && updates.getFirst().cotizacionCalculada().compareTo(new BigDecimal("16")) == 0));
     }
 }

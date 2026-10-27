@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
-import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
-import com.prontaentrega.schedulers.QuoteRecalculationScheduler;
+import com.prontaentrega.persistence.repository.CotizacionRepository;
+import com.prontaentrega.schedulers.CotizacionScheduler;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
@@ -27,13 +27,13 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
     private CotizacionService administrationService;
 
     @Autowired
-    private QuoteStrategyRepository strategyRepository;
+    private CotizacionRepository strategyRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
         @Autowired
-        private QuoteRecalculationScheduler scheduler;
+        private CotizacionScheduler scheduler;
 
     /** Actualiza jugadores válidos y omite aquellos sin todas las métricas ponderadas. */
     @Test

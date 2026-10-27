@@ -3,8 +3,8 @@ package com.prontaentrega.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.prontaentrega.models.DatosValoracion;
-import com.prontaentrega.persistence.repository.QuoteRecalculationRepository;
-import com.prontaentrega.persistence.repository.QuoteRecalculationRepository.ActualizacionCotizacion;
+import com.prontaentrega.persistence.repository.CotizacionRepository;
+import com.prontaentrega.persistence.repository.CotizacionRepository.ActualizacionCotizacion;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 class QuoteRecalculationRepositoryTest extends AbstractIntegrationTest {
     @Autowired
-    private QuoteRecalculationRepository quoteRepository;
+    private CotizacionRepository quoteRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

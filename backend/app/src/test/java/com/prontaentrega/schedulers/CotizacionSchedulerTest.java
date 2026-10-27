@@ -10,15 +10,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /** Verifica que el disparador semanal delega en el mismo servicio del endpoint manual. */
 @ExtendWith(MockitoExtension.class)
-class QuoteRecalculationSchedulerTest {
+class CotizacionSchedulerTest {
     @Mock
     private CotizacionService administrationService;
 
     /** Invoca el servicio común sin duplicar cálculo en el scheduler. */
     @Test
     void delegaRecotizacionAlServicioComun() {
-        QuoteRecalculationScheduler scheduler =
-                new QuoteRecalculationScheduler(administrationService);
+        CotizacionScheduler scheduler =
+                new CotizacionScheduler(administrationService);
 
         scheduler.recalcularCotizacionesSemanalmente();
 

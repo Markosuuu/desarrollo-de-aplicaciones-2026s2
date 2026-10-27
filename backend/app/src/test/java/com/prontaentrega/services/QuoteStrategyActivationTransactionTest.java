@@ -7,7 +7,7 @@ import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
-import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
+import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,7 +24,7 @@ class QuoteStrategyActivationTransactionTest extends AbstractIntegrationTest {
     private CotizacionService administrationService;
 
     @Autowired
-    private QuoteStrategyRepository strategyRepository;
+    private CotizacionRepository strategyRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;

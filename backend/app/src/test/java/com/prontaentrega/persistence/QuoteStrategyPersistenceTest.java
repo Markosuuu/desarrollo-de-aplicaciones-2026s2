@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
+import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.dao.EstadoEstrategiaCotizacionDAOSQL;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 class QuoteStrategyPersistenceTest extends AbstractIntegrationTest {
     @Autowired
-    private QuoteStrategyRepository strategyRepository;
+    private CotizacionRepository strategyRepository;
 
     @Autowired
     private EstadoEstrategiaCotizacionDAOSQL estadoDAO;

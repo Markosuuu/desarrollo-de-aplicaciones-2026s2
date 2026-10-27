@@ -14,8 +14,7 @@ import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
 import com.prontaentrega.models.estrategias.EstrategiaPonderada;
 import com.prontaentrega.models.estrategias.EstrategiaPonderadaConPenalizacion;
-import com.prontaentrega.persistence.repository.QuoteRecalculationRepository;
-import com.prontaentrega.persistence.repository.QuoteStrategyRepository;
+import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,10 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class CotizacionServiceTest {
     @Mock
-    private QuoteStrategyRepository strategyRepository;
-
-    @Mock
-    private QuoteRecalculationRepository quoteRepository;
+    private CotizacionRepository strategyRepository;
 
     private CotizacionService administrationService;
 
@@ -53,7 +49,6 @@ class CotizacionServiceTest {
         when(strategyRepository.estrategiaIdsConfigurables())
                 .thenReturn(java.util.Set.of("ponderada", "ponderada-con-penalizacion"));
         administrationService = new CotizacionService(strategyRepository,
-                quoteRepository,
                 List.of(new EstrategiaPonderada(), new EstrategiaPonderadaConPenalizacion()));
     }
 
@@ -69,7 +64,7 @@ class CotizacionServiceTest {
 
         assertThat(guardada).isSameAs(config);
         verify(strategyRepository).guardarConfiguracion("ponderada", config);
-        verify(quoteRepository, never()).buscarPagina(null, 200);
+        verify(strategyRepository, never()).buscarPagina(null, 200);
     }
 
     /** Activar persiste primero la selección y luego recotiza con la estrategia seleccionada. */
@@ -82,14 +77,14 @@ class CotizacionServiceTest {
         when(strategyRepository.bloquearEstado())
                 .thenReturn(Optional.of(new EstadoEstrategiaCotizacion(null)))
                 .thenReturn(Optional.of(new EstadoEstrategiaCotizacion("ponderada")));
-        when(quoteRepository.buscarPagina(null, 200)).thenReturn(List.of());
+        when(strategyRepository.buscarPagina(null, 200)).thenReturn(List.of());
         ResultadoRecotizacion resultado = new ResultadoRecotizacion("ponderada", 0, 0);
 
         assertThat(administrationService.activarEstrategia("ponderada")).isEqualTo(resultado);
 
-        InOrder orden = inOrder(strategyRepository, quoteRepository);
+        InOrder orden = inOrder(strategyRepository);
         orden.verify(strategyRepository).guardarEstado(new EstadoEstrategiaCotizacion("ponderada"));
-        orden.verify(quoteRepository).buscarPagina(null, 200);
+        orden.verify(strategyRepository).buscarPagina(null, 200);
     }
 
     /** Una estrategia registrada sin configuración completa no puede activarse. */
@@ -104,7 +99,7 @@ class CotizacionServiceTest {
                 .isInstanceOf(com.prontaentrega.services.exceptions.QuoteOperationConflictException.class);
         verify(strategyRepository, never()).guardarEstado(
                 new EstadoEstrategiaCotizacion("ponderada"));
-        verify(quoteRepository, never()).buscarPagina(null, 200);
+        verify(strategyRepository, never()).buscarPagina(null, 200);
     }
 
     @Test

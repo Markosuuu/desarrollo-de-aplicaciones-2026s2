@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository.dao;
 
 import com.prontaentrega.models.DatosValoracion;
-import com.prontaentrega.persistence.repository.QuoteRecalculationRepository.ActualizacionCotizacion;
+import com.prontaentrega.persistence.repository.CotizacionRepository.ActualizacionCotizacion;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;

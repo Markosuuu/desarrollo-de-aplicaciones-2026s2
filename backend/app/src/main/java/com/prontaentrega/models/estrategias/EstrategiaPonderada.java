@@ -6,9 +6,10 @@ import com.prontaentrega.models.EstrategiaCotizacion;
 import com.prontaentrega.models.exception.ConfiguracionNoCorrespondiente;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
+import org.springframework.stereotype.Component;
+
 import java.math.BigDecimal;
 import java.util.List;
-import org.springframework.stereotype.Component;
 
 /** Calcula la cotización incremental mediante métricas ponderadas sin penalización. */
 @Component
@@ -42,7 +43,6 @@ public class EstrategiaPonderada implements EstrategiaCotizacion {
         ))) {
             throw new ConfiguracionNoCorrespondiente("La configuración no corresponde a la estrategia ponderada");
         }
-
         validar(datos);
 
         BigDecimal score = pesoGoles.multiply(BigDecimal.valueOf(datos.goles()))
@@ -65,6 +65,7 @@ public class EstrategiaPonderada implements EstrategiaCotizacion {
                 || datos.dribblesGanadosPorPartido() == null || datos.faltasCometidasPorPartido() == null || datos.rating() == null) {
             throw new DatosValoracionInvalidaException("Faltan métricas requeridas para valorar al jugador");
         }
+
         if (datos.goles() < 0 || datos.asistencias() < 0) {
             throw new DatosValoracionInvalidaException("Las métricas del jugador contienen valores inválidos");
         }

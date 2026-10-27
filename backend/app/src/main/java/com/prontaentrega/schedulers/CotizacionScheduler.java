@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 
 /** Dispara semanalmente el mismo servicio de recálculo usado por la operación manual. */
 @Component
-public class QuoteRecalculationScheduler {
+public class CotizacionScheduler {
     private final CotizacionService administrationService;
 
     /** Construye el scheduler con el servicio transaccional de cotizaciones. */
-    public QuoteRecalculationScheduler(CotizacionService administrationService) {
+    public CotizacionScheduler(CotizacionService administrationService) {
         this.administrationService = administrationService;
     }
 
