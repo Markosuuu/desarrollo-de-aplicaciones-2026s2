@@ -56,10 +56,6 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
-}
-
 tasks.named('test', Test) {
     useJUnitPlatform {
         includeTags 'modelo'
@@ -85,15 +81,3 @@ tasks.register('e2eTest', Test) {
     }
     shouldRunAfter tasks.named('integrationTest')
 }
-
-
-
-
-
-
-
-
-
-
-
-
