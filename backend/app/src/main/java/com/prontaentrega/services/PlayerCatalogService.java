@@ -69,7 +69,7 @@ public class PlayerCatalogService {
     @Transactional
     public RefreshCatalogResponse refreshFromWhoScored() {
         LocalDateTime updatedAt = LocalDateTime.now(ZoneId.systemDefault());
-        final int pageSize = 20;
+        final int pageSize = 200;
 
         // 1. Descargar la primera página para obtener la paginación.
         PlayerScrapperResponse firstPage =

@@ -1,9 +1,9 @@
 package com.prontaentrega.controllers;
 
-import com.prontaentrega.controllers.dtos.AuthResponse;
-import com.prontaentrega.controllers.dtos.LoginRequest;
-import com.prontaentrega.controllers.dtos.RegisterRequest;
-import com.prontaentrega.controllers.exceptionhandler.ErrorResponse;
+import com.prontaentrega.controllers.dtos.auth.AuthResponse;
+import com.prontaentrega.controllers.dtos.auth.LoginRequest;
+import com.prontaentrega.controllers.dtos.auth.RegisterRequest;
+import com.prontaentrega.controllers.exceptions.ErrorResponse;
 import com.prontaentrega.services.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
