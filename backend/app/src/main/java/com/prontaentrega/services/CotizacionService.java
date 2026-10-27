@@ -70,12 +70,7 @@ public class CotizacionService {
     /** Recalcula todas las bolsas con la estrategia activa en un snapshot transaccional. */
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ResultadoRecotizacion recalcularEstrategiaActiva() {
-        // estrategia activa
-        // DatosActualizacion datos =
-
-
-
-        EstrategiaActiva estrategiaActiva = obtenerEstrategiaActiva();
+          EstrategiaActiva estrategiaActiva = obtenerEstrategiaActiva();
         int[] contadores = procesarTodasLasPaginas(
                 estrategiaActiva.strategy(),
                 estrategiaActiva.configuracion()
