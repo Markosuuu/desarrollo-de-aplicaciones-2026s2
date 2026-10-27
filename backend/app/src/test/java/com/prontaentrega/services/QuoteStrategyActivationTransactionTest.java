@@ -12,6 +12,8 @@ import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +21,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /** Verifica rollback de la selección activa al fallar la recotización disparada por activación. */
 @SpringBootTest
+@Tag("integracion")
 class QuoteStrategyActivationTransactionTest extends AbstractIntegrationTest {
     @Autowired
     private CotizacionService administrationService;

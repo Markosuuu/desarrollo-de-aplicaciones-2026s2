@@ -59,3 +59,41 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+tasks.named('test', Test) {
+    useJUnitPlatform {
+        includeTags 'modelo'
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'integracion'
+    }
+    shouldRunAfter tasks.named('test')
+}
+
+tasks.register('e2eTest', Test) {
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'e2e'
+    }
+    shouldRunAfter tasks.named('integrationTest')
+}
+
+
+
+
+
+
+
+
+
+
+
+

@@ -10,6 +10,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Comprueba lectura keyset y escritura batch con PostgreSQL real. */
 @SpringBootTest
+@Tag("integracion")
 class QuoteRecalculationRepositoryTest extends AbstractIntegrationTest {
     @Autowired
     private CotizacionRepository quoteRepository;

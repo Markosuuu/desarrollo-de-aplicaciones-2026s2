@@ -15,6 +15,8 @@ import java.util.UUID;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.stream.IntStream;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,6 +24,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /** Verifica cálculo y omisiones de la operación completa contra PostgreSQL. */
 @SpringBootTest
+@Tag("integracion")
 class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private CotizacionService administrationService;
