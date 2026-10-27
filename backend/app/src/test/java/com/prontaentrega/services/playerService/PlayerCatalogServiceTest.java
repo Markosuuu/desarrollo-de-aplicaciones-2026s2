@@ -3,6 +3,7 @@ package com.prontaentrega.services.playerService;
 import com.prontaentrega.models.*;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
+import com.prontaentrega.services.exceptions.PlayerNotFoundException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -347,5 +349,26 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         assertEquals(1, response.getSize());
         assertEquals(3, response.getTotalElements());
         assertEquals(3, response.getTotalPages());
+    }
+
+    @Test
+    void searchByIdRetornaJugador() {
+        BolsaDeJugador savedBolsa = saveJugador(15, "Julian Alvarez", "Boca", Liga.LALIGA);
+        Jugador savedJugador = savedBolsa.getEstadisticasDeportivas().getJugador();
+
+        BolsaDeJugador response = playerCatalogService.searchById(savedJugador.getId());
+        Jugador responseJugador = response.getEstadisticasDeportivas().getJugador();
+
+        assertEquals("Julian Alvarez", responseJugador.getNombre());
+        assertEquals("Boca", responseJugador.getEquipo());
+    }
+
+    @Test
+    void searchByIdNoExistenteArrojaException() {
+        PlayerNotFoundException e = assertThrows(
+                PlayerNotFoundException.class,
+                () -> playerCatalogService.searchById(new UUID(1,2))
+        );
+        assertEquals("No se encontro un jugador con el id dado.", e.getMessage());
     }
 }

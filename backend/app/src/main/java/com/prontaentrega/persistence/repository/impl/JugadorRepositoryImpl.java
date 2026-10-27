@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class JugadorRepositoryImpl implements JugadorRepository {
@@ -34,6 +35,12 @@ public class JugadorRepositoryImpl implements JugadorRepository {
         bolsa.getEstadisticasDeportivas().getJugador().setId(
                 persistida.getEstadisticasDeportivas().getJugador().getId());
         return bolsa;
+    }
+
+    @Override
+    public BolsaDeJugador findById(UUID id) {
+        Optional<BolsaDeJugadorDTOSQL> response = daosql.findBolsaByPlayerId(id);
+        return response.map(BolsaDeJugadorDTOSQL::aModelo).orElse(null);
     }
 
     /**

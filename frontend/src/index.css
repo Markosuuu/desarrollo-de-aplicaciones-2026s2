@@ -345,6 +345,9 @@ body[data-theme="dark"] .search-field input {
   border: 1px solid rgba(148, 163, 184, 0.18);
   min-height: 220px;
 }
+.player-card:hover {
+  cursor: pointer;
+}
 
 .player-card__top {
   display: flex;

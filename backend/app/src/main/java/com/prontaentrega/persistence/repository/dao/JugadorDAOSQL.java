@@ -27,4 +27,8 @@ public interface JugadorDAOSQL extends JpaRepository<BolsaDeJugadorDTOSQL, UUID>
     @Query("SELECT b FROM BolsaDeJugador b WHERE b.estadisticasDeportivas.jugador.whoscoredId = :whoscoredId")
     Optional<BolsaDeJugadorDTOSQL> findBolsaByWhoscoredId(
             @Param("whoscoredId") Integer whoscoredId);
+
+    @Query("SELECT b FROM BolsaDeJugador b WHERE b.estadisticasDeportivas.jugador.id = :playerId")
+    Optional<BolsaDeJugadorDTOSQL> findBolsaByPlayerId(
+            @Param("playerId") UUID playerId);
 }

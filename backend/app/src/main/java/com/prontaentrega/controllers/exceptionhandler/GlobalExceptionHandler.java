@@ -1,10 +1,7 @@
 package com.prontaentrega.controllers.exceptionhandler;
 
-import com.prontaentrega.services.exceptions.CatalogUnavailableException;
-import com.prontaentrega.services.exceptions.DuplicateUserException;
+import com.prontaentrega.services.exceptions.*;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
-import com.prontaentrega.services.exceptions.ProviderUnavailableException;
-import com.prontaentrega.services.exceptions.ValidationException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -73,6 +70,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ProviderUnavailableException.class)
     public ResponseEntity<RefreshCatalogResponse> handleProviderUnavailable(ProviderUnavailableException ex) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(RefreshCatalogResponse.failure(ex.getMessage()));
+    }
+
+    @ExceptionHandler(PlayerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handlePlayerNotFound(PlayerNotFoundException ex) {
+        return error(HttpStatus.NOT_FOUND, "JUGADOR NO ENCONTRADO", ex.getMessage());
     }
 
     private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message) {

@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -303,6 +304,78 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.updated").value(1))
                 .andExpect(jsonPath("$.skipped").value(0))
                 .andExpect(jsonPath("$.source").value("WhoScored"));
+    }
+
+    @Test
+    void searchByIdShouldReturnPlayerResponseWhenFound() throws Exception {
+        AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        Jugador jugador = new Jugador(11, "Riquelme", "Boquita",
+                Liga.LALIGA, Posicion.MIDFIELDER, 25, 180, 75
+        );
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador, true, 10, 5, BigDecimal.valueOf(3.5),
+                BigDecimal.valueOf(5.2), BigDecimal.valueOf(1.5), BigDecimal.valueOf(0.5),
+                BigDecimal.valueOf(5.5), 2200
+        );
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+        BolsaDeJugador savedBolsa = jugadorRepository.save(bolsaJugador);
+        UUID id = savedBolsa.getEstadisticasDeportivas().getJugador().getId();
+
+
+        mockMvc.perform(get("/api/players/"+id.toString())
+                .header("Authorization", "Bearer "+result.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("Riquelme"))
+                .andExpect(jsonPath("$.equipo").value("Boquita"))
+                .andExpect(jsonPath("$.liga").value("LaLiga"))
+        ;
+    }
+
+    @Test
+    void searchByIdWithoutAutorizationShouldReturnForbiden() throws Exception {
+        Jugador jugador = new Jugador(11, "Riquelme", "Boquita",
+                Liga.LALIGA, Posicion.MIDFIELDER, 25, 180, 75
+        );
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador, true, 10, 5, BigDecimal.valueOf(3.5),
+                BigDecimal.valueOf(5.2), BigDecimal.valueOf(1.5), BigDecimal.valueOf(0.5),
+                BigDecimal.valueOf(5.5), 2200
+        );
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+        BolsaDeJugador savedBolsa = jugadorRepository.save(bolsaJugador);
+        UUID id = savedBolsa.getEstadisticasDeportivas().getJugador().getId();
+
+        mockMvc.perform(get("/api/players/"+id.toString()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void searchByIdWithInvalidAutorizationShouldReturnUnauthorized() throws Exception {
+        Jugador jugador = new Jugador(11, "Riquelme", "Boquita",
+                Liga.LALIGA, Posicion.MIDFIELDER, 25, 180, 75
+        );
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador, true, 10, 5, BigDecimal.valueOf(3.5),
+                BigDecimal.valueOf(5.2), BigDecimal.valueOf(1.5), BigDecimal.valueOf(0.5),
+                BigDecimal.valueOf(5.5), 2200
+        );
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+        BolsaDeJugador savedBolsa = jugadorRepository.save(bolsaJugador);
+        UUID id = savedBolsa.getEstadisticasDeportivas().getJugador().getId();
+
+        mockMvc.perform(get("/api/players/"+id.toString())
+                .header("Authorization", "Bearer saraza"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void searchByIdWNonExistentReturns404() throws Exception {
+        AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(get("/api/players/21f22743-a0fe-4139-ad82-60df4096")
+                        .header("Authorization", "Bearer "+result.token()))
+                .andExpect(status().isNotFound());
     }
 
     private static @NotNull EstadisticasDeportivas getEstadisticas() {

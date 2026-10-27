@@ -21,6 +21,9 @@
   },
   "dependencies": {
     "@blobatar/react": "^2.7.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/x-charts": "^9.16.0",
     "@vitejs/plugin-react": "^6.1.1",
     "blobatar": "^2.7.0",
     "react": "^19.3.0",

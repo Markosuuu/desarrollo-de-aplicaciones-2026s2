@@ -9,6 +9,7 @@ import liga_al from "../assets/liga-al.png";
 import liga_fr from "../assets/liga-fr.png";
 import liga_it from "../assets/liga-it.png";
 import liga_en from "../assets/liga-en.png";
+import { useNavigate } from "react-router-dom";
 
 const PAGE_SIZE = 20;
 
@@ -25,6 +26,7 @@ export default function HomePage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     let active = true;
@@ -181,6 +183,7 @@ export default function HomePage() {
                   <article
                     key={player.id ?? `${player.nombre}-${player.equipo}`}
                     className="player-card"
+                    onClick={() => navigate('/player/'+player.id)}
                   >
                     <div className="player-card__top">
                       <span className="player-position">
