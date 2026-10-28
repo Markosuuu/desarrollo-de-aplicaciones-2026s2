@@ -8,6 +8,8 @@ import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.dao.EstadoEstrategiaCotizacionDAOSQL;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Verifica persistencia separada y lock del estado sobre PostgreSQL real. */
 @SpringBootTest
+@Tag("integracion")
 class QuoteStrategyPersistenceTest extends AbstractIntegrationTest {
     @Autowired
     private CotizacionRepository strategyRepository;

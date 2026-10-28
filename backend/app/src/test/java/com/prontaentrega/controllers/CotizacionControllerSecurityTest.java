@@ -14,6 +14,8 @@ import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 /** Comprueba aislamiento de las operaciones administrativas con clave maestra. */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Tag("integracion")
 class CotizacionControllerSecurityTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;

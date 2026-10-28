@@ -10,14 +10,18 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
 
 /** Comprueba lectura keyset y escritura batch con PostgreSQL real. */
 @SpringBootTest
+@Tag("integracion")
 class QuoteRecalculationRepositoryTest extends AbstractIntegrationTest {
     @Autowired
     private CotizacionRepository quoteRepository;
@@ -25,9 +29,16 @@ class QuoteRecalculationRepositoryTest extends AbstractIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @BeforeEach
+    @AfterEach
+    void limpiarDatosDeJugadores() {
+        jdbcTemplate.update("DELETE FROM bolsas_de_jugadores");
+        jdbcTemplate.update("DELETE FROM estadisticas_deportivas");
+        jdbcTemplate.update("DELETE FROM jugadores");
+    }
+
     /** Lee dos registros en páginas acotadas y persiste sus cotizaciones calculadas. */
     @Test
-    @Transactional
     void paginaProyeccionesYActualizaCotizacionesEnLotes() {
         UUID primeraBolsa = insertarJugador(1, new BigDecimal("10.00"), new BigDecimal("1.2"));
         UUID segundaBolsa = insertarJugador(2, new BigDecimal("20.00"), null);
