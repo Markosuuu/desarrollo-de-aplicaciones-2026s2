@@ -29,10 +29,14 @@ export default function PlayerPage() {
 
     useEffect(() => {
         const loadPlayer = async () => {
-            const response = await fetchPlayer(id, token);
-            setPlayer(response);
+            try {
+                const response = await fetchPlayer(id, token);
+                setPlayer(response);
+            } catch (error) {
+                console.error("Error al cargar el jugador:", error);
+            }
         };
-        loadPlayer();
+        void loadPlayer();
     }, [id, token]);
 
     if (!player) {

@@ -3,7 +3,7 @@ import { fetchPlayers } from "../api/playerApi";
 import { useAuth } from "../context/AuthContext";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
-
+import { Link } from "react-router-dom";
 import liga_es from "../assets/liga-es.png";
 import liga_al from "../assets/liga-al.png";
 import liga_fr from "../assets/liga-fr.png";
@@ -180,7 +180,7 @@ export default function HomePage() {
 
               <div className="player-grid">
                 {filteredPlayers.map((player) => (
-                  <article
+                  <Link
                     key={player.id ?? `${player.nombre}-${player.equipo}`}
                     className="player-card"
                     onClick={() => navigate('/player/'+player.id)}
@@ -219,7 +219,7 @@ export default function HomePage() {
                         <strong>{player.posicion || "—"}</strong>
                       </li>
                     </ul>
-                  </article>
+                  </Link>
                 ))}
               </div>
 
