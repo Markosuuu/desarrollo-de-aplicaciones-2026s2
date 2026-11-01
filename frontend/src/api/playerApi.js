@@ -38,3 +38,15 @@ export async function fetchPlayers({ page = 1, perPage = 20, nombre, equipo, lig
 
   return payload;
 }
+
+export async function fetchPlayer(id, token) {
+  const response = await fetch(`${API_BASE_URL}/players/${id}`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: 'Bearer '+ token
+    },
+  });
+  const payload = await response.json().catch(() => ({}));
+
+  return payload;
+}

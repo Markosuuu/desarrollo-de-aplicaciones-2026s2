@@ -6,6 +6,7 @@ import { useAuth } from "./context/AuthContext";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import PlayerPage from "./pages/PlayerPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -36,6 +37,16 @@ export default function App() {
             <ProtectedRoute requireAuth>
               <Sidebar>
                 <HomePage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/player/:id"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <PlayerPage />
               </Sidebar>
             </ProtectedRoute>
           }
