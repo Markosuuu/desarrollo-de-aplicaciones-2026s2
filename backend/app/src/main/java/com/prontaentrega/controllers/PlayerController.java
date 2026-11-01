@@ -1,7 +1,7 @@
 package com.prontaentrega.controllers;
 
-import com.prontaentrega.controllers.dtos.CatalogResponse;
-import com.prontaentrega.controllers.dtos.PlayerResponse;
+import com.prontaentrega.controllers.dtos.jugadores.CatalogResponse;
+import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
 import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.Liga;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;

@@ -344,8 +344,11 @@ body[data-theme="dark"] .search-field input {
   background: rgba(148, 163, 184, 0.08);
   border: 1px solid rgba(148, 163, 184, 0.18);
   min-height: 220px;
-  color: white;
   text-decoration: none;
+  color: #0f172a;
+}
+body[data-theme="dark"] .player-card {
+  color: white;
 }
 .player-card:hover {
   cursor: pointer;

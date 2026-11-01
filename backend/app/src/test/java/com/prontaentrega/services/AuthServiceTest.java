@@ -1,6 +1,5 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.controllers.dtos.LoginRequest;
 import com.prontaentrega.models.TokenEstado;
 import com.prontaentrega.models.Usuario;
 import com.prontaentrega.persistence.repository.TokenEstadoRepository;

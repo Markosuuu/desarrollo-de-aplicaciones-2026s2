@@ -1,10 +1,10 @@
 package com.prontaentrega.endToEnd;
 
 
-import com.prontaentrega.controllers.dtos.AuthResponse;
-import com.prontaentrega.controllers.dtos.LoginRequest;
-import com.prontaentrega.controllers.dtos.RegisterRequest;
-import com.prontaentrega.controllers.exceptionhandler.ErrorResponse;
+import com.prontaentrega.controllers.dtos.auth.AuthResponse;
+import com.prontaentrega.controllers.dtos.auth.LoginRequest;
+import com.prontaentrega.controllers.dtos.auth.RegisterRequest;
+import com.prontaentrega.controllers.exceptions.ErrorResponse;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class authEndToEnd extends AbstractIntegrationTest {
+public class AuthEndToEndTest extends AbstractIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;
     @Autowired

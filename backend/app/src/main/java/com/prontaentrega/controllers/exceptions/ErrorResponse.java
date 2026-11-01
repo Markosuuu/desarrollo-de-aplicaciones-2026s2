@@ -1,4 +1,4 @@
-package com.prontaentrega.controllers.exceptionhandler;
+package com.prontaentrega.controllers.exceptions;
 
 public record ErrorResponse(
         ErrorDetail error

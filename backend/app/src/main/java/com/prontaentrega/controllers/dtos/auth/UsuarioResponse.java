@@ -1,4 +1,4 @@
-package com.prontaentrega.controllers.dtos;
+package com.prontaentrega.controllers.dtos.auth;
 
 import com.prontaentrega.models.Usuario;
 import java.util.UUID;
