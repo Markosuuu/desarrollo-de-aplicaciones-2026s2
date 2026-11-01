@@ -3,13 +3,12 @@ import { fetchPlayers } from "../api/playerApi";
 import { useAuth } from "../context/AuthContext";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
-import { Link } from "react-router-dom";
 import liga_es from "../assets/liga-es.png";
 import liga_al from "../assets/liga-al.png";
 import liga_fr from "../assets/liga-fr.png";
 import liga_it from "../assets/liga-it.png";
 import liga_en from "../assets/liga-en.png";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const PAGE_SIZE = 20;
 
