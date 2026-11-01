@@ -24,20 +24,65 @@ const historialPrueba = [
 
 export default function PlayerPage() {
     const [player, setPlayer] = useState(null);
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
     const { token } = useAuth();
     const { id } = useParams();
+    const [retry, setRetry] = useState(0);
 
     useEffect(() => {
+        let active = true;
+
         const loadPlayer = async () => {
+            setLoading(true);
+            setError("");
+
             try {
                 const response = await fetchPlayer(id, token);
-                setPlayer(response);
+
+                if (active) {
+                    setPlayer(response);
+                }
             } catch (error) {
                 console.error("Error al cargar el jugador:", error);
+
+                if (active) {
+                    setError(
+                        error.message || "No se pudo cargar la información del jugador."
+                    );
+                }
+            } finally {
+                if (active) {
+                    setLoading(false);
+                }
             }
         };
+
         void loadPlayer();
-    }, [id, token]);
+
+        return () => {
+            active = false;
+        };
+    }, [id, token, retry]);
+
+    if (loading) {
+        return <div>Cargando jugador...</div>;
+    }
+
+    if (error) {
+        return (
+            <div className="playerPage-error">
+                <h2>No se pudo cargar el jugador</h2>
+                <button onClick={() => setRetry(prev => prev + 1)}>
+                    Reintentar
+                </button>
+            </div>
+        );
+    }
+
+    if (!player) {
+        return <div>No se encontró el jugador.</div>;
+    }
 
     if (!player) {
         return <div>Cargando...</div>;
