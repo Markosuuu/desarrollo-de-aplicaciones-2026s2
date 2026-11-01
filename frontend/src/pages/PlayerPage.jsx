@@ -83,10 +83,7 @@ export default function PlayerPage() {
     if (!player) {
         return <div>No se encontró el jugador.</div>;
     }
-
-    if (!player) {
-        return <div>Cargando...</div>;
-    }
+    
     return (
         <div className="playerPage-container">
             <h1 className="eyebrow texto-locura playerPage-titulo">

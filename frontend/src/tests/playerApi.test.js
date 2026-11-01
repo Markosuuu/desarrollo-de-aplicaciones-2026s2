@@ -1,0 +1,151 @@
+
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { fetchPlayers, fetchPlayer } from '../api/playerApi.js';
+
+describe('fetchPlayers', () => {
+    beforeEach(() => {
+        vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    test('realiza la petición con los parámetros y headers correspondientes', async () => {
+        const jugadores = [{ id: 1, nombre: 'Lionel Messi' }];
+
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue(jugadores),
+        });
+
+        const result = await fetchPlayers({
+            page: 2,
+            perPage: 10,
+            nombre: 'Messi',
+            equipo: 'Inter Miami',
+            liga: 'MLS',
+            token: 'token-test',
+        });
+
+        const [url, options] = fetch.mock.calls[0];
+        const parsedUrl = new URL(url);
+
+        expect(parsedUrl.searchParams.get('page')).toBe('2');
+        expect(parsedUrl.searchParams.get('perPage')).toBe('10');
+        expect(parsedUrl.searchParams.get('nombre')).toBe('Messi');
+        expect(parsedUrl.searchParams.get('equipo')).toBe('Inter%20Miami');
+        expect(parsedUrl.searchParams.get('liga')).toBe('MLS');
+
+        expect(options.headers).toEqual({
+            Accept: 'application/json',
+            Authorization: 'Bearer token-test',
+        });
+
+        expect(result).toEqual(jugadores);
+    });
+
+    test('ignora términos de búsqueda que no sean seguros', async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue([]),
+        });
+
+        await fetchPlayers({
+            nombre: '<script>alert(1)</script>',
+            equipo: 123,
+            token: 'token-test',
+        });
+
+        const [url] = fetch.mock.calls[0];
+        const parsedUrl = new URL(url);
+
+        expect(parsedUrl.searchParams.has('nombre')).toBe(false);
+        expect(parsedUrl.searchParams.has('equipo')).toBe(false);
+    });
+
+    test('lanza un error cuando la respuesta HTTP no es exitosa', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({
+                error: {
+                    message: 'Error al consultar jugadores',
+                },
+            }),
+        });
+
+        await expect(fetchPlayers()).rejects.toThrow(
+            'Error al consultar jugadores',
+        );
+    });
+
+    test('utiliza el mensaje por defecto cuando la respuesta no contiene un error', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({}),
+        });
+
+        await expect(fetchPlayers()).rejects.toThrow(
+            'No se pudo cargar el catálogo de jugadores.',
+        );
+    });
+
+    test('continúa aunque el servidor no devuelva JSON válido', async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
+        });
+
+        const result = await fetchPlayers();
+
+        expect(result).toEqual({});
+    });
+});
+
+describe('fetchPlayer', () => {
+    beforeEach(() => {
+        vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    test('obtiene un jugador utilizando su ID y token', async () => {
+        const jugador = {
+            id: 1,
+            nombre: 'Lionel Messi',
+            cotizacion: 300,
+        };
+
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue(jugador),
+        });
+
+        const result = await fetchPlayer(1, 'token-test');
+
+        expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/players/1'),
+            {
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: 'Bearer token-test',
+                },
+            },
+        );
+
+        expect(result).toEqual(jugador);
+    });
+
+    test('devuelve un objeto vacío cuando la respuesta no contiene JSON válido', async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
+        });
+
+        const result = await fetchPlayer(1, 'token-test');
+
+        expect(result).toEqual({});
+    });
+});
