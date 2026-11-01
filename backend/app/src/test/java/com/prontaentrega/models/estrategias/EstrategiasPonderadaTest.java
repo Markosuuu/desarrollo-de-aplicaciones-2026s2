@@ -11,9 +11,12 @@ import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
 import java.math.BigDecimal;
 import java.util.UUID;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /** Verifica las fórmulas del dominio sin servicios ni persistencia. */
+@Tag("modelo")
 class EstrategiasPonderadaTest {
     private final EstrategiaPonderada estrategiaPonderada = new EstrategiaPonderada();
 

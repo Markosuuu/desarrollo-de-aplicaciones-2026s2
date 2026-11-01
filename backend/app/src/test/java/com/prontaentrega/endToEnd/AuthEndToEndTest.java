@@ -8,6 +8,7 @@ import com.prontaentrega.controllers.exceptions.ErrorResponse;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Tag("e2e")
 public class AuthEndToEndTest extends AbstractIntegrationTest {
     @Autowired
     private TestRestTemplate restTemplate;

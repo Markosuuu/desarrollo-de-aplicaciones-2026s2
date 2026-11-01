@@ -3,6 +3,7 @@ package com.prontaentrega.controllers;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.prontaentrega.controllers.exceptions.CotizacionExceptionHandler;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.PessimisticLockingFailureException;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /** Verifica códigos quote y que errores de infraestructura no expongan detalles SQL. */
+@Tag("integracion")
 class CotizacionExceptionHandlerTest {
     private final CotizacionExceptionHandler handler = new CotizacionExceptionHandler();
 

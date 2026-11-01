@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,6 +32,7 @@ import org.springframework.test.context.DynamicPropertySource;
  * Tests de integracion del refresh usando PostgreSQL real y un servidor HTTP real.
  */
 @SpringBootTest
+@Tag("integracion")
 class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
 
     private static final AtomicInteger providerStatus = new AtomicInteger(200);

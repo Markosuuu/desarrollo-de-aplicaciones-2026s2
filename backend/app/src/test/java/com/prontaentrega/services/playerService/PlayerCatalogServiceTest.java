@@ -5,6 +5,7 @@ import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.services.exceptions.PlayerNotFoundException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
+import org.junit.jupiter.api.Tag;
 import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
+@Tag("integracion")
 public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     @Autowired
     private PlayerCatalogService playerCatalogService;

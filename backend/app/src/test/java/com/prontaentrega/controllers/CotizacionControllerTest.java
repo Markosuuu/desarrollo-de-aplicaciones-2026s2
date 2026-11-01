@@ -18,6 +18,7 @@ import com.prontaentrega.services.CotizacionService.QuoteStrategyView;
 import java.math.BigDecimal;
 import java.util.List;
 import com.prontaentrega.utils.AbstractIntegrationTest;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +31,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 /** Verifica el contrato y la clave maestra del endpoint manual de recotización. */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Tag("integracion")
 class CotizacionControllerTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;

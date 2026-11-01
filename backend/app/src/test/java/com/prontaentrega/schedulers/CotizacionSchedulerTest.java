@@ -3,6 +3,7 @@ package com.prontaentrega.schedulers;
 import static org.mockito.Mockito.verify;
 
 import com.prontaentrega.services.CotizacionService;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -10,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 /** Verifica que el disparador semanal delega en el mismo servicio del endpoint manual. */
 @ExtendWith(MockitoExtension.class)
+@Tag("integracion")
 class CotizacionSchedulerTest {
     @Mock
     private CotizacionService administrationService;

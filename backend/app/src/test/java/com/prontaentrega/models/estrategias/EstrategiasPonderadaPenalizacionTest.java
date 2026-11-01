@@ -4,6 +4,7 @@ import com.prontaentrega.models.DatosValoracion;
 import com.prontaentrega.models.exception.ConfiguracionNoCorrespondiente;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /** Verifica las fórmulas del dominio sin servicios ni persistencia. */
+@Tag("modelo")
 class EstrategiasPonderadaPenalizacionTest {
     private final EstrategiaPonderadaConPenalizacion estrategiaPenalizacion = new EstrategiaPonderadaConPenalizacion();
 

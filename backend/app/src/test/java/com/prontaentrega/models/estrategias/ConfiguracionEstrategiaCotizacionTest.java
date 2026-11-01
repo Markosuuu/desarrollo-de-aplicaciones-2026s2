@@ -7,9 +7,12 @@ import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
 import com.prontaentrega.controllers.dtos.cotizacion.CotizacionStrategyConfigRequest;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /** Verifica que la identidad se mantenga en Strategy y la configuración quede asociada por tipo. */
+@Tag("modelo")
 class ConfiguracionEstrategiaCotizacionTest {
     /** Las configuraciones no duplican el ID estable que posee cada estrategia. */
     @Test

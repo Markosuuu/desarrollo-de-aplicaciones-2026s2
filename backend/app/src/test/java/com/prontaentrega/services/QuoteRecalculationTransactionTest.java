@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
+
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /** Comprueba que un error de persistencia revierte todos los batches previos de la transacción. */
 @SpringBootTest
+@Tag("integracion")
 class QuoteRecalculationTransactionTest extends AbstractIntegrationTest {
     private static final UUID FIRST_QUOTE_ID = new UUID(2, 1);
     private static final UUID LAST_QUOTE_ID = new UUID(2, 201);
