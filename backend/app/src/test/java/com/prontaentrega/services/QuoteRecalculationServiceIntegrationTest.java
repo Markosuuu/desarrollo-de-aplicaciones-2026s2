@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -37,6 +38,11 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
 
         @Autowired
         private CotizacionScheduler scheduler;
+
+        @BeforeEach
+        void clearExistingBolsas() {
+            jdbcTemplate.update("DELETE FROM bolsas_de_jugadores");
+        }
 
     /** Actualiza jugadores válidos y omite aquellos sin todas las métricas ponderadas. */
     @Test

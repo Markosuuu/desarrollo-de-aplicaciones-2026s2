@@ -28,4 +28,12 @@ public class UsuarioJugadorToken {
         this.tokensEnVenta = tokensEnVenta;
         this.actualizadoEn = LocalDateTime.now();
     }
+
+    public void agregarTokens(Integer cantidadTokens) {
+        this.tokensDisponibles = this.tokensDisponibles + cantidadTokens;
+    }
+
+    public void quitarTokens(Integer cantidadTokens) {
+        this.tokensEnVenta = this.tokensEnVenta - cantidadTokens;
+    }
 }

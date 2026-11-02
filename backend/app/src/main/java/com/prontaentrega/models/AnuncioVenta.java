@@ -17,8 +17,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class AnuncioVenta {
     private UUID id;
-    private UUID vendedorId;
-    private UUID jugadorId;
+    private Usuario vendedor;
+    private BolsaDeJugador bolsaDeJugador;
     private Integer cantidadTokens;
     private BigDecimal precioPorToken;
     private BigDecimal precioTotal;
@@ -26,13 +26,18 @@ public class AnuncioVenta {
     private LocalDateTime creadoEn;
     private LocalDateTime actualizadoEn;
 
-    public AnuncioVenta(UUID vendedorId, UUID jugadorId, Integer cantidadTokens,
-                       BigDecimal precioPorToken, BigDecimal precioTotal) {
-        this.vendedorId = vendedorId;
-        this.jugadorId = jugadorId;
+    /**
+     * Constructor de anuncios para vender
+     * @param vendedor El vendedor del anuncio
+     * @param bolsaDeJugador La bolsa de jugador que se está vendiendo
+     * @param cantidadTokens La cantidad de tokens que se están vendiendo
+     */
+    public AnuncioVenta(Usuario vendedor, BolsaDeJugador bolsaDeJugador, Integer cantidadTokens) {
+        this.vendedor = vendedor;
+        this.bolsaDeJugador = bolsaDeJugador;
         this.cantidadTokens = cantidadTokens;
-        this.precioPorToken = precioPorToken;
-        this.precioTotal = precioTotal;
+        this.precioPorToken = bolsaDeJugador.getCotizacionActual();
+        this.precioTotal = this.precioPorToken.multiply(BigDecimal.valueOf(cantidadTokens));
         this.estado = EstadoAnuncioVenta.PENDIENTE;
         this.creadoEn = LocalDateTime.now();
         this.actualizadoEn = this.creadoEn;

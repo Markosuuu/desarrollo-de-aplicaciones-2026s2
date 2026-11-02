@@ -1,11 +1,10 @@
-package com.prontaentrega.services.dto;
+package com.prontaentrega.controllers.dtos.transacciones;
 
 import com.prontaentrega.models.AnuncioVenta;
 import java.math.BigDecimal;
 import java.util.UUID;
 
-// TODO: Mover a controller
-public record MarketplaceListingResponse(
+public record AnuncioVentaResponse(
         UUID id,
         UUID vendedorId,
         String vendedorNombre,
@@ -16,13 +15,13 @@ public record MarketplaceListingResponse(
         BigDecimal precioTotal,
         String estado
 ) {
-    public static MarketplaceListingResponse from(AnuncioVenta anuncio, String vendedorNombre, String nombreJugador) {
-        return new MarketplaceListingResponse(
+    public static AnuncioVentaResponse from(AnuncioVenta anuncio) {
+        return new AnuncioVentaResponse(
                 anuncio.getId(),
-                anuncio.getVendedorId(),
-                vendedorNombre,
-                anuncio.getJugadorId(),
-                nombreJugador,
+                anuncio.getVendedor().getId(),
+                anuncio.getVendedor().getNombre(),
+                anuncio.getBolsaDeJugador().getId(),
+                anuncio.getBolsaDeJugador().getEstadisticasDeportivas().getJugador().getNombre(),
                 anuncio.getCantidadTokens(),
                 anuncio.getPrecioPorToken(),
                 anuncio.getPrecioTotal(),

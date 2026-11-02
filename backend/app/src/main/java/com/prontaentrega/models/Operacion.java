@@ -18,6 +18,8 @@ public class Operacion {
     private UUID id;
     private UUID usuarioId;
     private UUID contraparteId;
+    private String usuarioNombre;
+    private String contraparteNombre;
     private UUID jugadorId;
     private Integer cantidad;
     private BigDecimal precioPorToken;
@@ -27,11 +29,13 @@ public class Operacion {
     private String nombreJugador;
     private LocalDateTime creadaEn;
 
-    public Operacion(UUID usuarioId, UUID contraparteId, UUID jugadorId, Integer cantidad,
+    public Operacion(UUID usuarioId, UUID contraparteId, String usuarioNombre, String contraparteNombre, UUID jugadorId, Integer cantidad,
                     BigDecimal precioPorToken, BigDecimal total, TipoOperacion tipo,
                     EstadoOperacion estado, String nombreJugador) {
         this.usuarioId = usuarioId;
         this.contraparteId = contraparteId;
+        this.usuarioNombre = usuarioNombre;
+        this.contraparteNombre = contraparteNombre;
         this.jugadorId = jugadorId;
         this.cantidad = cantidad;
         this.precioPorToken = precioPorToken;

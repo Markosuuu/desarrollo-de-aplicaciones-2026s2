@@ -1,11 +1,10 @@
-package com.prontaentrega.services.dto;
+package com.prontaentrega.controllers.dtos.transacciones;
 
 import com.prontaentrega.models.Operacion;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-// TODO: Mover a controller
 public record OperacionResponse(
         UUID id,
         String tipo,
@@ -20,7 +19,7 @@ public record OperacionResponse(
         String contraparteNombre,
         LocalDateTime creadaEn
 ) {
-    public static OperacionResponse from(Operacion operacion, String usuarioNombre, String contraparteNombre) {
+    public static OperacionResponse from(Operacion operacion) {
         return new OperacionResponse(
                 operacion.getId(),
                 operacion.getTipo().name(),
@@ -31,8 +30,8 @@ public record OperacionResponse(
                 operacion.getTotal(),
                 operacion.getUsuarioId(),
                 operacion.getContraparteId(),
-                usuarioNombre,
-                contraparteNombre,
+                operacion.getUsuarioNombre(),
+                operacion.getContraparteNombre(),
                 operacion.getCreadaEn()
         );
     }

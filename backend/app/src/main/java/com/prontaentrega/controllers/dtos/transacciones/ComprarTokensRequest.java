@@ -1,7 +1,6 @@
-package com.prontaentrega.services.dto;
+package com.prontaentrega.controllers.dtos.transacciones;
 
 import java.util.UUID;
 
-// TODO: Mover a controller
 public record ComprarTokensRequest(UUID anuncioId) {
 }

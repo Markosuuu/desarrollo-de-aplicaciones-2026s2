@@ -1,7 +1,11 @@
 package com.prontaentrega.persistence.dto;
 
 import com.prontaentrega.models.AnuncioVenta;
+import com.prontaentrega.models.BolsaDeJugador;
+import com.prontaentrega.models.EstadisticasDeportivas;
 import com.prontaentrega.models.EstadoAnuncioVenta;
+import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -55,8 +59,11 @@ public class AnuncioVentaDTOSQL {
     public static AnuncioVentaDTOSQL desdeModelo(AnuncioVenta anuncio) {
         AnuncioVentaDTOSQL dto = new AnuncioVentaDTOSQL();
         dto.id = anuncio.getId();
-        dto.vendedorId = anuncio.getVendedorId();
-        dto.jugadorId = anuncio.getJugadorId();
+        dto.vendedorId = anuncio.getVendedor().getId();
+        dto.jugadorId = anuncio.getBolsaDeJugador()
+                .getEstadisticasDeportivas()
+                .getJugador()
+                .getId();
         dto.cantidadTokens = anuncio.getCantidadTokens();
         dto.precioPorToken = anuncio.getPrecioPorToken();
         dto.precioTotal = anuncio.getPrecioTotal();
@@ -66,17 +73,26 @@ public class AnuncioVentaDTOSQL {
         return dto;
     }
 
-    public AnuncioVenta aModelo() {
+    public static AnuncioVenta aModelo(AnuncioVentaDTOSQL dto) {
         AnuncioVenta anuncio = new AnuncioVenta();
-        anuncio.setId(id);
-        anuncio.setVendedorId(vendedorId);
-        anuncio.setJugadorId(jugadorId);
-        anuncio.setCantidadTokens(cantidadTokens);
-        anuncio.setPrecioPorToken(precioPorToken);
-        anuncio.setPrecioTotal(precioTotal);
-        anuncio.setEstado(estado);
-        anuncio.setCreadoEn(creadoEn);
-        anuncio.setActualizadoEn(actualizadoEn);
+        anuncio.setId(dto.id);
+        Usuario vendedor = new Usuario();
+        vendedor.setId(dto.vendedorId);
+        anuncio.setVendedor(vendedor);
+        BolsaDeJugador bolsaDeJugador = new BolsaDeJugador();
+        bolsaDeJugador.setId(dto.jugadorId);
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas();
+        Jugador jugador = new Jugador();
+        jugador.setId(dto.jugadorId);
+        estadisticas.setJugador(jugador);
+        bolsaDeJugador.setEstadisticasDeportivas(estadisticas);
+        anuncio.setBolsaDeJugador(bolsaDeJugador);
+        anuncio.setCantidadTokens(dto.cantidadTokens);
+        anuncio.setPrecioPorToken(dto.precioPorToken);
+        anuncio.setPrecioTotal(dto.precioTotal);
+        anuncio.setEstado(dto.estado);
+        anuncio.setCreadoEn(dto.creadoEn);
+        anuncio.setActualizadoEn(dto.actualizadoEn);
         return anuncio;
     }
 }

@@ -3,21 +3,13 @@ package com.prontaentrega.services;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.prontaentrega.models.AnuncioVenta;
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.EstadisticasDeportivas;
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.models.Liga;
-import com.prontaentrega.models.Posicion;
-import com.prontaentrega.models.Usuario;
-import com.prontaentrega.models.UsuarioJugadorToken;
+import com.prontaentrega.models.*;
 import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.persistence.repository.UsuarioJugadorTokenRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
-import com.prontaentrega.services.dto.OperacionResponse;
-import com.prontaentrega.services.exceptions.ValidationException;
+import com.prontaentrega.services.exceptions.*;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -36,11 +28,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 @Tag("integracion")
-class MarketplaceServiceTest extends AbstractIntegrationTest {
+class MercadoServiceTest extends AbstractIntegrationTest {
     private static final AtomicLong EMAIL_SEQUENCE = new AtomicLong();
 
     @Autowired
-    private MarketplaceService marketplaceService;
+    private MercadoService mercadoService;
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -72,10 +64,8 @@ class MarketplaceServiceTest extends AbstractIntegrationTest {
         UUID jugadorId = saveJugador("Jugador 1");
         usuarioJugadorTokenRepository.save(new UsuarioJugadorToken(seller.getId(), jugadorId, 3, 0));
 
-        ValidationException ex = assertThrows(ValidationException.class,
-                () -> marketplaceService.sellTokens(seller.getId(), jugadorId, 5));
-
-        assertEquals("TOKENS_INSUFICIENTES", ex.getCode());
+        assertThrows(CantidadDeTokensException.class,
+                () -> mercadoService.vender(seller.getId(), jugadorId, 5));
     }
 
     @Test
@@ -84,10 +74,8 @@ class MarketplaceServiceTest extends AbstractIntegrationTest {
         UUID jugadorId = saveJugador("Jugador 2");
         usuarioJugadorTokenRepository.save(new UsuarioJugadorToken(seller.getId(), jugadorId, 4, 0));
 
-        ValidationException ex = assertThrows(ValidationException.class,
-                () -> marketplaceService.sellTokens(seller.getId(), jugadorId, 0));
-
-        assertEquals("CANTIDAD_INVALIDA", ex.getCode());
+        assertThrows(CantidadDeTokensException.class,
+                () -> mercadoService.vender(seller.getId(), jugadorId, 0));
     }
 
     @Test
@@ -96,19 +84,17 @@ class MarketplaceServiceTest extends AbstractIntegrationTest {
         UUID jugadorId = saveJugador("Jugador 3");
         usuarioJugadorTokenRepository.save(new UsuarioJugadorToken(seller.getId(), jugadorId, 5, 0));
 
-        UUID anuncioId = marketplaceService.sellTokens(seller.getId(), jugadorId, 2).id();
+        UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 2).getId();
 
-        ValidationException selfBuy = assertThrows(ValidationException.class,
-                () -> marketplaceService.buyTokens(seller.getId(), anuncioId));
-        assertEquals("COMPRA_PROPIA", selfBuy.getCode());
+        assertThrows(VendedorComprandoTokensPropiosException.class,
+                () -> mercadoService.comprar(seller.getId(), anuncioId));
 
         Usuario buyer = saveUser("Comprador", uniqueEmail("comprador@test.com"));
         buyer.setCreditosDisponibles(BigDecimal.ZERO);
         usuarioRepository.save(buyer);
 
-        ValidationException creditError = assertThrows(ValidationException.class,
-                () -> marketplaceService.buyTokens(buyer.getId(), anuncioId));
-        assertEquals("CREDITOS_INSUFICIENTES", creditError.getCode());
+        assertThrows(CreditosInsuficientesException.class,
+                () -> mercadoService.comprar(buyer.getId(), anuncioId));
     }
 
     @Test
@@ -124,12 +110,11 @@ class MarketplaceServiceTest extends AbstractIntegrationTest {
         usuarioRepository.save(buyer1);
         usuarioRepository.save(buyer2);
 
-        UUID anuncioId = marketplaceService.sellTokens(seller.getId(), jugadorId, 5).id();
-        marketplaceService.buyTokens(buyer1.getId(), anuncioId);
+        UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 5).getId();
+        mercadoService.comprar(buyer1.getId(), anuncioId);
 
-        ValidationException ex = assertThrows(ValidationException.class,
-                () -> marketplaceService.buyTokens(buyer2.getId(), anuncioId));
-        assertEquals("ANUNCIO_NO_DISPONIBLE", ex.getCode());
+        assertThrows(AnuncioNoPendienteException.class,
+                () -> mercadoService.comprar(buyer2.getId(), anuncioId));
     }
 
     @Test
@@ -141,12 +126,12 @@ class MarketplaceServiceTest extends AbstractIntegrationTest {
 
         UUID jugadorId = saveJugador("Jugador 5");
         usuarioJugadorTokenRepository.save(new UsuarioJugadorToken(seller.getId(), jugadorId, 10, 0));
-        UUID anuncioId = marketplaceService.sellTokens(seller.getId(), jugadorId, 3).id();
-        marketplaceService.buyTokens(buyer.getId(), anuncioId);
+        UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 3).getId();
+        mercadoService.comprar(buyer.getId(), anuncioId);
 
-        List<OperacionResponse> history = marketplaceService.getUserTransactions(seller.getId());
+        List<Operacion> history = mercadoService.getTransaccionesById(seller.getId());
         assertEquals(1, history.size());
-        assertEquals("VENTA", history.get(0).tipo());
+        assertEquals(TipoOperacion.VENTA, history.get(0).getTipo());
     }
 
     private Usuario saveUser(String nombre, String correo) {

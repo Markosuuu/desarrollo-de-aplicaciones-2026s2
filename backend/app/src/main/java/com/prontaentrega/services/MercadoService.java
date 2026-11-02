@@ -1,0 +1,232 @@
+package com.prontaentrega.services;
+
+import com.prontaentrega.models.AnuncioVenta;
+import com.prontaentrega.models.BolsaDeJugador;
+import com.prontaentrega.models.EstadoAnuncioVenta;
+import com.prontaentrega.models.EstadoOperacion;
+import com.prontaentrega.models.Operacion;
+import com.prontaentrega.models.TipoOperacion;
+import com.prontaentrega.models.Usuario;
+import com.prontaentrega.models.UsuarioJugadorToken;
+import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
+import com.prontaentrega.persistence.repository.JugadorRepository;
+import com.prontaentrega.persistence.repository.OperacionRepository;
+import com.prontaentrega.persistence.repository.UsuarioJugadorTokenRepository;
+import com.prontaentrega.persistence.repository.UsuarioRepository;
+import com.prontaentrega.services.exceptions.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Servicio para manejar la lógica del marketplace, incluyendo la compra y venta de tokens.
+ */
+@Service
+public class MercadoService {
+    private final AnuncioVentaRepository anuncioVentaRepository;
+    private final UsuarioJugadorTokenRepository usuarioJugadorTokenRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final JugadorRepository jugadorRepository;
+    private final OperacionRepository operacionRepository;
+
+    public MercadoService(AnuncioVentaRepository anuncioVentaRepository,
+                          UsuarioJugadorTokenRepository usuarioJugadorTokenRepository,
+                          UsuarioRepository usuarioRepository,
+                          JugadorRepository jugadorRepository,
+                          OperacionRepository operacionRepository) {
+        this.anuncioVentaRepository = anuncioVentaRepository;
+        this.usuarioJugadorTokenRepository = usuarioJugadorTokenRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.jugadorRepository = jugadorRepository;
+        this.operacionRepository = operacionRepository;
+    }
+
+    /**
+     * Metodo para obtener los anuncios de venta pendientes en el mercado.
+     * @param page Nro de página
+     * @param size Cantidad de anuncios por página
+     * @return Lista de anuncios de venta
+     */
+    public Page<AnuncioVenta> getAnuncios(int page, int size) {
+        int normalizedPage = Math.max(page, 1) - 1;
+        int normalizedSize = Math.max(size, 1);
+        Pageable pageable = PageRequest.of(normalizedPage, normalizedSize);
+
+        return anuncioVentaRepository.findByEstado(EstadoAnuncioVenta.PENDIENTE, pageable);
+    }
+
+    /**
+     * Metodo para vender tokens en el mercado.
+     *
+     * @param usuarioId El ID del usuario que está vendiendo los tokens
+     * @param jugadorId El ID del jugador cuyos tokens se están vendiendo
+     * @param cantidad La cantidad de tokens a vender
+     * @throws UsuarioNoEncontradoException Si el usuario no existe
+     * @throws JugadorNoEncontradoException Si el jugador no existe
+     * @throws CantidadDeTokensException Si la cantidad de tokens es inválida o insuficiente para vender
+     * @return El anuncio de venta creado
+     */
+    public AnuncioVenta vender(UUID usuarioId, UUID jugadorId, Integer cantidad) {
+        Usuario vendedor = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id" + usuarioId.toString()));
+
+        BolsaDeJugador bolsa = Optional.ofNullable(jugadorRepository.findById(jugadorId))
+                .orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado con el id" + jugadorId.toString()));
+
+        if (cantidad == null || cantidad <= 0) {
+            throw new CantidadDeTokensException("La cantidad debe ser mayor a cero");
+        }
+
+        UsuarioJugadorToken saldo = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(usuarioId, jugadorId)
+                .orElse(new UsuarioJugadorToken(usuarioId, jugadorId, 0, 0));
+
+        int disponibles = saldo.getTokensDisponibles() == null ? 0 : saldo.getTokensDisponibles();
+
+        if (cantidad > disponibles) {
+            throw new CantidadDeTokensException("No posees suficientes tokens para vender");
+        }
+
+        AnuncioVenta anuncio = new AnuncioVenta(vendedor, bolsa, cantidad);
+        anuncioVentaRepository.save(anuncio);
+
+        // Estos setters son medio raretes, quizás se podría pasar a service?
+        saldo.setTokensDisponibles(disponibles - cantidad);
+        saldo.setTokensEnVenta((saldo.getTokensEnVenta() == null ? 0 : saldo.getTokensEnVenta()) + cantidad);
+        saldo.setActualizadoEn(LocalDateTime.now());
+        usuarioJugadorTokenRepository.save(saldo);
+
+        return anuncio;
+    }
+
+    /**
+     * Metodo para comprar tokens en el mercado.
+     * @param compradorId El ID del usuario que está comprando los tokens
+     * @param anuncioId El ID del anuncio de venta que se está comprando
+     * @throws AnuncioNoEncontradoException Si el anuncio no existe
+     * @throws AnuncioNoPendienteException Si el anuncio no está pendiente
+     * @throws VendedorComprandoTokensPropiosException Si el comprador es el mismo que el vendedor
+     * @throws UsuarioNoEncontradoException Si el comprador o vendedor no existen
+     * @throws CreditosInsuficientesException Si el comprador no tiene suficientes créditos
+     * @throws CantidadDeTokensException Si la cantidad de tokens en el anuncio es mayor a la cantidad de tokens en venta del vendedor
+     */
+    @Transactional
+    public void comprar(UUID compradorId, UUID anuncioId) {
+        AnuncioVenta anuncio = anuncioVentaRepository.findByIdForUpdate(anuncioId)
+                .orElseThrow(() -> new AnuncioNoEncontradoException("El anuncio no existe"));
+
+        if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
+            throw new AnuncioNoPendienteException("La venta ya no está disponible");
+        }
+
+        if (anuncio.getVendedor().getId().equals(compradorId)) {
+            throw new VendedorComprandoTokensPropiosException("No puedes comprar tus propios tokens");
+        }
+
+        Usuario comprador = usuarioRepository.findById(compradorId)
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Comprador no encontrado con el id: " + compradorId.toString()));
+
+        Usuario vendedor = usuarioRepository.findById(anuncio.getVendedor().getId())
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Vendedor no encontrado con el id: " + anuncio.getVendedor().getId().toString()));
+
+        if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(anuncio.getPrecioTotal()) < 0) {
+            throw new CreditosInsuficientesException("No tienes suficientes créditos");
+        }
+
+        UsuarioJugadorToken tokenVendedor = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(
+                anuncio.getVendedor().getId(), anuncio.getBolsaDeJugador().getId())
+                .orElse(new UsuarioJugadorToken(anuncio.getVendedor().getId(), anuncio.getBolsaDeJugador().getId(), 0, 0));
+
+        int enVenta = tokenVendedor.getTokensEnVenta() == null ? 0 : tokenVendedor.getTokensEnVenta();
+
+        if (anuncio.getCantidadTokens() > enVenta) {
+            throw new CantidadDeTokensException("La publicación ya no tiene tokens disponibles");
+        }
+
+        // Actualización de los usuarios
+        comprador.restarCreditos(anuncio.getPrecioTotal());
+        vendedor.sumarCreditos(anuncio.getPrecioTotal());
+        usuarioRepository.save(comprador);
+        usuarioRepository.save(vendedor);
+
+        // Actualización de los tokens
+        UsuarioJugadorToken tokenComprador = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(compradorId, anuncio.getBolsaDeJugador().getId())
+                .orElse(new UsuarioJugadorToken(compradorId, anuncio.getBolsaDeJugador().getId(), 0, 0));
+        tokenComprador.agregarTokens(anuncio.getCantidadTokens());
+        tokenComprador.setActualizadoEn(LocalDateTime.now());
+        usuarioJugadorTokenRepository.save(tokenComprador);
+
+        tokenVendedor.quitarTokens(anuncio.getCantidadTokens());
+        tokenVendedor.setActualizadoEn(LocalDateTime.now());
+        usuarioJugadorTokenRepository.save(tokenVendedor);
+
+        // Actualización del anuncio
+        anuncio.setEstado(EstadoAnuncioVenta.COMPLETADA);
+        anuncio.setActualizadoEn(LocalDateTime.now());
+        anuncioVentaRepository.save(anuncio);
+
+        BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(anuncio.getBolsaDeJugador().getId()))
+                .orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado con el id" + anuncio.getBolsaDeJugador().getId().toString()));
+
+        String nombreJugador = bolsaJugador.getEstadisticasDeportivas().getJugador().getNombre();
+
+        // Actualización de las operaciones
+        // No es como data repetida? Quizás conviene solo al consultar
+        // En cualquier caso se puede suprimir a una Operacion como "transaccion" y quitar el TipoOperaicon
+
+        Operacion compra = new Operacion(compradorId, anuncio.getVendedor().getId(), comprador.getNombre(), anuncio.getVendedor().getNombre(), anuncio.getBolsaDeJugador().getId(),
+                anuncio.getCantidadTokens(), anuncio.getPrecioPorToken(), anuncio.getPrecioTotal(),
+                TipoOperacion.COMPRA, EstadoOperacion.COMPLETADA, nombreJugador);
+
+        Operacion venta = new Operacion(anuncio.getVendedor().getId(), compradorId, anuncio.getVendedor().getNombre(), comprador.getNombre(), anuncio.getBolsaDeJugador().getId(),
+                anuncio.getCantidadTokens(), anuncio.getPrecioPorToken(), anuncio.getPrecioTotal(),
+                TipoOperacion.VENTA, EstadoOperacion.COMPLETADA, nombreJugador);
+
+        operacionRepository.save(compra);
+        operacionRepository.save(venta);
+    }
+
+    /**
+     * Metodo para cancelar una venta en el marketplace.
+     * @param vendedorId El ID del usuario que está cancelando la venta
+     * @param anuncioId El ID del anuncio de venta que se está cancelando
+     * TODO: Falta endpoint en capa controller
+     */
+    public void cancelarVenta(UUID vendedorId, UUID anuncioId) {
+        AnuncioVenta anuncio = anuncioVentaRepository.findById(anuncioId)
+                .orElseThrow(() -> new ValidationException("ANUNCIO_NO_ENCONTRADO", "El anuncio no existe"));
+
+        if (!anuncio.getVendedor().getId().equals(vendedorId)) {
+            throw new ValidationException("NO_AUTORIZADO", "No puedes cancelar una venta ajena");
+        }
+        if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
+            throw new ValidationException("ANUNCIO_NO_CANCELABLE", "No se puede cancelar una venta completada");
+        }
+
+        UsuarioJugadorToken saldo = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(vendedorId, anuncio.getBolsaDeJugador().getId())
+                .orElse(new UsuarioJugadorToken(vendedorId, anuncio.getBolsaDeJugador().getId(), 0, 0));
+        saldo.setTokensDisponibles((saldo.getTokensDisponibles() == null ? 0 : saldo.getTokensDisponibles()) + anuncio.getCantidadTokens());
+        saldo.setTokensEnVenta((saldo.getTokensEnVenta() == null ? 0 : saldo.getTokensEnVenta()) - anuncio.getCantidadTokens());
+        saldo.setActualizadoEn(java.time.LocalDateTime.now());
+        usuarioJugadorTokenRepository.save(saldo);
+
+        anuncio.setEstado(EstadoAnuncioVenta.CANCELADA);
+        anuncio.setActualizadoEn(java.time.LocalDateTime.now());
+        anuncioVentaRepository.save(anuncio);
+    }
+
+    /**
+     * Metodo para obtener las transacciones de un usuario.
+     * @param usuarioId El ID del usuario
+     * @return Una lista de las transacciones del usuario
+     */
+    public List<Operacion> getTransaccionesById(UUID usuarioId) {
+        return operacionRepository.findByUsuarioId(usuarioId);
+    }
+}

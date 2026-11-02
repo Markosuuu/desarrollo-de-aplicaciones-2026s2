@@ -34,4 +34,12 @@ public class Usuario {
         this.passwordHash = passwordHash;
         this.creditosDisponibles = BigDecimal.valueOf(100);
     }
+
+    public void restarCreditos(BigDecimal precioTotal) {
+        this.creditosDisponibles = this.creditosDisponibles.subtract(precioTotal);
+    }
+
+    public void sumarCreditos(BigDecimal precioTotal) {
+        this.creditosDisponibles = this.creditosDisponibles.add(precioTotal);
+    }
 }
