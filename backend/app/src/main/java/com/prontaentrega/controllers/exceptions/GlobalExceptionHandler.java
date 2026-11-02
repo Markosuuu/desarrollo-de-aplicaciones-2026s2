@@ -105,6 +105,16 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, "JUGADOR_NO_ENCONTRADO", ex.getMessage());
     }
 
+    @ExceptionHandler(AnuncioNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(AnuncioNoEncontradoException ex) {
+        return error(HttpStatus.BAD_REQUEST, "ANUNCIO_NO_ENCONTRADO", ex.getMessage());
+    }
+
+    @ExceptionHandler(VendedorComprandoTokensPropiosException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(VendedorComprandoTokensPropiosException ex) {
+        return error(HttpStatus.BAD_REQUEST, "VENDEDOR_COMPRANDO_TOKENS_PROPIOS", ex.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message) {
         ErrorResponse response = new ErrorResponse(
                 new ErrorResponse.ErrorDetail(code, message)

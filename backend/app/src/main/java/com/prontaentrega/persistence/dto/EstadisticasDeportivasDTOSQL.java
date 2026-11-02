@@ -31,13 +31,13 @@ public class EstadisticasDeportivasDTOSQL {
     @JoinColumn(name = "jugador_id", nullable = false, unique = true)
     private JugadorDTOSQL jugador;
 
-    @Column(nullable = false)
+    @Column
     private Boolean activo;
 
-    @Column(nullable = false)
+    @Column
     private Integer goles;
 
-    @Column(nullable = false)
+    @Column
     private Integer asistencias;
 
     @Column(name = "disparos_por_partido")

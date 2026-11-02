@@ -248,6 +248,10 @@ public class MercadoService {
     }
 
     public void comprarSuper(UUID compradorId, UUID jugadorId, Integer cantidad) {
+        if (cantidad == null || cantidad <= 0) {
+            throw new CantidadDeTokensException("La cantidad debe ser mayor a cero");
+        }
+
         Usuario comprador = usuarioRepository.findById(compradorId)
                 .orElseThrow(() -> new UsuarioNoEncontradoException("Comprador no encontrado con el id: " + compradorId.toString()));
 

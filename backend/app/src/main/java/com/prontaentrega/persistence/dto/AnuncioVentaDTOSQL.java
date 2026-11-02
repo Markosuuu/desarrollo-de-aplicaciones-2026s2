@@ -1,18 +1,17 @@
 package com.prontaentrega.persistence.dto;
 
 import com.prontaentrega.models.AnuncioVenta;
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.EstadisticasDeportivas;
 import com.prontaentrega.models.enums.EstadoAnuncioVenta;
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.models.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,11 +30,13 @@ public class AnuncioVentaDTOSQL {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "vendedor_id", nullable = false)
-    private UUID vendedorId;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "vendedor_id", nullable = false)
+    private UsuarioDTOSQL vendedor;
 
-    @Column(name = "jugador_id", nullable = false)
-    private UUID jugadorId;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "bolsa_de_jugador_id", nullable = false)
+    private BolsaDeJugadorDTOSQL bolsaDeJugador;
 
     @Column(name = "cantidad_tokens", nullable = false)
     private Integer cantidadTokens;
@@ -56,14 +57,14 @@ public class AnuncioVentaDTOSQL {
     @Column(name = "actualizado_en", nullable = false)
     private LocalDateTime actualizadoEn;
 
-    public static AnuncioVentaDTOSQL desdeModelo(AnuncioVenta anuncio) {
+    public static AnuncioVentaDTOSQL desdeModelo(
+            AnuncioVenta anuncio,
+            UsuarioDTOSQL vendedor,
+            BolsaDeJugadorDTOSQL bolsaDeJugador) {
         AnuncioVentaDTOSQL dto = new AnuncioVentaDTOSQL();
         dto.id = anuncio.getId();
-        dto.vendedorId = anuncio.getVendedor().getId();
-        dto.jugadorId = anuncio.getBolsaDeJugador()
-                .getEstadisticasDeportivas()
-                .getJugador()
-                .getId();
+        dto.vendedor = vendedor;
+        dto.bolsaDeJugador = bolsaDeJugador;
         dto.cantidadTokens = anuncio.getCantidadTokens();
         dto.precioPorToken = anuncio.getPrecioPorToken();
         dto.precioTotal = anuncio.getPrecioTotal();
@@ -73,26 +74,17 @@ public class AnuncioVentaDTOSQL {
         return dto;
     }
 
-    public static AnuncioVenta aModelo(AnuncioVentaDTOSQL dto) {
+    public AnuncioVenta aModelo() {
         AnuncioVenta anuncio = new AnuncioVenta();
-        anuncio.setId(dto.id);
-        Usuario vendedor = new Usuario();
-        vendedor.setId(dto.vendedorId);
-        anuncio.setVendedor(vendedor);
-        BolsaDeJugador bolsaDeJugador = new BolsaDeJugador();
-        bolsaDeJugador.setId(dto.jugadorId);
-        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas();
-        Jugador jugador = new Jugador();
-        jugador.setId(dto.jugadorId);
-        estadisticas.setJugador(jugador);
-        bolsaDeJugador.setEstadisticasDeportivas(estadisticas);
-        anuncio.setBolsaDeJugador(bolsaDeJugador);
-        anuncio.setCantidadTokens(dto.cantidadTokens);
-        anuncio.setPrecioPorToken(dto.precioPorToken);
-        anuncio.setPrecioTotal(dto.precioTotal);
-        anuncio.setEstado(dto.estado);
-        anuncio.setCreadoEn(dto.creadoEn);
-        anuncio.setActualizadoEn(dto.actualizadoEn);
+        anuncio.setId(id);
+        anuncio.setVendedor(UsuarioDTOSQL.aUsuario(vendedor));
+        anuncio.setBolsaDeJugador(bolsaDeJugador.aModelo());
+        anuncio.setCantidadTokens(cantidadTokens);
+        anuncio.setPrecioPorToken(precioPorToken);
+        anuncio.setPrecioTotal(precioTotal);
+        anuncio.setEstado(estado);
+        anuncio.setCreadoEn(creadoEn);
+        anuncio.setActualizadoEn(actualizadoEn);
         return anuncio;
     }
 }

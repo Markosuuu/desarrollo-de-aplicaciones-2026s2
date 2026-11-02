@@ -34,6 +34,12 @@ public class OperacionDTOSQL {
     @Column(name = "contraparte_id", nullable = false)
     private UUID contraparteId;
 
+    @Column(name = "usuario_nombre")
+    private String usuarioNombre;
+
+    @Column(name = "contraparte_nombre")
+    private String contraparteNombre;
+
     @Column(name = "jugador_id", nullable = false)
     private UUID jugadorId;
 
@@ -65,6 +71,8 @@ public class OperacionDTOSQL {
         dto.id = operacion.getId();
         dto.usuarioId = operacion.getUsuarioId();
         dto.contraparteId = operacion.getContraparteId();
+        dto.usuarioNombre = operacion.getUsuarioNombre();
+        dto.contraparteNombre = operacion.getContraparteNombre();
         dto.jugadorId = operacion.getJugadorId();
         dto.cantidad = operacion.getCantidad();
         dto.precioPorToken = operacion.getPrecioPorToken();
@@ -81,6 +89,8 @@ public class OperacionDTOSQL {
         operacion.setId(id);
         operacion.setUsuarioId(usuarioId);
         operacion.setContraparteId(contraparteId);
+        operacion.setUsuarioNombre(usuarioNombre);
+        operacion.setContraparteNombre(contraparteNombre);
         operacion.setJugadorId(jugadorId);
         operacion.setCantidad(cantidad);
         operacion.setPrecioPorToken(precioPorToken);

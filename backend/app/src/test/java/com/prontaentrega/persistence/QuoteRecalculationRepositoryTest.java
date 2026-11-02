@@ -32,6 +32,8 @@ class QuoteRecalculationRepositoryTest extends AbstractIntegrationTest {
     @BeforeEach
     @AfterEach
     void limpiarDatosDeJugadores() {
+        jdbcTemplate.update("DELETE FROM anuncios_venta");
+        jdbcTemplate.update("DELETE FROM inventarios_usuarios");
         jdbcTemplate.update("DELETE FROM bolsas_de_jugadores");
         jdbcTemplate.update("DELETE FROM estadisticas_deportivas");
         jdbcTemplate.update("DELETE FROM jugadores");

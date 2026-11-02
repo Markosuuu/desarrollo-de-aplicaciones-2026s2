@@ -1,13 +1,13 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.InventarioUsuario;
-import com.prontaentrega.models.Usuario;
 import com.prontaentrega.persistence.dto.InventarioUsuarioDTOSQL;
-import com.prontaentrega.persistence.repository.JugadorRepository;
+import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
+import com.prontaentrega.persistence.dto.UsuarioDTOSQL;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
-import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.persistence.repository.dao.InventarioUsuarioDAOSQL;
+import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;
+import com.prontaentrega.persistence.repository.dao.UsuarioDAOSQL;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,21 +16,25 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class InventarioUsuarioRepositoryImpl implements InventarioUsuarioRepository {
     private final InventarioUsuarioDAOSQL dao;
-    private final UsuarioRepository usuarioRepository;
-    private final JugadorRepository jugadorRepository;
+    private final UsuarioDAOSQL usuarioDao;
+    private final JugadorDAOSQL jugadorDao;
 
     public InventarioUsuarioRepositoryImpl(
             InventarioUsuarioDAOSQL dao,
-            UsuarioRepository usuarioRepository,
-            JugadorRepository jugadorRepository) {
+            UsuarioDAOSQL usuarioDao,
+            JugadorDAOSQL jugadorDao) {
         this.dao = dao;
-        this.usuarioRepository = usuarioRepository;
-        this.jugadorRepository = jugadorRepository;
+        this.usuarioDao = usuarioDao;
+        this.jugadorDao = jugadorDao;
     }
 
     @Override
     public InventarioUsuario save(InventarioUsuario token) {
-        InventarioUsuarioDTOSQL dto = InventarioUsuarioDTOSQL.desdeModelo(token);
+        UsuarioDTOSQL usuario = usuarioDao.getReferenceById(token.getUsuario().getId());
+        BolsaDeJugadorDTOSQL bolsaDeJugador =
+                jugadorDao.getReferenceById(token.getBolsaDeJugador().getId());
+        InventarioUsuarioDTOSQL dto =
+                InventarioUsuarioDTOSQL.desdeModelo(token, usuario, bolsaDeJugador);
         InventarioUsuarioDTOSQL saved = dao.save(dto);
         token.setId(saved.getId());
         return token;
@@ -50,16 +54,7 @@ public class InventarioUsuarioRepositoryImpl implements InventarioUsuarioReposit
     }
 
     private InventarioUsuario aModelo(InventarioUsuarioDTOSQL dto) {
-        Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
-                .orElseThrow(() -> new IllegalStateException(
-                        "No existe el usuario " + dto.getUsuarioId() + " del inventario " + dto.getId()));
-        BolsaDeJugador bolsaDeJugador = jugadorRepository.findById(dto.getJugadorId());
-        if (bolsaDeJugador == null) {
-            throw new IllegalStateException(
-                    "No existe la bolsa del jugador " + dto.getJugadorId()
-                            + " del inventario " + dto.getId());
-        }
-        return dto.aModelo(usuario, bolsaDeJugador);
+        return dto.aModelo();
     }
 
     @Override

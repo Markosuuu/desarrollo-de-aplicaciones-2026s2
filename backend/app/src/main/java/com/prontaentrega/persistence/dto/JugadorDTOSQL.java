@@ -42,7 +42,7 @@ public class JugadorDTOSQL {
     @Convert(converter = PosicionAttributeConverter.class)
     private Posicion posicion;
 
-    @Column(nullable = false)
+    @Column
     private Integer edad;
 
     @Column

@@ -41,6 +41,8 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
 
         @BeforeEach
         void clearExistingBolsas() {
+            jdbcTemplate.update("DELETE FROM anuncios_venta");
+            jdbcTemplate.update("DELETE FROM inventarios_usuarios");
             jdbcTemplate.update("DELETE FROM bolsas_de_jugadores");
         }
 
