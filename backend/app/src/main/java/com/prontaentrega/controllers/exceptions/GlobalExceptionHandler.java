@@ -110,6 +110,16 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, "ANUNCIO_NO_ENCONTRADO", ex.getMessage());
     }
 
+    @ExceptionHandler(SinAutorizacionExpcetion.class)
+    public ResponseEntity<ErrorResponse> handleValidation(SinAutorizacionExpcetion ex) {
+        return error(HttpStatus.BAD_REQUEST, "SIN_AUTORIZACION", ex.getMessage());
+    }
+
+    @ExceptionHandler(AnuncioNoPendienteException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(AnuncioNoPendienteException ex) {
+        return error(HttpStatus.BAD_REQUEST, "ANUNCIO_NO_PENDIENTE", ex.getMessage());
+    }
+
     @ExceptionHandler(VendedorComprandoTokensPropiosException.class)
     public ResponseEntity<ErrorResponse> handleValidation(VendedorComprandoTokensPropiosException ex) {
         return error(HttpStatus.BAD_REQUEST, "VENDEDOR_COMPRANDO_TOKENS_PROPIOS", ex.getMessage());

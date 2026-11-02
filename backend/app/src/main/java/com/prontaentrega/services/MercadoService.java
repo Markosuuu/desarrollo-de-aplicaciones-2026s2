@@ -203,38 +203,45 @@ public class MercadoService {
      * Metodo para cancelar una venta en el marketplace.
      * @param vendedorId El ID del usuario que está cancelando la venta
      * @param anuncioId El ID del anuncio de venta que se está cancelando
-     * TODO: Falta endpoint en capa controller
+     * @throws AnuncioNoEncontradoException Si el anuncio no existe
+     * @throws SinAutorizacionExpcetion Si el usuario no es el vendedor
+     * @throws AnuncioNoPendienteException Si el anuncio no está pendiente
      */
     public void cancelarVenta(UUID vendedorId, UUID anuncioId) {
         AnuncioVenta anuncio = anuncioVentaRepository.findById(anuncioId)
-                .orElseThrow(() -> new ValidationException("ANUNCIO_NO_ENCONTRADO", "El anuncio no existe"));
+                .orElseThrow(() -> new AnuncioNoEncontradoException("El anuncio no existe"));
 
         if (!anuncio.getVendedor().getId().equals(vendedorId)) {
-            throw new ValidationException("NO_AUTORIZADO", "No puedes cancelar una venta ajena");
+            throw new SinAutorizacionExpcetion("No puedes cancelar una venta ajena");
         }
+
         if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
-            throw new ValidationException("ANUNCIO_NO_CANCELABLE", "No se puede cancelar una venta completada");
+            throw new AnuncioNoPendienteException("No se puede cancelar una venta completada");
         }
 
         Usuario vendedor = usuarioRepository.findById(vendedorId)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(
                         "Usuario no encontrado con el id" + vendedorId));
+
         UUID jugadorId = anuncio.getBolsaDeJugador()
                 .getEstadisticasDeportivas()
                 .getJugador()
                 .getId();
+
         BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(jugadorId))
                 .orElseThrow(() -> new JugadorNoEncontradoException(
                         "Jugador no encontrado con el id" + jugadorId));
+
         InventarioUsuario saldo = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(vendedorId, jugadorId)
                 .orElse(new InventarioUsuario(vendedor, bolsaJugador, 0, 0));
-        saldo.setTokensDisponibles((saldo.getTokensDisponibles() == null ? 0 : saldo.getTokensDisponibles()) + anuncio.getCantidadTokens());
-        saldo.setTokensEnVenta((saldo.getTokensEnVenta() == null ? 0 : saldo.getTokensEnVenta()) - anuncio.getCantidadTokens());
-        saldo.setActualizadoEn(java.time.LocalDateTime.now());
+
+        saldo.setTokensDisponibles(saldo.getTokensDisponibles() + anuncio.getCantidadTokens());
+        saldo.setTokensEnVenta(saldo.getTokensEnVenta() - anuncio.getCantidadTokens());
+        saldo.setActualizadoEn(LocalDateTime.now());
         inventarioUsuarioRepository.save(saldo);
 
         anuncio.setEstado(EstadoAnuncioVenta.CANCELADA);
-        anuncio.setActualizadoEn(java.time.LocalDateTime.now());
+        anuncio.setActualizadoEn(LocalDateTime.now());
         anuncioVentaRepository.save(anuncio);
     }
 
