@@ -10,7 +10,7 @@ import com.prontaentrega.models.enums.TipoOperacion;
 import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
-import com.prontaentrega.persistence.repository.UsuarioJugadorTokenRepository;
+import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.exceptions.*;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -47,7 +47,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
     private AnuncioVentaRepository anuncioVentaRepository;
 
     @Autowired
-    private UsuarioJugadorTokenRepository usuarioJugadorTokenRepository;
+    private InventarioUsuarioRepository inventarioUsuarioRepository;
 
     @Autowired
     private OperacionRepository operacionRepository;
@@ -56,7 +56,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
     void cleanDatabase() {
         operacionRepository.deleteAll();
         anuncioVentaRepository.deleteAll();
-        usuarioJugadorTokenRepository.deleteAll();
+        inventarioUsuarioRepository.deleteAll();
         usuarioRepository.deleteAll();
         jugadorRepository.deleteAll();
     }
@@ -64,8 +64,9 @@ class MercadoServiceTest extends AbstractIntegrationTest {
     @Test
     void sellShouldRejectWhenQuantityExceedsAvailable() {
         Usuario seller = saveUser("Vendedor", uniqueEmail("vendedor@test.com"));
-        UUID jugadorId = saveJugador("Jugador 1");
-        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 3, 0));
+        BolsaDeJugador bolsa = saveJugador("Jugador 1");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 3, 0));
 
         assertThrows(CantidadDeTokensException.class,
                 () -> mercadoService.vender(seller.getId(), jugadorId, 5));
@@ -74,8 +75,9 @@ class MercadoServiceTest extends AbstractIntegrationTest {
     @Test
     void sellShouldRejectZeroOrNegativeQuantity() {
         Usuario seller = saveUser("Vendedor", uniqueEmail("vendedor2@test.com"));
-        UUID jugadorId = saveJugador("Jugador 2");
-        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 4, 0));
+        BolsaDeJugador bolsa = saveJugador("Jugador 2");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 4, 0));
 
         assertThrows(CantidadDeTokensException.class,
                 () -> mercadoService.vender(seller.getId(), jugadorId, 0));
@@ -84,8 +86,9 @@ class MercadoServiceTest extends AbstractIntegrationTest {
     @Test
     void buyShouldRejectSelfPurchaseAndInsufficientCredits() {
         Usuario seller = saveUser("Vendedor", uniqueEmail("vendedor3@test.com"));
-        UUID jugadorId = saveJugador("Jugador 3");
-        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 5, 0));
+        BolsaDeJugador bolsa = saveJugador("Jugador 3");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 5, 0));
 
         UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 2).getId();
 
@@ -105,9 +108,10 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         Usuario seller = saveUser("Vendedor", uniqueEmail("vendedor4@test.com"));
         Usuario buyer1 = saveUser("Comprador 1", uniqueEmail("buyer1@test.com"));
         Usuario buyer2 = saveUser("Comprador 2", uniqueEmail("buyer2@test.com"));
-        UUID jugadorId = saveJugador("Jugador 4");
+        BolsaDeJugador bolsa = saveJugador("Jugador 4");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
 
-        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 10, 0));
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 10, 0));
         buyer1.setCreditosDisponibles(BigDecimal.valueOf(100));
         buyer2.setCreditosDisponibles(BigDecimal.valueOf(100));
         usuarioRepository.save(buyer1);
@@ -127,8 +131,9 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         buyer.setCreditosDisponibles(BigDecimal.valueOf(100));
         usuarioRepository.save(buyer);
 
-        UUID jugadorId = saveJugador("Jugador 5");
-        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 10, 0));
+        BolsaDeJugador bolsa = saveJugador("Jugador 5");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 10, 0));
         UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 3).getId();
         mercadoService.comprar(buyer.getId(), anuncioId);
 
@@ -142,7 +147,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         return usuarioRepository.save(usuario);
     }
 
-    private UUID saveJugador(String nombre) {
+    private BolsaDeJugador saveJugador(String nombre) {
         Jugador jugador = new Jugador((int) (System.currentTimeMillis() % 100000),
                 nombre,
                 "Equipo X",
@@ -160,7 +165,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
                 100
         );
         BolsaDeJugador persistida = jugadorRepository.save(bolsa);
-        return persistida.getEstadisticasDeportivas().getJugador().getId();
+        return persistida;
     }
 
     private String uniqueEmail(String base) {

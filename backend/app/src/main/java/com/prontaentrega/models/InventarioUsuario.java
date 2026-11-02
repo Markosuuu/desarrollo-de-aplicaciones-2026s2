@@ -15,15 +15,19 @@ import lombok.Setter;
 @NoArgsConstructor
 public class InventarioUsuario {
     private UUID id;
-    private UUID usuarioId;
-    private UUID jugadorId;
+    private Usuario usuario;
+    private BolsaDeJugador bolsaDeJugador;
     private Integer tokensDisponibles;
     private Integer tokensEnVenta;
     private LocalDateTime actualizadoEn;
 
-    public InventarioUsuario(UUID usuarioId, UUID jugadorId, Integer tokensDisponibles, Integer tokensEnVenta) {
-        this.usuarioId = usuarioId;
-        this.jugadorId = jugadorId;
+    public InventarioUsuario(
+            Usuario usuario,
+            BolsaDeJugador bolsaDeJugador,
+            Integer tokensDisponibles,
+            Integer tokensEnVenta) {
+        this.usuario = usuario;
+        this.bolsaDeJugador = bolsaDeJugador;
         this.tokensDisponibles = tokensDisponibles;
         this.tokensEnVenta = tokensEnVenta;
         this.actualizadoEn = LocalDateTime.now();

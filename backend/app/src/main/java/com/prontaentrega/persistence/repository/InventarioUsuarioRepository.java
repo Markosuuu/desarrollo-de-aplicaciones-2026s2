@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface UsuarioJugadorTokenRepository {
+public interface InventarioUsuarioRepository {
     InventarioUsuario save(InventarioUsuario token);
     Optional<InventarioUsuario> findByUsuarioIdAndJugadorId(UUID usuarioId, UUID jugadorId);
     List<InventarioUsuario> findAllByUsuarioId(UUID usuarioId);
