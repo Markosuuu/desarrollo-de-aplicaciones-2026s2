@@ -2,6 +2,7 @@ package com.prontaentrega.services;
 
 import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.Liga;
+import com.prontaentrega.persistence.PersistenceManager;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.PlayerStat;
@@ -30,19 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class PlayerCatalogService {
-    @PersistenceContext
-    private EntityManager entityManager;
-
+    private final PersistenceManager playerPersistenceManager;
     private final JugadorRepository jugadorRepository;
     private final PlayerScrapper playerScrapper;
     private final ScrappedPlayerMapper scrappedPlayerMapper;
 
     public PlayerCatalogService(JugadorRepository jugadorRepository,
                                 PlayerScrapper playerScrapper,
-                                ScrappedPlayerMapper scrappedPlayerMapper) {
+                                ScrappedPlayerMapper scrappedPlayerMapper, PersistenceManager playerPersistenceManager) {
         this.jugadorRepository = jugadorRepository;
         this.playerScrapper = playerScrapper;
         this.scrappedPlayerMapper = scrappedPlayerMapper;
+        this.playerPersistenceManager = playerPersistenceManager;
     }
 
     /**
@@ -104,8 +104,7 @@ public class PlayerCatalogService {
             updated += pageResults[1];
             skipped += pageResults[2];
 
-            entityManager.flush();
-            entityManager.clear();
+            playerPersistenceManager.flushAndClear();
         }
 
         if (created + updated == 0) {
