@@ -1,5 +1,6 @@
 package com.prontaentrega.models;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Getter;
@@ -21,6 +22,8 @@ public class Usuario {
 
     private String passwordHash;
 
+    private BigDecimal creditosDisponibles;
+
     private LocalDateTime creadoEn;
 
     private LocalDateTime actualizadoEn;
@@ -29,5 +32,6 @@ public class Usuario {
         this.nombre = nombre;
         this.correo = correo;
         this.passwordHash = passwordHash;
+        this.creditosDisponibles = BigDecimal.valueOf(100);
     }
 }

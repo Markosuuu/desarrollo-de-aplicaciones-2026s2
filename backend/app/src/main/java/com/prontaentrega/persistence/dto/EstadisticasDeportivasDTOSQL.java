@@ -27,7 +27,7 @@ public class EstadisticasDeportivasDTOSQL {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, optional = false)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL, optional = false)
     @JoinColumn(name = "jugador_id", nullable = false, unique = true)
     private JugadorDTOSQL jugador;
 
