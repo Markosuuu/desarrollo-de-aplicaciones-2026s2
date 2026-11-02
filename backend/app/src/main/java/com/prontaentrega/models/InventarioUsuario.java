@@ -7,13 +7,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Rarete
+ * Clase que representa el inventario de un usuario en el sistema.
+ * Relaciona un usuario con una cantidad de tokens de un jugador
  */
-
 @Getter
 @Setter
 @NoArgsConstructor
-public class UsuarioJugadorToken {
+public class InventarioUsuario {
     private UUID id;
     private UUID usuarioId;
     private UUID jugadorId;
@@ -21,7 +21,7 @@ public class UsuarioJugadorToken {
     private Integer tokensEnVenta;
     private LocalDateTime actualizadoEn;
 
-    public UsuarioJugadorToken(UUID usuarioId, UUID jugadorId, Integer tokensDisponibles, Integer tokensEnVenta) {
+    public InventarioUsuario(UUID usuarioId, UUID jugadorId, Integer tokensDisponibles, Integer tokensEnVenta) {
         this.usuarioId = usuarioId;
         this.jugadorId = jugadorId;
         this.tokensDisponibles = tokensDisponibles;

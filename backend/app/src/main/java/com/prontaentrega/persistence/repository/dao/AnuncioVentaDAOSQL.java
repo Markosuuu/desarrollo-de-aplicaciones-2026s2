@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.models.EstadoAnuncioVenta;
+import com.prontaentrega.models.enums.EstadoAnuncioVenta;
 import com.prontaentrega.persistence.dto.AnuncioVentaDTOSQL;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;

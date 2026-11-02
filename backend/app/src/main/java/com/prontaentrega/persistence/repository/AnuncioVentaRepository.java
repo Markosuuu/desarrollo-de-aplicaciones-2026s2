@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository;
 
 import com.prontaentrega.models.AnuncioVenta;
-import com.prontaentrega.models.EstadoAnuncioVenta;
+import com.prontaentrega.models.enums.EstadoAnuncioVenta;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;

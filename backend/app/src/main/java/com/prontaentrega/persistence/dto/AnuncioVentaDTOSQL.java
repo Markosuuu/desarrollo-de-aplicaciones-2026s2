@@ -3,7 +3,7 @@ package com.prontaentrega.persistence.dto;
 import com.prontaentrega.models.AnuncioVenta;
 import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.EstadisticasDeportivas;
-import com.prontaentrega.models.EstadoAnuncioVenta;
+import com.prontaentrega.models.enums.EstadoAnuncioVenta;
 import com.prontaentrega.models.Jugador;
 import com.prontaentrega.models.Usuario;
 import jakarta.persistence.Column;

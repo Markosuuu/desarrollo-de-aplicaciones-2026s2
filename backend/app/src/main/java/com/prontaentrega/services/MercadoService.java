@@ -2,12 +2,12 @@ package com.prontaentrega.services;
 
 import com.prontaentrega.models.AnuncioVenta;
 import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.EstadoAnuncioVenta;
-import com.prontaentrega.models.EstadoOperacion;
+import com.prontaentrega.models.enums.EstadoAnuncioVenta;
+import com.prontaentrega.models.enums.EstadoOperacion;
 import com.prontaentrega.models.Operacion;
-import com.prontaentrega.models.TipoOperacion;
+import com.prontaentrega.models.enums.TipoOperacion;
 import com.prontaentrega.models.Usuario;
-import com.prontaentrega.models.UsuarioJugadorToken;
+import com.prontaentrega.models.InventarioUsuario;
 import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
@@ -84,8 +84,8 @@ public class MercadoService {
             throw new CantidadDeTokensException("La cantidad debe ser mayor a cero");
         }
 
-        UsuarioJugadorToken saldo = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(usuarioId, jugadorId)
-                .orElse(new UsuarioJugadorToken(usuarioId, jugadorId, 0, 0));
+        InventarioUsuario saldo = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(usuarioId, jugadorId)
+                .orElse(new InventarioUsuario(usuarioId, jugadorId, 0, 0));
 
         int disponibles = saldo.getTokensDisponibles() == null ? 0 : saldo.getTokensDisponibles();
 
@@ -139,9 +139,9 @@ public class MercadoService {
             throw new CreditosInsuficientesException("No tienes suficientes créditos");
         }
 
-        UsuarioJugadorToken tokenVendedor = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(
+        InventarioUsuario tokenVendedor = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(
                 anuncio.getVendedor().getId(), anuncio.getBolsaDeJugador().getId())
-                .orElse(new UsuarioJugadorToken(anuncio.getVendedor().getId(), anuncio.getBolsaDeJugador().getId(), 0, 0));
+                .orElse(new InventarioUsuario(anuncio.getVendedor().getId(), anuncio.getBolsaDeJugador().getId(), 0, 0));
 
         int enVenta = tokenVendedor.getTokensEnVenta() == null ? 0 : tokenVendedor.getTokensEnVenta();
 
@@ -156,8 +156,8 @@ public class MercadoService {
         usuarioRepository.save(vendedor);
 
         // Actualización de los tokens
-        UsuarioJugadorToken tokenComprador = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(compradorId, anuncio.getBolsaDeJugador().getId())
-                .orElse(new UsuarioJugadorToken(compradorId, anuncio.getBolsaDeJugador().getId(), 0, 0));
+        InventarioUsuario tokenComprador = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(compradorId, anuncio.getBolsaDeJugador().getId())
+                .orElse(new InventarioUsuario(compradorId, anuncio.getBolsaDeJugador().getId(), 0, 0));
         tokenComprador.agregarTokens(anuncio.getCantidadTokens());
         tokenComprador.setActualizadoEn(LocalDateTime.now());
         usuarioJugadorTokenRepository.save(tokenComprador);
@@ -209,8 +209,8 @@ public class MercadoService {
             throw new ValidationException("ANUNCIO_NO_CANCELABLE", "No se puede cancelar una venta completada");
         }
 
-        UsuarioJugadorToken saldo = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(vendedorId, anuncio.getBolsaDeJugador().getId())
-                .orElse(new UsuarioJugadorToken(vendedorId, anuncio.getBolsaDeJugador().getId(), 0, 0));
+        InventarioUsuario saldo = usuarioJugadorTokenRepository.findByUsuarioIdAndJugadorId(vendedorId, anuncio.getBolsaDeJugador().getId())
+                .orElse(new InventarioUsuario(vendedorId, anuncio.getBolsaDeJugador().getId(), 0, 0));
         saldo.setTokensDisponibles((saldo.getTokensDisponibles() == null ? 0 : saldo.getTokensDisponibles()) + anuncio.getCantidadTokens());
         saldo.setTokensEnVenta((saldo.getTokensEnVenta() == null ? 0 : saldo.getTokensEnVenta()) - anuncio.getCantidadTokens());
         saldo.setActualizadoEn(java.time.LocalDateTime.now());

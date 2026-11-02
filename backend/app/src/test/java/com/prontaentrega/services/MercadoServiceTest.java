@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.prontaentrega.models.*;
+import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.models.enums.TipoOperacion;
 import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
@@ -62,7 +65,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
     void sellShouldRejectWhenQuantityExceedsAvailable() {
         Usuario seller = saveUser("Vendedor", uniqueEmail("vendedor@test.com"));
         UUID jugadorId = saveJugador("Jugador 1");
-        usuarioJugadorTokenRepository.save(new UsuarioJugadorToken(seller.getId(), jugadorId, 3, 0));
+        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 3, 0));
 
         assertThrows(CantidadDeTokensException.class,
                 () -> mercadoService.vender(seller.getId(), jugadorId, 5));
@@ -72,7 +75,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
     void sellShouldRejectZeroOrNegativeQuantity() {
         Usuario seller = saveUser("Vendedor", uniqueEmail("vendedor2@test.com"));
         UUID jugadorId = saveJugador("Jugador 2");
-        usuarioJugadorTokenRepository.save(new UsuarioJugadorToken(seller.getId(), jugadorId, 4, 0));
+        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 4, 0));
 
         assertThrows(CantidadDeTokensException.class,
                 () -> mercadoService.vender(seller.getId(), jugadorId, 0));
@@ -82,7 +85,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
     void buyShouldRejectSelfPurchaseAndInsufficientCredits() {
         Usuario seller = saveUser("Vendedor", uniqueEmail("vendedor3@test.com"));
         UUID jugadorId = saveJugador("Jugador 3");
-        usuarioJugadorTokenRepository.save(new UsuarioJugadorToken(seller.getId(), jugadorId, 5, 0));
+        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 5, 0));
 
         UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 2).getId();
 
@@ -104,7 +107,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         Usuario buyer2 = saveUser("Comprador 2", uniqueEmail("buyer2@test.com"));
         UUID jugadorId = saveJugador("Jugador 4");
 
-        usuarioJugadorTokenRepository.save(new UsuarioJugadorToken(seller.getId(), jugadorId, 10, 0));
+        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 10, 0));
         buyer1.setCreditosDisponibles(BigDecimal.valueOf(100));
         buyer2.setCreditosDisponibles(BigDecimal.valueOf(100));
         usuarioRepository.save(buyer1);
@@ -125,7 +128,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         usuarioRepository.save(buyer);
 
         UUID jugadorId = saveJugador("Jugador 5");
-        usuarioJugadorTokenRepository.save(new UsuarioJugadorToken(seller.getId(), jugadorId, 10, 0));
+        usuarioJugadorTokenRepository.save(new InventarioUsuario(seller.getId(), jugadorId, 10, 0));
         UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 3).getId();
         mercadoService.comprar(buyer.getId(), anuncioId);
 

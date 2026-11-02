@@ -1,8 +1,8 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.EstadoOperacion;
+import com.prontaentrega.models.enums.EstadoOperacion;
 import com.prontaentrega.models.Operacion;
-import com.prontaentrega.models.TipoOperacion;
+import com.prontaentrega.models.enums.TipoOperacion;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

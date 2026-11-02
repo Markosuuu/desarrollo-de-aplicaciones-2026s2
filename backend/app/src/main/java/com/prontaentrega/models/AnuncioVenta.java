@@ -3,6 +3,8 @@ package com.prontaentrega.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
+
+import com.prontaentrega.models.enums.EstadoAnuncioVenta;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

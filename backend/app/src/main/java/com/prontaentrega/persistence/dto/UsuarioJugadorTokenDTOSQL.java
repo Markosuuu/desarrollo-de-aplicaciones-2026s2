@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.UsuarioJugadorToken;
+import com.prontaentrega.models.InventarioUsuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,7 +38,7 @@ public class UsuarioJugadorTokenDTOSQL {
     @Column(name = "actualizado_en", nullable = false)
     private LocalDateTime actualizadoEn;
 
-    public static UsuarioJugadorTokenDTOSQL desdeModelo(UsuarioJugadorToken token) {
+    public static UsuarioJugadorTokenDTOSQL desdeModelo(InventarioUsuario token) {
         UsuarioJugadorTokenDTOSQL dto = new UsuarioJugadorTokenDTOSQL();
         dto.id = token.getId();
         dto.usuarioId = token.getUsuarioId();
@@ -49,8 +49,8 @@ public class UsuarioJugadorTokenDTOSQL {
         return dto;
     }
 
-    public UsuarioJugadorToken aModelo() {
-        UsuarioJugadorToken token = new UsuarioJugadorToken();
+    public InventarioUsuario aModelo() {
+        InventarioUsuario token = new InventarioUsuario();
         token.setId(id);
         token.setUsuarioId(usuarioId);
         token.setJugadorId(jugadorId);

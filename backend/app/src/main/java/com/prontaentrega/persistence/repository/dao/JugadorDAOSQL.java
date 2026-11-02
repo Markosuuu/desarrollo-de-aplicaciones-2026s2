@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository.dao;
 
 import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
-import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.enums.Liga;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
