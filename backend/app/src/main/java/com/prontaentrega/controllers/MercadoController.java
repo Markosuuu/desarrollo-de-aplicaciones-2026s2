@@ -77,7 +77,7 @@ public class MercadoController {
                 .map(OperacionResponse::from)
                 .toList();
 
-        response.sort(Comparator.comparing(OperacionResponse::creadaEn).reversed());
+//        response.sort(Comparator.comparing(OperacionResponse::creadaEn).reversed());
 
         return ResponseEntity.ok(response);
     }
@@ -86,4 +86,20 @@ public class MercadoController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (UUID) authentication.getPrincipal();
     }
+
+    @PostMapping("/orders/super/buy")
+    public ResponseEntity<Map<String, Object>> comprarSuper(@RequestBody ComprarTokensSuperRequest request) {
+        UUID buyerId = currentUserId();
+        mercadoService.comprarSuper(buyerId, request.jugadorId(), request.cantidad());
+
+        // TODO: Mejorar response
+        return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Compra completada correctamente",
+                "jugadorId", request.jugadorId(),
+                "cantidad", request.cantidad()
+        ));
+    }
+
+    public record ComprarTokensSuperRequest(UUID jugadorId, Integer cantidad) {}
 }

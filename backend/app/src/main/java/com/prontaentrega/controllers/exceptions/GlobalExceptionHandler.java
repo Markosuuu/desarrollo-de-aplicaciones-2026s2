@@ -95,6 +95,16 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.NOT_FOUND, "JUGADOR NO ENCONTRADO", ex.getMessage());
     }
 
+    @ExceptionHandler(CantidadDeTokensException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(CantidadDeTokensException ex) {
+        return error(HttpStatus.BAD_REQUEST, "CANTIDAD_DE_TOKENS_INVALIDA", ex.getMessage());
+    }
+
+    @ExceptionHandler(JugadorNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(JugadorNoEncontradoException ex) {
+        return error(HttpStatus.BAD_REQUEST, "JUGADOR_NO_ENCONTRADO", ex.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message) {
         ErrorResponse response = new ErrorResponse(
                 new ErrorResponse.ErrorDetail(code, message)

@@ -15,6 +15,7 @@ import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.exceptions.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -139,6 +140,7 @@ public class MercadoService {
                 .getEstadisticasDeportivas()
                 .getJugador()
                 .getId();
+
         BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(jugadorId))
                 .orElseThrow(() -> new JugadorNoEncontradoException(
                         "Jugador no encontrado con el id" + jugadorId));
@@ -243,5 +245,47 @@ public class MercadoService {
      */
     public List<Operacion> getTransaccionesById(UUID usuarioId) {
         return operacionRepository.findByUsuarioId(usuarioId);
+    }
+
+    public void comprarSuper(UUID compradorId, UUID jugadorId, Integer cantidad) {
+        Usuario comprador = usuarioRepository.findById(compradorId)
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Comprador no encontrado con el id: " + compradorId.toString()));
+
+        BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(jugadorId))
+                .orElseThrow(() -> new JugadorNoEncontradoException(
+                        "Jugador no encontrado con el id" + jugadorId));
+
+        if (bolsaJugador.getTokensRestantes() < cantidad) {
+            throw new CantidadDeTokensException("El jugador ya no tiene suficientes tokens disponibles");
+        }
+
+        BigDecimal precioFinal = bolsaJugador.getCotizacionActual().multiply(BigDecimal.valueOf(cantidad));
+
+        if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(precioFinal) < 0) {
+            throw new CreditosInsuficientesException("No tienes suficientes créditos");
+        }
+
+        comprador.restarCreditos(precioFinal);
+        usuarioRepository.save(comprador);
+
+        InventarioUsuario tokenComprador = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(compradorId, jugadorId)
+                .orElse(new InventarioUsuario(comprador, bolsaJugador, 0, 0));
+        tokenComprador.agregarTokens(cantidad);
+        tokenComprador.setActualizadoEn(LocalDateTime.now());
+        inventarioUsuarioRepository.save(tokenComprador);
+
+
+        bolsaJugador.setTokensRestantes(bolsaJugador.getTokensRestantes() - cantidad);
+        jugadorRepository.save(bolsaJugador);
+
+        String nombreJugador = bolsaJugador.getEstadisticasDeportivas().getJugador().getNombre();
+
+        // Mala operacion, porque el comprador y vendedor son el mismo id
+        // habría que quitar lógica o ver que onda
+        Operacion compra = new Operacion(compradorId, compradorId, comprador.getNombre(), "Super usuario", jugadorId,
+                cantidad, bolsaJugador.getCotizacionActual(), precioFinal,
+                TipoOperacion.COMPRA, EstadoOperacion.COMPLETADA, nombreJugador);
+
+        operacionRepository.save(compra);
     }
 }
