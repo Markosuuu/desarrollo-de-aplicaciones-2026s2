@@ -153,7 +153,8 @@ button {
   background: rgba(255, 255, 255, 0.12);
 }
 
-.sidebar__user {
+.sidebar__user,
+.sidebar__logo {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -179,11 +180,13 @@ button {
   white-space: nowrap;
 }
 
-.sidebar__username {
+.sidebar__username,
+.sidebar__home {
   color: #111827;
 }
 
-body[data-theme="dark"] .sidebar__username {
+body[data-theme="dark"] .sidebar__username,
+body[data-theme="dark"] .sidebar__home {
   color: #f3f4f6;
 }
 

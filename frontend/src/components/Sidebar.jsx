@@ -7,6 +7,7 @@ import "blobatar/motion.css";
 
 import sol from "../assets/icono-theme-sol.png";
 import luna from "../assets/icono-theme-luna.png";
+import casa from "../assets/casa.png";
 
 export default function Sidebar({ children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -31,6 +32,10 @@ export default function Sidebar({ children }) {
         >
           <span aria-hidden="true">{collapsed ? "»" : "«"}</span>
         </button>
+        <Link to="/" className="sidebar__logo" title="Inicio">
+          <img src={casa} alt="Home" width={50} height={50} />
+          <span className="sidebar__home">Inicio</span>
+        </Link>
         <Link
           to="/profile"
           className="sidebar__user"
