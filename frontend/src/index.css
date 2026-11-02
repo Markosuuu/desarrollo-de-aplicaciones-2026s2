@@ -160,6 +160,7 @@ button {
   min-width: 0;
   padding: 0.5rem 0.25rem;
   font-weight: 700;
+  text-decoration: none;
 }
 
 .sidebar__avatar {
@@ -176,6 +177,14 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.sidebar__username {
+  color: #111827;
+}
+
+body[data-theme="dark"] .sidebar__username {
+  color: #f3f4f6;
 }
 
 .sidebar__actions {

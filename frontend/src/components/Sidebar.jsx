@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { Blobatar } from "@blobatar/react";
@@ -31,7 +31,11 @@ export default function Sidebar({ children }) {
         >
           <span aria-hidden="true">{collapsed ? "»" : "«"}</span>
         </button>
-        <div className="sidebar__user" title={user?.nombre || "Usuario"}>
+        <Link
+          to="/profile"
+          className="sidebar__user"
+          title={user?.nombre || "Usuario"}
+        >
           <span className="sidebar__avatar" aria-hidden="true">
             <Blobatar
               name={user?.nombre || "Usuario"}
@@ -40,7 +44,7 @@ export default function Sidebar({ children }) {
             />
           </span>
           <span className="sidebar__username">{user?.nombre || "Usuario"}</span>
-        </div>
+        </Link>
 
         <div className="sidebar__actions">
           <button
