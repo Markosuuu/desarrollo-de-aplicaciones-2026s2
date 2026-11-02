@@ -7,6 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Nuevamente es un contenedor, igual este me parece necesario
+ */
+
 @Getter
 @Setter
 @NoArgsConstructor

@@ -7,6 +7,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * La clase está bien, quizás haría falta darle una vuelta al tema de los anuncios
+ * porque es una clase que contiene datos nomás
+ */
+
 @Getter
 @Setter
 @NoArgsConstructor

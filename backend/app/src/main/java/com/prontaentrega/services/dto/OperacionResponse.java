@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+// TODO: Mover a controller
 public record OperacionResponse(
         UUID id,
         String tipo,

@@ -33,12 +33,20 @@ public class MarketplaceController {
     public ResponseEntity<List<MarketplaceListingResponse>> getListings(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "32") int size) {
+        // TODO:
+        // Page<MarketplaceListing> catalogo = marketplaceService.getListings(page, size)
+        // Convertir a DTOs y devolver la respuesta
         return ResponseEntity.ok(marketplaceService.getListings(page, size));
     }
 
     @PostMapping("/orders/sell")
     public ResponseEntity<MarketplaceListingResponse> sell(@RequestBody VenderTokensRequest request) {
         UUID sellerId = currentUserId();
+
+        // TODO:
+        // MarketplaceListing market = marketplaceService
+        //                                     .sellTokens(sellerId, request.jugadorId(), request.cantidad())
+        // Convertir a DTOs y devolver la respuesta
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(marketplaceService.sellTokens(sellerId, request.jugadorId(), request.cantidad()));
     }
@@ -47,6 +55,8 @@ public class MarketplaceController {
     public ResponseEntity<Map<String, Object>> buy(@RequestBody ComprarTokensRequest request) {
         UUID buyerId = currentUserId();
         marketplaceService.buyTokens(buyerId, request.anuncioId());
+
+        // TODO: Mejorar response
         return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Compra completada correctamente",
@@ -56,6 +66,7 @@ public class MarketplaceController {
 
     @GetMapping("/users/{id}/transactions")
     public ResponseEntity<List<OperacionResponse>> getTransactions(@PathVariable UUID id) {
+        // TODO: Mejorar response
         return ResponseEntity.ok(marketplaceService.getUserTransactions(id));
     }
 

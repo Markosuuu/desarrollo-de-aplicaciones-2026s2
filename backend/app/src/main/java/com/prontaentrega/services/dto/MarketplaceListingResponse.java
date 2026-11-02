@@ -4,6 +4,7 @@ import com.prontaentrega.models.AnuncioVenta;
 import java.math.BigDecimal;
 import java.util.UUID;
 
+// TODO: Mover a controller
 public record MarketplaceListingResponse(
         UUID id,
         UUID vendedorId,
