@@ -299,4 +299,8 @@ public class MercadoService {
 
         operacionRepository.save(compra);
     }
+
+    public List<InventarioUsuario> getInventarioById(UUID usuarioId) {
+        return inventarioUsuarioRepository.findAllByUsuarioId(usuarioId);
+    }
 }

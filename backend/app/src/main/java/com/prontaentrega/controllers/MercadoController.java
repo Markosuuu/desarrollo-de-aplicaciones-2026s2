@@ -1,6 +1,8 @@
 package com.prontaentrega.controllers;
 
+import com.prontaentrega.controllers.dtos.transacciones.InventarioUsuarioResponse;
 import com.prontaentrega.models.AnuncioVenta;
+import com.prontaentrega.models.InventarioUsuario;
 import com.prontaentrega.models.Operacion;
 import com.prontaentrega.services.MercadoService;
 import com.prontaentrega.controllers.dtos.transacciones.ComprarTokensRequest;
@@ -102,6 +104,18 @@ public class MercadoController {
                 "jugadorId", request.jugadorId(),
                 "cantidad", request.cantidad()
         ));
+    }
+
+    @GetMapping("/users/{id}/inventario")
+    public ResponseEntity<List<InventarioUsuarioResponse>> getInventario(@PathVariable UUID id) {
+
+        List<InventarioUsuario> inventario = mercadoService.getInventarioById(id);
+
+        List<InventarioUsuarioResponse> response = inventario.stream()
+                .map(InventarioUsuarioResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(response);
     }
 
     public record ComprarTokensSuperRequest(UUID jugadorId, Integer cantidad) {}
