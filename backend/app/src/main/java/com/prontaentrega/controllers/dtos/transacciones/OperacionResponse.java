@@ -24,14 +24,14 @@ public record OperacionResponse(
                 operacion.getId(),
                 operacion.getTipo().name(),
                 operacion.getEstado().name(),
-                operacion.getNombreJugador(),
+                operacion.getJugador().getNombre(),
                 operacion.getCantidad(),
                 operacion.getPrecioPorToken(),
                 operacion.getTotal(),
-                operacion.getUsuarioId(),
-                operacion.getContraparteId(),
-                operacion.getUsuarioNombre(),
-                operacion.getContraparteNombre(),
+                operacion.getUsuario().getId(),
+                operacion.getContraparte().getId(),
+                operacion.getUsuario().getNombre(),
+                operacion.getContraparte().getNombre(),
                 operacion.getCreadaEn()
         );
     }

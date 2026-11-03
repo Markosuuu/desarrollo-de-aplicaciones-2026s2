@@ -2,6 +2,7 @@ package com.prontaentrega.services;
 
 import com.prontaentrega.models.AnuncioVenta;
 import com.prontaentrega.models.BolsaDeJugador;
+import com.prontaentrega.models.Jugador;
 import com.prontaentrega.models.enums.EstadoAnuncioVenta;
 import com.prontaentrega.models.enums.EstadoOperacion;
 import com.prontaentrega.models.Operacion;
@@ -201,19 +202,19 @@ public class MercadoService {
         anuncio.setActualizadoEn(LocalDateTime.now());
         anuncioVentaRepository.save(anuncio);
 
-        String nombreJugador = bolsaJugador.getEstadisticasDeportivas().getJugador().getNombre();
+        Jugador jugador = bolsaJugador.getEstadisticasDeportivas().getJugador();
 
         // Actualización de las operaciones
         // No es como data repetida? Quizás conviene solo al consultar
         // En cualquier caso se puede suprimir a una Operacion como "transaccion" y quitar el TipoOperaicon
 
-        Operacion compra = new Operacion(compradorId, vendedor.getId(), comprador.getNombre(), vendedor.getNombre(), jugadorId,
+        Operacion compra = new Operacion(comprador, vendedor, jugador,
                 cantidadCompra, anuncio.getPrecioPorToken(), precioCompra,
-                TipoOperacion.COMPRA, EstadoOperacion.COMPLETADA, nombreJugador);
+                TipoOperacion.COMPRA, EstadoOperacion.COMPLETADA);
 
-        Operacion venta = new Operacion(vendedor.getId(), compradorId, vendedor.getNombre(), comprador.getNombre(), jugadorId,
+        Operacion venta = new Operacion(vendedor, comprador, jugador,
                 cantidadCompra, anuncio.getPrecioPorToken(), precioCompra,
-                TipoOperacion.VENTA, EstadoOperacion.COMPLETADA, nombreJugador);
+                TipoOperacion.VENTA, EstadoOperacion.COMPLETADA);
 
         operacionRepository.save(compra);
         operacionRepository.save(venta);
@@ -309,13 +310,13 @@ public class MercadoService {
         bolsaJugador.setTokensRestantes(bolsaJugador.getTokensRestantes() - cantidad);
         jugadorRepository.save(bolsaJugador);
 
-        String nombreJugador = bolsaJugador.getEstadisticasDeportivas().getJugador().getNombre();
+        Jugador jugador = bolsaJugador.getEstadisticasDeportivas().getJugador();
 
         // Mala operacion, porque el comprador y vendedor son el mismo id
         // habría que quitar lógica o ver que onda
-        Operacion compra = new Operacion(compradorId, compradorId, comprador.getNombre(), "Super usuario", jugadorId,
+        Operacion compra = new Operacion(comprador, comprador, jugador,
                 cantidad, bolsaJugador.getCotizacionActual(), precioFinal,
-                TipoOperacion.COMPRA, EstadoOperacion.COMPLETADA, nombreJugador);
+                TipoOperacion.COMPRA, EstadoOperacion.COMPLETADA);
 
         operacionRepository.save(compra);
     }

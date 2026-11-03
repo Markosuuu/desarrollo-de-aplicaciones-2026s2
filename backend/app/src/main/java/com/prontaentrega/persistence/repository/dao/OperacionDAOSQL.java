@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface OperacionDAOSQL extends JpaRepository<OperacionDTOSQL, UUID> {
-    List<OperacionDTOSQL> findAllByUsuarioIdOrderByCreadaEnDesc(UUID usuarioId);
+    List<OperacionDTOSQL> findAllByUsuario_IdOrderByCreadaEnDesc(UUID usuarioId);
 
-    List<OperacionDTOSQL> findAllByContraparteIdOrderByCreadaEnDesc(UUID contraparteId);
+    List<OperacionDTOSQL> findAllByContraparte_IdOrderByCreadaEnDesc(UUID contraparteId);
 }

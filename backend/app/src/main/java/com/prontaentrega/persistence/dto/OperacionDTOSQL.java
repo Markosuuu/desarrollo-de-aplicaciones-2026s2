@@ -7,9 +7,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,20 +31,17 @@ public class OperacionDTOSQL {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "usuario_id", nullable = false)
-    private UUID usuarioId;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private UsuarioDTOSQL usuario;
 
-    @Column(name = "contraparte_id", nullable = false)
-    private UUID contraparteId;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "contraparte_id", nullable = false)
+    private UsuarioDTOSQL contraparte;
 
-    @Column(name = "usuario_nombre")
-    private String usuarioNombre;
-
-    @Column(name = "contraparte_nombre")
-    private String contraparteNombre;
-
-    @Column(name = "jugador_id", nullable = false)
-    private UUID jugadorId;
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "jugador_id", nullable = false)
+    private JugadorDTOSQL jugador;
 
     @Column(nullable = false)
     private Integer cantidad;
@@ -60,26 +60,24 @@ public class OperacionDTOSQL {
     @Column(nullable = false)
     private EstadoOperacion estado;
 
-    @Column(name = "nombre_jugador", nullable = false)
-    private String nombreJugador;
-
     @Column(name = "creada_en", nullable = false)
     private LocalDateTime creadaEn;
 
-    public static OperacionDTOSQL desdeModelo(Operacion operacion) {
+    public static OperacionDTOSQL desdeModelo(
+            Operacion operacion,
+            UsuarioDTOSQL usuario,
+            UsuarioDTOSQL contraparte,
+            JugadorDTOSQL jugador) {
         OperacionDTOSQL dto = new OperacionDTOSQL();
         dto.id = operacion.getId();
-        dto.usuarioId = operacion.getUsuarioId();
-        dto.contraparteId = operacion.getContraparteId();
-        dto.usuarioNombre = operacion.getUsuarioNombre();
-        dto.contraparteNombre = operacion.getContraparteNombre();
-        dto.jugadorId = operacion.getJugadorId();
+        dto.usuario = usuario;
+        dto.contraparte = contraparte;
+        dto.jugador = jugador;
         dto.cantidad = operacion.getCantidad();
         dto.precioPorToken = operacion.getPrecioPorToken();
         dto.total = operacion.getTotal();
         dto.tipo = operacion.getTipo();
         dto.estado = operacion.getEstado();
-        dto.nombreJugador = operacion.getNombreJugador();
         dto.creadaEn = operacion.getCreadaEn();
         return dto;
     }
@@ -87,17 +85,14 @@ public class OperacionDTOSQL {
     public Operacion aModelo() {
         Operacion operacion = new Operacion();
         operacion.setId(id);
-        operacion.setUsuarioId(usuarioId);
-        operacion.setContraparteId(contraparteId);
-        operacion.setUsuarioNombre(usuarioNombre);
-        operacion.setContraparteNombre(contraparteNombre);
-        operacion.setJugadorId(jugadorId);
+        operacion.setUsuario(UsuarioDTOSQL.aUsuario(usuario));
+        operacion.setContraparte(UsuarioDTOSQL.aUsuario(contraparte));
+        operacion.setJugador(jugador.aJugador());
         operacion.setCantidad(cantidad);
         operacion.setPrecioPorToken(precioPorToken);
         operacion.setTotal(total);
         operacion.setTipo(tipo);
         operacion.setEstado(estado);
-        operacion.setNombreJugador(nombreJugador);
         operacion.setCreadaEn(creadaEn);
         return operacion;
     }

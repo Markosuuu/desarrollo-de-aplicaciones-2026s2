@@ -156,6 +156,9 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         assertEquals(1, historialComprador.size());
         assertEquals(2, historialComprador.get(0).getCantidad());
         assertEquals(0, historialComprador.get(0).getTotal().compareTo(BigDecimal.valueOf(10)));
+        assertEquals(buyer.getId(), historialComprador.get(0).getUsuario().getId());
+        assertEquals(seller.getId(), historialComprador.get(0).getContraparte().getId());
+        assertEquals(jugadorId, historialComprador.get(0).getJugador().getId());
     }
 
     @Test

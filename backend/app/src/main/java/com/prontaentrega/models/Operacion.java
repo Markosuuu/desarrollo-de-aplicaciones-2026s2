@@ -19,33 +19,27 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Operacion {
     private UUID id;
-    private UUID usuarioId;
-    private UUID contraparteId;
-    private String usuarioNombre;
-    private String contraparteNombre;
-    private UUID jugadorId;
+    private Usuario usuario;
+    private Usuario contraparte;
+    private Jugador jugador;
     private Integer cantidad;
     private BigDecimal precioPorToken;
     private BigDecimal total;
     private TipoOperacion tipo;
     private EstadoOperacion estado;
-    private String nombreJugador;
     private LocalDateTime creadaEn;
 
-    public Operacion(UUID usuarioId, UUID contraparteId, String usuarioNombre, String contraparteNombre, UUID jugadorId, Integer cantidad,
+    public Operacion(Usuario usuario, Usuario contraparte, Jugador jugador, Integer cantidad,
                     BigDecimal precioPorToken, BigDecimal total, TipoOperacion tipo,
-                    EstadoOperacion estado, String nombreJugador) {
-        this.usuarioId = usuarioId;
-        this.contraparteId = contraparteId;
-        this.usuarioNombre = usuarioNombre;
-        this.contraparteNombre = contraparteNombre;
-        this.jugadorId = jugadorId;
+                    EstadoOperacion estado) {
+        this.usuario = usuario;
+        this.contraparte = contraparte;
+        this.jugador = jugador;
         this.cantidad = cantidad;
         this.precioPorToken = precioPorToken;
         this.total = total;
         this.tipo = tipo;
         this.estado = estado;
-        this.nombreJugador = nombreJugador;
         this.creadaEn = LocalDateTime.now();
     }
 }
