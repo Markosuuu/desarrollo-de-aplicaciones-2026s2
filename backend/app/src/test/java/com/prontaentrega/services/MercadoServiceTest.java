@@ -305,13 +305,13 @@ class MercadoServiceTest extends AbstractIntegrationTest {
 
         mercadoService.cancelarVenta(vendedor.getId(), anuncioId);
 
-        AnuncioVenta anuncio_cancelado = anuncioVentaRepository.findById(anuncioId).orElseThrow();
-        InventarioUsuario inventario_cancelado = inventarioUsuarioRepository
+        AnuncioVenta anunciocancelado = anuncioVentaRepository.findById(anuncioId).orElseThrow();
+        InventarioUsuario inventariocancelado = inventarioUsuarioRepository
                 .findByUsuarioIdAndJugadorId(vendedor.getId(), jugadorId).orElseThrow();
 
-        assertEquals(EstadoAnuncioVenta.CANCELADA, anuncio_cancelado.getEstado());
-        assertEquals(10, inventario_cancelado.getTokensDisponibles());
-        assertEquals(0, inventario_cancelado.getTokensEnVenta());
+        assertEquals(EstadoAnuncioVenta.CANCELADA, anunciocancelado.getEstado());
+        assertEquals(10, inventariocancelado.getTokensDisponibles());
+        assertEquals(0, inventariocancelado.getTokensEnVenta());
     }
 
     @Test
@@ -561,8 +561,6 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         Usuario usuario = saveUser("Usuario", uniqueEmail("inventario-user@test.com"));
         BolsaDeJugador bolsa1 = saveJugador("Jugador inventario 1");
         BolsaDeJugador bolsa2 = saveJugador("Jugador inventario 2");
-        UUID jugador1Id = bolsa1.getEstadisticasDeportivas().getJugador().getId();
-        UUID jugador2Id = bolsa2.getEstadisticasDeportivas().getJugador().getId();
         inventarioUsuarioRepository.save(new InventarioUsuario(usuario, bolsa1, 5, 0));
         inventarioUsuarioRepository.save(new InventarioUsuario(usuario, bolsa2, 2, 1));
 

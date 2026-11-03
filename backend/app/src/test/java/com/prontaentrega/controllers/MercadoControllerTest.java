@@ -83,8 +83,6 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         jugadorRepository.deleteAll();
     }
 
-    // GET /api/marketplace/listings
-
     @Test
     void obtenerAnunciosPendientesConValoresPorDefectoTest() throws Exception {
         UsuarioAutenticado vendedor = registrar("Vendedor", "listings-vendedor@test.com");
@@ -145,8 +143,6 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isUnauthorized());
     }
 
-    // POST /api/orders/sell
-
     @Test
     void venderDeberiaCrearElAnuncioYDevolver201() throws Exception {
         UsuarioAutenticado vendedor = registrar("Vendedor", "sell-ok@test.com");
@@ -189,8 +185,6 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
                         .content(json(Map.of("jugadorId", UUID.randomUUID(), "cantidad", 1))))
                 .andExpect(status().isForbidden());
     }
-
-    // POST /api/orders/buy
 
     @Test
     void comprarUnAnuncioTest() throws Exception {
@@ -344,8 +338,6 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    //  DELETE /api/orders/{anuncioId}
-
     @Test
     void cancelarVentaDeberiaCancelarElAnuncioYDevolverLosTokens() throws Exception {
         UsuarioAutenticado vendedor = registrar("Vendedor", "cancel-ok@test.com");
@@ -399,8 +391,6 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    // GET /api/users/{id}/transactions
-
     @Test
     void obtenerElHistorialDelUsuario() throws Exception {
         UsuarioAutenticado vendedor = registrar("Vendedor", "tx-vendedor@test.com");
@@ -433,8 +423,6 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/users/{id}/transactions", UUID.randomUUID()))
                 .andExpect(status().isForbidden());
     }
-
-    // POST /api/orders/super/buy
 
     @Test
     void comprarASuperRetornaElDetalle() throws Exception {
@@ -502,8 +490,6 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isForbidden());
     }
 
-    // GET /api/users/{id}/inventario
-
     @Test
     void obtenerElInventarioDeUnUsuarioTest() throws Exception {
         UsuarioAutenticado usuario = registrar("Usuario", "inv-ok@test.com");
@@ -541,8 +527,6 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/users/{id}/inventario", UUID.randomUUID()))
                 .andExpect(status().isForbidden());
     }
-
-    // helpers
 
     private record UsuarioAutenticado(UUID id, String token) {
     }
