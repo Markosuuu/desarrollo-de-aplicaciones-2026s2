@@ -31,6 +31,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class QuoteRecalculationServiceTest {
     @Mock
     private CotizacionRepository strategyRepository;
+    @Mock
     private HistorialCotizacionRepository historialCotizacionRepository;
 
     /** Usa la configuración activa, actualiza cotización vigente y cuenta jugadores omitidos. */

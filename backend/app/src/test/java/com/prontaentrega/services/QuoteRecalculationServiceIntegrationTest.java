@@ -6,6 +6,7 @@ import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
+import com.prontaentrega.persistence.repository.dao.HistorialCotizacionDAOSQL;
 import com.prontaentrega.schedulers.CotizacionScheduler;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -16,6 +17,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +37,16 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-        @Autowired
-        private CotizacionScheduler scheduler;
+    @Autowired
+    private CotizacionScheduler scheduler;
+
+    @Autowired
+    private HistorialCotizacionDAOSQL historialCotizacionDAO;
+
+    @BeforeEach
+    void setup() {
+        historialCotizacionDAO.deleteAll();
+    }
 
     /** Actualiza jugadores válidos y omite aquellos sin todas las métricas ponderadas. */
     @Test
@@ -58,6 +68,7 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
             assertThat(cotizacion(bolsaValida)).isEqualByComparingTo("16.00");
             assertThat(cotizacion(bolsaOmitida)).isEqualByComparingTo("20.00");
         } finally {
+            historialCotizacionDAO.deleteAll();
             strategyRepository.guardarEstado(new EstadoEstrategiaCotizacion(null));
             jdbcTemplate.update("DELETE FROM bolsas_de_jugadores WHERE id IN (?, ?)",
                     bolsaValida, bolsaOmitida);
@@ -96,6 +107,7 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
             assertThat(resultadoManual.processedPlayers()).isEqualTo(1);
             assertThat(resultadoManual.skippedPlayers()).isEqualTo(1);
         } finally {
+            historialCotizacionDAO.deleteAll();
             strategyRepository.guardarEstado(new EstadoEstrategiaCotizacion(null));
             jdbcTemplate.update("DELETE FROM bolsas_de_jugadores WHERE id IN (?, ?)",
                     bolsaValida, bolsaOmitida);
@@ -134,6 +146,7 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
             assertThat(manual.processedPlayers()).isEqualTo(1);
             assertThat(manual.skippedPlayers()).isEqualTo(1);
         } finally {
+            historialCotizacionDAO.deleteAll();
             strategyRepository.guardarEstado(new EstadoEstrategiaCotizacion(null));
             jdbcTemplate.update("DELETE FROM bolsas_de_jugadores WHERE id IN (?, ?)",
                     bolsaValida, bolsaOmitida);
@@ -166,6 +179,7 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
                     "SELECT estrategia_activa_id FROM estado_estrategia_cotizacion WHERE id = ?",
                     String.class, "global")).isEqualTo("ponderada");
         } finally {
+            historialCotizacionDAO.deleteAll();
             strategyRepository.guardarEstado(new EstadoEstrategiaCotizacion(null));
             borrarMercadoNumerado();
             jdbcTemplate.update("DELETE FROM configuracion_estrategia_ponderada WHERE estrategia_id = ?",
