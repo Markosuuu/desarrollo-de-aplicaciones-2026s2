@@ -111,6 +111,82 @@
   filter: brightness(0.9);
 }
 
+.user-page-sell-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.user-page-dialog-backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 55%);
+}
+
+.user-page-sell-dialog {
+  width: min(100%, 440px);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color, #dedede);
+  border-radius: 16px;
+  background: var(--card-background, #fff);
+  color: var(--text-color, #212121);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 25%);
+}
+
+.user-page-sell-dialog h2 {
+  margin: 0 0 0.75rem;
+  color: inherit;
+}
+
+.user-page-sell-dialog form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.user-page-sell-dialog input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-color, #dedede);
+  border-radius: 8px;
+  background: var(--card-background, #fff);
+  color: inherit;
+}
+
+.user-page-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.user-page-dialog-actions button {
+  padding: 0.55rem 0.9rem;
+  border: 0;
+  border-radius: 7px;
+  background: var(--accent, #aa3bff);
+  color: #fff;
+  font: inherit;
+}
+
+.user-page-dialog-actions .user-page-cancel-button {
+  border: 1px solid var(--border-color, #dedede);
+  background: transparent;
+  color: inherit;
+}
+
+.user-page-dialog-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.user-page-sell-error {
+  color: #c62828;
+}
+
 .user-page-error {
   display: flex;
   align-items: center;

@@ -8,6 +8,8 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import PlayerPage from "./pages/PlayerPage";
 import UserPage from "./pages/UserPage";
+import MercadoPage from "./pages/MercadoPage";
+import OfertaPage from "./pages/OfertaPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -58,6 +60,26 @@ export default function App() {
             <ProtectedRoute requireAuth>
               <Sidebar>
                 <UserPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mercado"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <MercadoPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mercado/:id"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <OfertaPage />
               </Sidebar>
             </ProtectedRoute>
           }

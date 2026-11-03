@@ -1,14 +1,10 @@
 package com.prontaentrega.controllers;
 
-import com.prontaentrega.controllers.dtos.transacciones.InventarioUsuarioResponse;
+import com.prontaentrega.controllers.dtos.transacciones.*;
 import com.prontaentrega.models.AnuncioVenta;
 import com.prontaentrega.models.InventarioUsuario;
 import com.prontaentrega.models.Operacion;
 import com.prontaentrega.services.MercadoService;
-import com.prontaentrega.controllers.dtos.transacciones.ComprarTokensRequest;
-import com.prontaentrega.controllers.dtos.transacciones.AnuncioVentaResponse;
-import com.prontaentrega.controllers.dtos.transacciones.OperacionResponse;
-import com.prontaentrega.controllers.dtos.transacciones.VenderTokensRequest;
 
 import java.util.*;
 
@@ -87,11 +83,6 @@ public class MercadoController {
         return ResponseEntity.ok(response);
     }
 
-    private UUID currentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (UUID) authentication.getPrincipal();
-    }
-
     @PostMapping("/orders/super/buy")
     public ResponseEntity<Map<String, Object>> comprarSuper(@RequestBody ComprarTokensSuperRequest request) {
         UUID buyerId = currentUserId();
@@ -118,5 +109,8 @@ public class MercadoController {
         return ResponseEntity.ok(response);
     }
 
-    public record ComprarTokensSuperRequest(UUID jugadorId, Integer cantidad) {}
+    private UUID currentUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return (UUID) authentication.getPrincipal();
+    }
 }

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
+import { useNavigate } from "react-router-dom";
+import { createSellOrder } from "../api/marketApi";
 import { fetchUserInventory, fetchUserTransactions } from "../api/userApi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/userPage.css";
@@ -29,11 +31,16 @@ function formatDate(value) {
 
 function UserPage() {
   const { token, user } = useAuth();
+  const navigate = useNavigate();
   const [inventory, setInventory] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
+  const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
+  const [sellQuantity, setSellQuantity] = useState("");
+  const [sellError, setSellError] = useState("");
+  const [creatingOffer, setCreatingOffer] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -85,9 +92,56 @@ function UserPage() {
     (item) => item.usuario?.id === user?.id,
   )?.usuario;
   const credits = currentUser?.creditosDisponibles ?? user?.creditosDisponibles;
+  const availableTokens = Number(selectedInventoryItem?.tokensDisponibles) || 0;
+
+  const openSellDialog = (item) => {
+    setSelectedInventoryItem(item);
+    setSellQuantity(String(item.tokensDisponibles));
+    setSellError("");
+  };
+
+  const closeSellDialog = () => {
+    if (creatingOffer) return;
+    setSelectedInventoryItem(null);
+    setSellError("");
+  };
+
+  const handleCreateOffer = async (event) => {
+    event.preventDefault();
+    const quantity = Number(sellQuantity);
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity <= 0 ||
+      quantity > availableTokens
+    ) {
+      setSellError(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
+      return;
+    }
+
+    setCreatingOffer(true);
+    setSellError("");
+    try {
+      const listing = await createSellOrder(
+        {
+          jugadorId: selectedInventoryItem.jugador.id,
+          cantidad: quantity,
+        },
+        token,
+      );
+      navigate(`/mercado/${listing.id}`, {
+        state: { listing },
+      });
+    } catch (createError) {
+      console.error("Error al crear el anuncio de venta:", createError);
+      setSellError(createError.message || "No se pudo crear la oferta.");
+    } finally {
+      setCreatingOffer(false);
+    }
+  };
 
   return (
-    <section className="user-page-container">
+    <main className="user-page-container">
       <header className="user-page-header">
         <h1 className="texto-locura eyebrow">{user?.nombre || "Usuario"}</h1>
         <p className="user-page-credits">
@@ -152,8 +206,10 @@ function UserPage() {
                           className="user-page-sell-button"
                           type="button"
                           aria-label={`Vender tokens de ${player.nombre || "jugador"}`}
+                          disabled={(Number(item.tokensDisponibles) || 0) <= 0}
+                          onClick={() => openSellDialog(item)}
                         >
-                          Vender
+                          Crear oferta
                         </button>
                       </td>
                     </tr>
@@ -231,7 +287,59 @@ function UserPage() {
           </div>
         )}
       </article>
-    </section>
+
+      {selectedInventoryItem && (
+        <div className="user-page-dialog-backdrop">
+          <section
+            className="user-page-sell-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="user-page-sell-title"
+          >
+            <h2 id="user-page-sell-title">Crear oferta</h2>
+            <p>
+              {selectedInventoryItem.jugador?.nombre || "Jugador"} ·{" "}
+              {formatNumber(selectedInventoryItem.jugador?.cotizacion)} créditos
+              por token
+            </p>
+            <form onSubmit={handleCreateOffer}>
+              <label htmlFor="user-page-sell-quantity">
+                Cantidad de tokens (disponibles: {availableTokens})
+              </label>
+              <input
+                autoFocus
+                id="user-page-sell-quantity"
+                type="number"
+                min="1"
+                max={availableTokens}
+                step="1"
+                value={sellQuantity}
+                onChange={(event) => setSellQuantity(event.target.value)}
+                required
+              />
+              {sellError && (
+                <p className="user-page-sell-error" role="alert">
+                  {sellError}
+                </p>
+              )}
+              <div className="user-page-dialog-actions">
+                <button
+                  type="button"
+                  className="user-page-cancel-button"
+                  onClick={closeSellDialog}
+                  disabled={creatingOffer}
+                >
+                  Volver
+                </button>
+                <button type="submit" disabled={creatingOffer}>
+                  {creatingOffer ? "Creando..." : "Publicar oferta"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+    </main>
   );
 }
 

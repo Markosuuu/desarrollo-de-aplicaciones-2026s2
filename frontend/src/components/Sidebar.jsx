@@ -8,6 +8,7 @@ import "blobatar/motion.css";
 import sol from "../assets/icono-theme-sol.png";
 import luna from "../assets/icono-theme-luna.png";
 import casa from "../assets/casa.png";
+import pelota from "../assets/pelota-futbol.png";
 
 export default function Sidebar({ children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -53,6 +54,14 @@ export default function Sidebar({ children }) {
             />
           </span>
           <span className="sidebar__username">{user?.nombre || "Usuario"}</span>
+        </Link>
+
+        {/* Enlace al perfil de usuario */}
+        <Link to="/mercado" className="sidebar__user" title="Mercado">
+          <span className="sidebar__avatar" aria-hidden="true">
+            <img src={pelota} alt="mercado" width={50} />
+          </span>
+          <span className="sidebar__username">Mercado</span>
         </Link>
 
         <div className="sidebar__actions">

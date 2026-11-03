@@ -1,11 +1,17 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import UserPage from "../pages/UserPage";
 
 const mocks = vi.hoisted(() => ({
+  createSellOrder: vi.fn(),
   fetchUserInventory: vi.fn(),
   fetchUserTransactions: vi.fn(),
   useAuth: vi.fn(),
+}));
+
+vi.mock("../api/marketApi", () => ({
+  createSellOrder: mocks.createSellOrder,
 }));
 
 vi.mock("../api/userApi", () => ({
@@ -26,6 +32,7 @@ const inventory = [
     id: "inventory-1",
     usuario: { id: "user-1", creditosDisponibles: 75.5 },
     jugador: {
+      id: "player-1",
       nombre: "Lionel Messi",
       liga: "MLS",
       equipo: "Inter Miami",
@@ -62,6 +69,20 @@ const transactions = [
   },
 ];
 
+function renderUserPage() {
+  return render(
+    <MemoryRouter initialEntries={["/profile"]}>
+      <Routes>
+        <Route path="/profile" element={<UserPage />} />
+        <Route
+          path="/mercado/:id"
+          element={<div data-testid="offer-route">Oferta creada</div>}
+        />
+      </Routes>
+    </MemoryRouter>,
+  );
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.useAuth.mockReturnValue({
@@ -70,11 +91,12 @@ beforeEach(() => {
   });
   mocks.fetchUserInventory.mockResolvedValue(inventory);
   mocks.fetchUserTransactions.mockResolvedValue(transactions);
+  mocks.createSellOrder.mockResolvedValue({ id: "listing-1" });
 });
 
 describe("UserPage", () => {
   test("carga y muestra el inventario, el historial y los créditos actuales", async () => {
-    render(<UserPage />);
+    renderUserPage();
 
     expect(await screen.findAllByText("Lionel Messi")).toHaveLength(2);
     expect(screen.getByText("75,5")).toBeInTheDocument();
@@ -95,22 +117,42 @@ describe("UserPage", () => {
     );
   });
 
-  test("mantiene el botón Vender sin iniciar una operación", async () => {
-    render(<UserPage />);
+  test("abre el formulario de creación sin publicar hasta confirmar cantidad", async () => {
+    renderUserPage();
 
     fireEvent.click(
       await screen.findByRole("button", { name: "Vender tokens de Lionel Messi" }),
     );
 
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(mocks.createSellOrder).not.toHaveBeenCalled();
     expect(mocks.fetchUserInventory).toHaveBeenCalledTimes(1);
     expect(mocks.fetchUserTransactions).toHaveBeenCalledTimes(1);
+  });
+
+  test("crea una oferta con la cantidad elegida y navega a su detalle", async () => {
+    renderUserPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Vender tokens de Lionel Messi" }),
+    );
+    fireEvent.change(screen.getByLabelText(/Cantidad de tokens/), {
+      target: { value: "3" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Publicar oferta" }));
+
+    expect(mocks.createSellOrder).toHaveBeenCalledWith(
+      { jugadorId: "player-1", cantidad: 3 },
+      "token-prueba",
+    );
+    expect(await screen.findByTestId("offer-route")).toBeInTheDocument();
   });
 
   test("muestra estados vacíos cuando la API no devuelve registros", async () => {
     mocks.fetchUserInventory.mockResolvedValue([]);
     mocks.fetchUserTransactions.mockResolvedValue([]);
 
-    render(<UserPage />);
+    renderUserPage();
 
     expect(
       await screen.findByText("Todavía no tienes jugadores en tu inventario."),
