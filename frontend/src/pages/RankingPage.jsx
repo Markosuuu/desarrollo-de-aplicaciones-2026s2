@@ -59,7 +59,7 @@ export default function RankingPage() {
         setPaginacion(null);
         paginacionRef.current = null;
 
-        cargarPagina(1);
+        void cargarPagina(1);
     }, [cargarPagina]);
 
     // Detecta cuando el usuario llega al final de la tabla
@@ -74,7 +74,7 @@ export default function RankingPage() {
             const actual = paginacionRef.current;
 
             if (actual && actual.pagina < actual.totalPaginas) {
-                cargarPagina(actual.pagina + 1);
+                void cargarPagina(actual.pagina + 1);
             }
         });
 
@@ -84,7 +84,7 @@ export default function RankingPage() {
     }, [loading, error, paginacion, cargarPagina]);
 
     const irAlJugador = (id) => {
-        navigate(`/player/${id}`);
+        void navigate(`/player/${id}`);
     };
 
     const formatearCotizacion = (cotizacion) => {
@@ -130,7 +130,6 @@ export default function RankingPage() {
                             key={jugador.id}
                             onClick={() => irAlJugador(jugador.id)}
                             className="ranking-row"
-                            role="link"
                             tabIndex={0}
                             onKeyDown={(event) => {
                                 if (event.key === "Enter") {
