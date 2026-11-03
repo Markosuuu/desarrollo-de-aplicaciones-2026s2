@@ -131,9 +131,13 @@
   padding: 1.5rem;
   border: 1px solid var(--border-color, #dedede);
   border-radius: 16px;
-  background: var(--card-background, #fff);
+  background: #fff;
   color: var(--text-color, #212121);
   box-shadow: 0 12px 40px rgb(0 0 0 / 25%);
+}
+
+body[data-theme="dark"] .user-page-sell-dialog {
+  background: #212121;
 }
 
 .user-page-sell-dialog h2 {

@@ -174,7 +174,8 @@ function UserPage() {
                   <th scope="col">Liga</th>
                   <th scope="col">Equipo</th>
                   <th scope="col">Posición</th>
-                  <th scope="col">Cantidad</th>
+                  <th scope="col">Cantidad disponible</th>
+                  <th scope="col">Cantidad en venta</th>
                   <th scope="col">Valor por token</th>
                   <th scope="col">Vender</th>
                 </tr>
@@ -182,9 +183,6 @@ function UserPage() {
               <tbody>
                 {inventory.map((item) => {
                   const player = item.jugador || {};
-                  const totalTokens =
-                    (Number(item.tokensDisponibles) || 0) +
-                    (Number(item.tokensEnVenta) || 0);
 
                   return (
                     <tr key={item.id}>
@@ -199,7 +197,8 @@ function UserPage() {
                       <td>{player.liga || "—"}</td>
                       <td>{player.equipo || "—"}</td>
                       <td>{player.posicion || "—"}</td>
-                      <td>{formatNumber(totalTokens)}</td>
+                      <td>{formatNumber(item.tokensDisponibles)}</td>
+                      <td>{formatNumber(item.tokensEnVenta)}</td>
                       <td>{formatNumber(player.cotizacion)}</td>
                       <td>
                         <button

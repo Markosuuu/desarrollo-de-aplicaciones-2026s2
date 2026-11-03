@@ -37,7 +37,7 @@ export default function Sidebar({ children }) {
         {/* Enlace al inicio */}
         <Link to="/" className="sidebar__logo" title="Inicio">
           <img src={casa} alt="Home" width={50} height={50} />
-          <span className="sidebar__home">Inicio</span>
+          <span className="sidebar__username">Inicio</span>
         </Link>
 
         {/* Enlace al perfil de usuario */}
