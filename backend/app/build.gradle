@@ -6,7 +6,14 @@ plugins {
 }
 
 jacocoTestReport {
-    dependsOn test
+    dependsOn test, integrationTest
+
+    executionData.from(
+            fileTree(layout.buildDirectory.dir('jacoco')) {
+                include '*.exec'
+            }
+    )
+
     reports {
         xml.required = true
     }
