@@ -286,6 +286,7 @@ function UserPage() {
       {selectedInventoryItem && (
         <div className="user-page-dialog-backdrop">
           <dialog
+            open
             className="user-page-sell-dialog"
             aria-modal="true"
             aria-labelledby="user-page-sell-title"

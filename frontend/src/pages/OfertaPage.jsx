@@ -299,6 +299,7 @@ export default function OfertaPage() {
       {buyDialogOpen && listing && (
         <div className="offer-dialog-backdrop">
           <dialog
+            open
             className="offer-buy-dialog"
             aria-modal="true"
             aria-labelledby="offer-buy-title"
