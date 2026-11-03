@@ -61,18 +61,18 @@ describe("marketApi", () => {
     );
   });
 
-  test("compra una oferta por su id", async () => {
+  test("compra una cantidad concreta de una oferta", async () => {
     const fetchMock = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(mockResponse({ success: true }));
 
-    await buyListing("listing-1", "token-test");
+    await buyListing("listing-1", 2, "token-test");
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:8080/api/orders/buy",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ anuncioId: "listing-1" }),
+        body: JSON.stringify({ anuncioId: "listing-1", cantidad: 2 }),
       }),
     );
   });

@@ -86,7 +86,11 @@ function renderUserPage() {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.useAuth.mockReturnValue({
-    user: { id: "user-1", nombre: "Usuario de prueba", creditosDisponibles: 100 },
+    user: {
+      id: "user-1",
+      nombre: "Usuario de prueba",
+      creditosDisponibles: 100,
+    },
     token: "token-prueba",
   });
   mocks.fetchUserInventory.mockResolvedValue(inventory);
@@ -101,7 +105,8 @@ describe("UserPage", () => {
     expect(await screen.findAllByText("Lionel Messi")).toHaveLength(2);
     expect(screen.getByText("75,5")).toBeInTheDocument();
     expect(screen.getByText("Inter Miami")).toBeInTheDocument();
-    expect(screen.getByText("10")).toBeInTheDocument();
+    expect(screen.getByText("7")).toBeInTheDocument();
+    expect(screen.getByText("3")).toBeInTheDocument();
     expect(screen.getByText("Comprador")).toBeInTheDocument();
     expect(screen.getByText("Vendedor")).toBeInTheDocument();
     expect(screen.getByText("+24,5")).toBeInTheDocument();
@@ -121,7 +126,9 @@ describe("UserPage", () => {
     renderUserPage();
 
     fireEvent.click(
-      await screen.findByRole("button", { name: "Vender tokens de Lionel Messi" }),
+      await screen.findByRole("button", {
+        name: "Vender tokens de Lionel Messi",
+      }),
     );
 
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
@@ -134,7 +141,9 @@ describe("UserPage", () => {
     renderUserPage();
 
     fireEvent.click(
-      await screen.findByRole("button", { name: "Vender tokens de Lionel Messi" }),
+      await screen.findByRole("button", {
+        name: "Vender tokens de Lionel Messi",
+      }),
     );
     fireEvent.change(screen.getByLabelText(/Cantidad de tokens/), {
       target: { value: "3" },

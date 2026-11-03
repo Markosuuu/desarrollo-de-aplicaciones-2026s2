@@ -30,6 +30,8 @@ export default function OfertaPage() {
   const [error, setError] = useState("");
   const [actionError, setActionError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [buyDialogOpen, setBuyDialogOpen] = useState(false);
+  const [buyQuantity, setBuyQuantity] = useState("1");
   const [retry, setRetry] = useState(0);
 
   useEffect(() => {
@@ -99,19 +101,40 @@ export default function OfertaPage() {
 
   const isOwner = listing?.vendedorId === user?.id;
   const isPending = listing?.estado === "PENDIENTE";
+  const availableTokens = Number(listing?.cantidadTokens) || 0;
+  const quantityToBuy = Number(buyQuantity);
+  const purchaseTotal =
+    (Number(listing?.precioPorToken) || 0) * (Number(buyQuantity) || 0);
 
-  const handleBuy = async () => {
+  const openBuyDialog = () => {
+    if (!listing || isOwner || !isPending || submitting) return;
+    setBuyQuantity("1");
+    setActionError("");
+    setBuyDialogOpen(true);
+  };
+
+  const handleBuy = async (event) => {
+    event.preventDefault();
     if (!listing || isOwner || !isPending || submitting) return;
 
-    const confirmed = window.confirm(
-      `¿Confirmas la compra de ${listing.cantidadTokens} tokens de ${listing.nombreJugador} por ${formatNumber(listing.precioTotal)} créditos?`,
-    );
-    if (!confirmed) return;
+    if (
+      !Number.isInteger(quantityToBuy) ||
+      quantityToBuy <= 0 ||
+      quantityToBuy > availableTokens
+    ) {
+      setActionError(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
+      return;
+    }
+
+    if (credits !== null && purchaseTotal > Number(credits)) {
+      setActionError("No tienes créditos suficientes para esa cantidad.");
+      return;
+    }
 
     setSubmitting(true);
     setActionError("");
     try {
-      await buyListing(listing.id, token);
+      await buyListing(listing.id, quantityToBuy, token);
       navigate("/profile", { replace: true });
     } catch (buyError) {
       console.error("Error al comprar el anuncio:", buyError);
@@ -243,10 +266,10 @@ export default function OfertaPage() {
                 <button
                   type="button"
                   className="market-action-button"
-                  onClick={handleBuy}
+                  onClick={openBuyDialog}
                   disabled={submitting || creditsLoading}
                 >
-                  {submitting ? "Procesando compra..." : "Comprar"}
+                  Comprar
                 </button>
               ) : (
                 <p className="offer-not-available">
@@ -257,6 +280,75 @@ export default function OfertaPage() {
           )}
         </section>
       </div>
+
+      {buyDialogOpen && listing && (
+        <div className="offer-dialog-backdrop">
+          <section
+            className="offer-buy-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="offer-buy-title"
+          >
+            <h2 id="offer-buy-title">Comprar tokens</h2>
+            <p>
+              Oferta de {listing.vendedorNombre || "vendedor"} para{" "}
+              {listing.nombreJugador}.
+            </p>
+            <form onSubmit={handleBuy}>
+              <label htmlFor="offer-buy-quantity">
+                Cantidad (máximo {availableTokens})
+              </label>
+              <input
+                autoFocus
+                id="offer-buy-quantity"
+                type="number"
+                min="1"
+                max={availableTokens}
+                step="1"
+                value={buyQuantity}
+                onChange={(event) => {
+                  setBuyQuantity(event.target.value);
+                  setActionError("");
+                }}
+                required
+              />
+              <p className="offer-buy-total">
+                Total: <strong>{formatNumber(purchaseTotal)} créditos</strong>
+              </p>
+              <p className="offer-buy-balance">
+                Créditos disponibles: {formatNumber(credits)}
+              </p>
+              {actionError && (
+                <p className="offer-inline-error" role="alert">
+                  {actionError}
+                </p>
+              )}
+              <div className="offer-buy-actions">
+                <button
+                  type="button"
+                  className="offer-buy-cancel"
+                  onClick={() => setBuyDialogOpen(false)}
+                  disabled={submitting}
+                >
+                  Volver
+                </button>
+                <button
+                  type="submit"
+                  className="market-action-button"
+                  disabled={
+                    submitting ||
+                    !Number.isInteger(quantityToBuy) ||
+                    quantityToBuy <= 0 ||
+                    quantityToBuy > availableTokens
+                  }
+                >
+                  {submitting ? "Procesando compra..." : "Confirmar compra"}
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
     </main>
   );
 }

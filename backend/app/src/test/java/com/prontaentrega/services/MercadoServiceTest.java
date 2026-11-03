@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.prontaentrega.models.*;
+import com.prontaentrega.models.enums.EstadoAnuncioVenta;
 import com.prontaentrega.models.enums.Liga;
 import com.prontaentrega.models.enums.Posicion;
 import com.prontaentrega.models.enums.TipoOperacion;
@@ -122,6 +123,54 @@ class MercadoServiceTest extends AbstractIntegrationTest {
 
         assertThrows(AnuncioNoPendienteException.class,
                 () -> mercadoService.comprar(buyer2.getId(), anuncioId));
+    }
+
+    @Test
+    void partialPurchaseShouldTransferOnlyRequestedTokensAndKeepListingOpen() {
+        Usuario seller = saveUser("Vendedor parcial", uniqueEmail("partial-seller@test.com"));
+        Usuario buyer = saveUser("Comprador parcial", uniqueEmail("partial-buyer@test.com"));
+        BolsaDeJugador bolsa = saveJugador("Jugador parcial");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 10, 0));
+
+        UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 5).getId();
+        mercadoService.comprar(buyer.getId(), anuncioId, 2);
+
+        AnuncioVenta anuncioActualizado = anuncioVentaRepository.findById(anuncioId).orElseThrow();
+        Usuario compradorActualizado = usuarioRepository.findById(buyer.getId()).orElseThrow();
+        Usuario vendedorActualizado = usuarioRepository.findById(seller.getId()).orElseThrow();
+        InventarioUsuario tokensComprador = inventarioUsuarioRepository
+                .findByUsuarioIdAndJugadorId(buyer.getId(), jugadorId).orElseThrow();
+        InventarioUsuario tokensVendedor = inventarioUsuarioRepository
+                .findByUsuarioIdAndJugadorId(seller.getId(), jugadorId).orElseThrow();
+
+        assertEquals(EstadoAnuncioVenta.PENDIENTE, anuncioActualizado.getEstado());
+        assertEquals(3, anuncioActualizado.getCantidadTokens());
+        assertEquals(0, anuncioActualizado.getPrecioTotal().compareTo(BigDecimal.valueOf(15)));
+        assertEquals(0, compradorActualizado.getCreditosDisponibles().compareTo(BigDecimal.valueOf(90)));
+        assertEquals(0, vendedorActualizado.getCreditosDisponibles().compareTo(BigDecimal.valueOf(110)));
+        assertEquals(2, tokensComprador.getTokensDisponibles());
+        assertEquals(3, tokensVendedor.getTokensEnVenta());
+
+        List<Operacion> historialComprador = mercadoService.getTransaccionesById(buyer.getId());
+        assertEquals(1, historialComprador.size());
+        assertEquals(2, historialComprador.get(0).getCantidad());
+        assertEquals(0, historialComprador.get(0).getTotal().compareTo(BigDecimal.valueOf(10)));
+    }
+
+    @Test
+    void partialPurchaseShouldRejectQuantityOutsideListingRange() {
+        Usuario seller = saveUser("Vendedor límite", uniqueEmail("partial-limit-seller@test.com"));
+        Usuario buyer = saveUser("Comprador límite", uniqueEmail("partial-limit-buyer@test.com"));
+        BolsaDeJugador bolsa = saveJugador("Jugador límite");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 10, 0));
+        UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 3).getId();
+
+        assertThrows(CantidadDeTokensException.class,
+                () -> mercadoService.comprar(buyer.getId(), anuncioId, 0));
+        assertThrows(CantidadDeTokensException.class,
+                () -> mercadoService.comprar(buyer.getId(), anuncioId, 4));
     }
 
     @Test

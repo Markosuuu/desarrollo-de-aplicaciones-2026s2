@@ -89,14 +89,41 @@ describe("OfertaPage", () => {
     expect(screen.getByText("75 créditos")).toBeInTheDocument();
   });
 
-  test("confirma la compra, llama a la API y redirige al perfil", async () => {
+  test("permite elegir la cantidad, confirma la compra y redirige al perfil", async () => {
     renderOffer();
 
     fireEvent.click(await screen.findByRole("button", { name: "Comprar" }));
 
-    expect(window.confirm).toHaveBeenCalled();
-    expect(mocks.buyListing).toHaveBeenCalledWith("listing-1", "token-test");
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText("Total:")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/Cantidad \(máximo 4\)/), {
+      target: { value: "2" },
+    });
+    expect(screen.getByText("25 créditos")).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Confirmar compra" }),
+    );
+
+    expect(mocks.buyListing).toHaveBeenCalledWith(
+      "listing-1",
+      2,
+      "token-test",
+    );
     expect(await screen.findByTestId("profile-route")).toBeInTheDocument();
+  });
+
+  test("no permite comprar más tokens que los anunciados", async () => {
+    renderOffer();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Comprar" }));
+    fireEvent.change(screen.getByLabelText(/Cantidad \(máximo 4\)/), {
+      target: { value: "5" },
+    });
+
+    expect(
+      screen.getByRole("button", { name: "Confirmar compra" }),
+    ).toBeDisabled();
+    expect(mocks.buyListing).not.toHaveBeenCalled();
   });
 
   test("muestra el botón de cancelación para el dueño y actualiza el estado", async () => {

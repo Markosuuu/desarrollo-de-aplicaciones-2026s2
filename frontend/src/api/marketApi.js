@@ -49,11 +49,11 @@ export async function createSellOrder({ jugadorId, cantidad }, token) {
   return payload;
 }
 
-export function buyListing(anuncioId, token) {
+export function buyListing(anuncioId, cantidad, token) {
   return request("/orders/buy", {
     method: "POST",
     token,
-    body: { anuncioId },
+    body: { anuncioId, cantidad },
   });
 }
 

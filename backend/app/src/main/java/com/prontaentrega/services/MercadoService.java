@@ -119,11 +119,24 @@ public class MercadoService {
      */
     @Transactional
     public void comprar(UUID compradorId, UUID anuncioId) {
+        comprar(compradorId, anuncioId, null);
+    }
+
+    @Transactional
+    public void comprar(UUID compradorId, UUID anuncioId, Integer cantidadSolicitada) {
         AnuncioVenta anuncio = anuncioVentaRepository.findByIdForUpdate(anuncioId)
                 .orElseThrow(() -> new AnuncioNoEncontradoException("El anuncio no existe"));
 
         if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
             throw new AnuncioNoPendienteException("La venta ya no está disponible");
+        }
+
+        int cantidadCompra = cantidadSolicitada == null
+                ? anuncio.getCantidadTokens()
+                : cantidadSolicitada;
+        if (cantidadCompra <= 0 || cantidadCompra > anuncio.getCantidadTokens()) {
+            throw new CantidadDeTokensException(
+                    "La cantidad debe ser mayor a cero y no superar los tokens disponibles en la oferta");
         }
 
         if (anuncio.getVendedor().getId().equals(compradorId)) {
@@ -145,7 +158,9 @@ public class MercadoService {
                 .orElseThrow(() -> new JugadorNoEncontradoException(
                         "Jugador no encontrado con el id" + jugadorId));
 
-        if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(anuncio.getPrecioTotal()) < 0) {
+        BigDecimal precioCompra = anuncio.getPrecioPorToken()
+                .multiply(BigDecimal.valueOf(cantidadCompra));
+        if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(precioCompra) < 0) {
             throw new CreditosInsuficientesException("No tienes suficientes créditos");
         }
 
@@ -160,24 +175,29 @@ public class MercadoService {
         }
 
         // Actualización de los usuarios
-        comprador.restarCreditos(anuncio.getPrecioTotal());
-        vendedor.sumarCreditos(anuncio.getPrecioTotal());
+        comprador.restarCreditos(precioCompra);
+        vendedor.sumarCreditos(precioCompra);
         usuarioRepository.save(comprador);
         usuarioRepository.save(vendedor);
 
         // Actualización de los tokens
         InventarioUsuario tokenComprador = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(compradorId, jugadorId)
                 .orElse(new InventarioUsuario(comprador, bolsaJugador, 0, 0));
-        tokenComprador.agregarTokens(anuncio.getCantidadTokens());
+        tokenComprador.agregarTokens(cantidadCompra);
         tokenComprador.setActualizadoEn(LocalDateTime.now());
         inventarioUsuarioRepository.save(tokenComprador);
 
-        tokenVendedor.quitarTokens(anuncio.getCantidadTokens());
+        tokenVendedor.quitarTokens(cantidadCompra);
         tokenVendedor.setActualizadoEn(LocalDateTime.now());
         inventarioUsuarioRepository.save(tokenVendedor);
 
-        // Actualización del anuncio
-        anuncio.setEstado(EstadoAnuncioVenta.COMPLETADA);
+        int cantidadRestante = anuncio.getCantidadTokens() - cantidadCompra;
+        anuncio.setCantidadTokens(cantidadRestante);
+        anuncio.setPrecioTotal(
+                anuncio.getPrecioPorToken().multiply(BigDecimal.valueOf(cantidadRestante)));
+        if (cantidadRestante == 0) {
+            anuncio.setEstado(EstadoAnuncioVenta.COMPLETADA);
+        }
         anuncio.setActualizadoEn(LocalDateTime.now());
         anuncioVentaRepository.save(anuncio);
 
@@ -188,11 +208,11 @@ public class MercadoService {
         // En cualquier caso se puede suprimir a una Operacion como "transaccion" y quitar el TipoOperaicon
 
         Operacion compra = new Operacion(compradorId, vendedor.getId(), comprador.getNombre(), vendedor.getNombre(), jugadorId,
-                anuncio.getCantidadTokens(), anuncio.getPrecioPorToken(), anuncio.getPrecioTotal(),
+                cantidadCompra, anuncio.getPrecioPorToken(), precioCompra,
                 TipoOperacion.COMPRA, EstadoOperacion.COMPLETADA, nombreJugador);
 
         Operacion venta = new Operacion(vendedor.getId(), compradorId, vendedor.getNombre(), comprador.getNombre(), jugadorId,
-                anuncio.getCantidadTokens(), anuncio.getPrecioPorToken(), anuncio.getPrecioTotal(),
+                cantidadCompra, anuncio.getPrecioPorToken(), precioCompra,
                 TipoOperacion.VENTA, EstadoOperacion.COMPLETADA, nombreJugador);
 
         operacionRepository.save(compra);

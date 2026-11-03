@@ -6,6 +6,7 @@ import com.prontaentrega.models.InventarioUsuario;
 import com.prontaentrega.models.Operacion;
 import com.prontaentrega.services.MercadoService;
 
+import jakarta.validation.Valid;
 import java.util.*;
 
 import org.springframework.data.domain.Page;
@@ -48,9 +49,9 @@ public class MercadoController {
     }
 
     @PostMapping("/orders/buy")
-    public ResponseEntity<ComprarTokensResponse> buy(@RequestBody ComprarTokensRequest request) {
+    public ResponseEntity<ComprarTokensResponse> buy(@Valid @RequestBody ComprarTokensRequest request) {
         UUID vendedorId = currentUserId();
-        mercadoService.comprar(vendedorId, request.anuncioId());
+        mercadoService.comprar(vendedorId, request.anuncioId(), request.cantidad());
 
         return ResponseEntity.ok(ComprarTokensResponse.from(true, "Compra completada correctamente", request.anuncioId()));
     }
