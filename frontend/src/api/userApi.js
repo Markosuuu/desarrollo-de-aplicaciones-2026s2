@@ -4,8 +4,8 @@ const API_BASE_URL =
 const ALLOWED_API_HOSTS = new Set(["transactions", "inventario"]);
 
 async function fetchUserData(userId, resource, token) {
-  if (!ALLOWED_API_HOSTS.has(resource)) {
-    throw new Error("Invalid API host");
+  if (!ALLOWED_API_HOSTS.includes(resource)) {
+    throw new Error("API inválida");
   }
 
   const response = await fetch(
