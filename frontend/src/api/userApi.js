@@ -7,20 +7,27 @@ const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function fetchUserData(userId, resource, token) {
-  if (!UUID_PATTERN.test(String(userId))) {
-    throw new Error("Id de usuario inválido.");
-  }
+  const normalizedUserId = String(userId);
 
-  if (!ALLOWED_API_HOSTS.has(resource)) {
-    throw new Error("Recurso no encontrado");
-  }
+    if (!UUID_PATTERN.test(normalizedUserId)) {
+        throw new Error("Id de usuario inválido.");
+    }
 
-  const response = await fetch(`${API_BASE_URL}/users/${userId}/${resource}`, {
-    headers: {
-      Accept: "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-  });
+    if (!ALLOWED_API_HOSTS.has(resource)) {
+        throw new Error("Recurso no encontrado");
+    }
+
+    const safeUserId = encodeURIComponent(normalizedUserId);
+
+    const response = await fetch(
+        `${API_BASE_URL}/users/${safeUserId}/${resource}`,
+        {
+            headers: {
+                Accept: "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
 
   const payload = await response.json().catch(() => ({}));
 
