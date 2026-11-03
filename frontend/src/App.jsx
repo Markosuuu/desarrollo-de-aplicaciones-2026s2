@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import PlayerPage from "./pages/PlayerPage";
+import RankingPage from "./pages/RankingPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -47,6 +48,17 @@ export default function App() {
             <ProtectedRoute requireAuth>
               <Sidebar>
                 <PlayerPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ranking"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <RankingPage />
               </Sidebar>
             </ProtectedRoute>
           }
