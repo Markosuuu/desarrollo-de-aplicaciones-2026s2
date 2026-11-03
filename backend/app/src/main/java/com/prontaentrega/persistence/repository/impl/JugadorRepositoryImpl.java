@@ -78,4 +78,10 @@ public class JugadorRepositoryImpl implements JugadorRepository {
     public Long count() {
         return daosql.count();
     }
+
+    @Override
+    public Page<BolsaDeJugador> getRanking(Pageable page) {
+        Page<BolsaDeJugadorDTOSQL> pageDTO = daosql.getRanking(page);
+        return pageDTO.map(BolsaDeJugadorDTOSQL::aModelo);
+    }
 }

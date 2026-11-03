@@ -133,6 +133,16 @@ public class PlayerCatalogService {
         }
     }
 
+    @Transactional
+    public Page<BolsaDeJugador> getRanking(int page, int perPage) {
+        int safePage = Math.max(page, 1);
+        int safePerPage = Math.clamp(perPage, 1, 50);
+
+        Pageable pageable = PageRequest.of(safePage, safePerPage);
+
+        return jugadorRepository.getRanking(pageable);
+    }
+
     /**
      * Procesa los jugadores de una página y contabiliza los resultados.
      *

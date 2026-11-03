@@ -413,7 +413,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void buscarHistorialSinAutorizacionShould403() throws Exception {
+    void buscarHistorialSinAutorizacionShouldReturnForbidden() throws Exception {
         BolsaDeJugador bolsa = crearJugadorDePrueba();
         UUID idJugador = bolsa.getEstadisticasDeportivas().getJugador().getId();
         LocalDateTime fecha = LocalDateTime.of(2026, 10, 1, 12, 0);
@@ -427,6 +427,34 @@ class PlayerControllerTest extends AbstractIntegrationTest {
 
         mockMvc.perform(get("/api/players/{id}/quotes", idJugador))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getRankingWithAutorizationShouldReturnPaginatedResponse() throws Exception {
+        AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        Jugador jugador = new Jugador(11, "Riquelme", "Boquita",
+                Liga.LALIGA, Posicion.MIDFIELDER, 25, 180, 75
+        );
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador, true, 10, 5, BigDecimal.valueOf(3.5),
+                BigDecimal.valueOf(5.2), BigDecimal.valueOf(1.5), BigDecimal.valueOf(0.5),
+                BigDecimal.valueOf(5.5), 2200
+        );
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+        BolsaDeJugador savedBolsa = jugadorRepository.save(bolsaJugador);
+
+        mockMvc.perform(get("/api/players/ranking")
+                        .header("Authorization", "Bearer "+result.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.paginacion").exists())
+                .andExpect(jsonPath("$.jugadores").isArray())
+
+                // Datos de paginación
+                .andExpect(jsonPath("$.paginacion.pagina").value(1))
+                .andExpect(jsonPath("$.paginacion.porPagina").value(20))
+                .andExpect(jsonPath("$.paginacion.total").value(1))
+                .andExpect(jsonPath("$.paginacion.totalPaginas").value(1));
     }
 
     private static @NotNull EstadisticasDeportivas getEstadisticas() {

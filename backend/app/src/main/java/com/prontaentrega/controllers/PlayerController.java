@@ -111,4 +111,23 @@ public class PlayerController {
 
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/players/ranking")
+    public ResponseEntity<CatalogResponse> getRanking(@RequestParam(defaultValue = "1") int page,
+                                                      @RequestParam(defaultValue = "20") int perPage) {
+        Page<BolsaDeJugador> jugadores = playerCatalogService.getRanking(page, perPage);
+
+        List<PlayerResponse> players = jugadores.getContent().stream()
+                .map(PlayerResponse::from)
+                .toList();
+
+        var response = new CatalogResponse(players, new CatalogResponse.Paginacion(
+                page,
+                perPage,
+                jugadores.getTotalElements(),
+                jugadores.getTotalPages()
+        ));
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
 }
