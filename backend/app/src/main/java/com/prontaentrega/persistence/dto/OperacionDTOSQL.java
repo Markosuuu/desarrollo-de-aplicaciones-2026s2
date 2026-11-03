@@ -83,17 +83,17 @@ public class OperacionDTOSQL {
     }
 
     public Operacion aModelo() {
-        Operacion operacion = new Operacion();
-        operacion.setId(id);
-        operacion.setUsuario(UsuarioDTOSQL.aUsuario(usuario));
-        operacion.setContraparte(UsuarioDTOSQL.aUsuario(contraparte));
-        operacion.setJugador(jugador.aJugador());
-        operacion.setCantidad(cantidad);
-        operacion.setPrecioPorToken(precioPorToken);
-        operacion.setTotal(total);
-        operacion.setTipo(tipo);
-        operacion.setEstado(estado);
-        operacion.setCreadaEn(creadaEn);
-        return operacion;
+        return Operacion.builder()
+                .id(id)
+                .usuario(UsuarioDTOSQL.aUsuario(usuario))
+                .contraparte(UsuarioDTOSQL.aUsuario(contraparte))
+                .jugador(jugador.aJugador())
+                .cantidad(cantidad)
+                .precioPorToken(precioPorToken)
+                .total(total)
+                .tipo(tipo)
+                .estado(estado)
+                .creadaEn(creadaEn)
+                .build();
     }
 }

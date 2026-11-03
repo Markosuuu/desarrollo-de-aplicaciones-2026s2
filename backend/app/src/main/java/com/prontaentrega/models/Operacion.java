@@ -6,9 +6,7 @@ import java.util.UUID;
 
 import com.prontaentrega.models.enums.EstadoOperacion;
 import com.prontaentrega.models.enums.TipoOperacion;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * Nuevamente es un contenedor, igual este me parece necesario
@@ -16,18 +14,19 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class Operacion {
     private UUID id;
-    private Usuario usuario;
-    private Usuario contraparte;
-    private Jugador jugador;
-    private Integer cantidad;
-    private BigDecimal precioPorToken;
-    private BigDecimal total;
-    private TipoOperacion tipo;
-    private EstadoOperacion estado;
-    private LocalDateTime creadaEn;
+    private final Usuario usuario;
+    private final Usuario contraparte;
+    private final Jugador jugador;
+    private final Integer cantidad;
+    private final BigDecimal precioPorToken;
+    private final BigDecimal total;
+    private final TipoOperacion tipo;
+    private final EstadoOperacion estado;
+    private final LocalDateTime creadaEn;
 
     public Operacion(Usuario usuario, Usuario contraparte, Jugador jugador, Integer cantidad,
                     BigDecimal precioPorToken, BigDecimal total, TipoOperacion tipo,
