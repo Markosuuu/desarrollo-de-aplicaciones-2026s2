@@ -43,18 +43,14 @@ public class InventarioUsuarioDTOSQL {
     @Column(name = "actualizado_en", nullable = false)
     private LocalDateTime actualizadoEn;
 
-    // TODO: Revisar si hace falta pasar 3 params
-    public static InventarioUsuarioDTOSQL desdeModelo(
-            InventarioUsuario token,
-            UsuarioDTOSQL usuario,
-            BolsaDeJugadorDTOSQL bolsaDeJugador) {
+    public static InventarioUsuarioDTOSQL desdeModelo(InventarioUsuario inventario) {
         InventarioUsuarioDTOSQL dto = new InventarioUsuarioDTOSQL();
-        dto.id = token.getId();
-        dto.usuario = usuario;
-        dto.bolsaDeJugador = bolsaDeJugador;
-        dto.tokensDisponibles = token.getTokensDisponibles();
-        dto.tokensEnVenta = token.getTokensEnVenta();
-        dto.actualizadoEn = token.getActualizadoEn();
+        dto.id = inventario.getId();
+        dto.usuario = UsuarioDTOSQL.desdeUsuario(inventario.getUsuario());
+        dto.bolsaDeJugador = BolsaDeJugadorDTOSQL.desdeModelo(inventario.getBolsaDeJugador());
+        dto.tokensDisponibles = inventario.getTokensDisponibles();
+        dto.tokensEnVenta = inventario.getTokensEnVenta();
+        dto.actualizadoEn = inventario.getActualizadoEn();
         return dto;
     }
 

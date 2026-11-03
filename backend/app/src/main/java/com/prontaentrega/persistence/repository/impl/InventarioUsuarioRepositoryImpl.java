@@ -29,15 +29,11 @@ public class InventarioUsuarioRepositoryImpl implements InventarioUsuarioReposit
     }
 
     @Override
-    public InventarioUsuario save(InventarioUsuario token) {
-        UsuarioDTOSQL usuario = usuarioDao.getReferenceById(token.getUsuario().getId());
-        BolsaDeJugadorDTOSQL bolsaDeJugador =
-                jugadorDao.getReferenceById(token.getBolsaDeJugador().getId());
-        InventarioUsuarioDTOSQL dto =
-                InventarioUsuarioDTOSQL.desdeModelo(token, usuario, bolsaDeJugador);
+    public InventarioUsuario save(InventarioUsuario inventario) {
+        InventarioUsuarioDTOSQL dto = InventarioUsuarioDTOSQL.desdeModelo(inventario);
         InventarioUsuarioDTOSQL saved = dao.save(dto);
-        token.setId(saved.getId());
-        return token;
+        inventario.setId(saved.getId());
+        return inventario;
     }
 
     @Override

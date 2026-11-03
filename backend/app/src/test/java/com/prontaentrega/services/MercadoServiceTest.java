@@ -216,7 +216,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
                 "WhoScored",
                 100
         );
-        
+
         return jugadorRepository.save(bolsa);
     }
 
