@@ -20,8 +20,7 @@ export default function OfertaPage() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const { user, token } = useAuth();
-  const initialListing =
-    state?.listing?.id === id ? state.listing : null;
+  const initialListing = state?.listing?.id === id ? state.listing : null;
   const [listing, setListing] = useState(initialListing);
   const [credits, setCredits] = useState(null);
   const [creditsLoading, setCreditsLoading] = useState(true);
@@ -57,7 +56,8 @@ export default function OfertaPage() {
           if (active) {
             setListing(null);
             setError(
-              fetchError.message || "No se pudo cargar la información del anuncio.",
+              fetchError.message ||
+                "No se pudo cargar la información del anuncio.",
             );
           }
         })
@@ -79,11 +79,16 @@ export default function OfertaPage() {
             (item) => item.usuario?.id === user.id,
           )?.usuario;
           setCredits(
-            currentUser?.creditosDisponibles ?? user.creditosDisponibles ?? null,
+            currentUser?.creditosDisponibles ??
+              user.creditosDisponibles ??
+              null,
           );
         })
         .catch((fetchError) => {
-          console.error("Error al cargar los créditos del usuario:", fetchError);
+          console.error(
+            "Error al cargar los créditos del usuario:",
+            fetchError,
+          );
           if (active) {
             setCredits(null);
             setCreditsError("No se pudieron cargar los créditos actuales.");
@@ -135,7 +140,7 @@ export default function OfertaPage() {
     setActionError("");
     try {
       await buyListing(listing.id, quantityToBuy, token);
-      navigate("/profile", { replace: true });
+      void navigate("/profile", { replace: true });
     } catch (buyError) {
       console.error("Error al comprar el anuncio:", buyError);
       setActionError(buyError.message || "No se pudo completar la compra.");
@@ -165,6 +170,47 @@ export default function OfertaPage() {
     }
   };
 
+  // Para arreglar issues de Sonar
+  let creditsLabel;
+
+  if (creditsLoading) {
+    creditsLabel = "Cargando...";
+  } else if (creditsError) {
+    creditsLabel = "No disponible";
+  } else {
+    creditsLabel = `${formatNumber(credits)} créditos`;
+  }
+
+  let offerAction;
+
+  if (!isPending) {
+    offerAction = (
+      <p className="offer-not-available">Esta oferta ya no está disponible.</p>
+    );
+  } else if (isOwner) {
+    offerAction = (
+      <button
+        type="button"
+        className="market-action-button market-action-button--secondary"
+        onClick={handleCancel}
+        disabled={submitting}
+      >
+        {submitting ? "Cancelando..." : "Cancelar oferta"}
+      </button>
+    );
+  } else {
+    offerAction = (
+      <button
+        type="button"
+        className="market-action-button"
+        onClick={openBuyDialog}
+        disabled={submitting || creditsLoading}
+      >
+        Comprar
+      </button>
+    );
+  }
+
   return (
     <main className="home-shell mercado-shell">
       <div className="home-panel">
@@ -178,9 +224,7 @@ export default function OfertaPage() {
           </Link>
 
           {loading && (
-            <div className="catalog-state" role="status">
-              Cargando oferta...
-            </div>
+            <output className="catalog-state">Cargando oferta...</output>
           )}
 
           {!loading && error && (
@@ -225,13 +269,7 @@ export default function OfertaPage() {
                 </div>
                 <div>
                   <dt>Tus créditos actuales</dt>
-                  <dd>
-                    {creditsLoading
-                      ? "Cargando..."
-                      : creditsError
-                        ? "No disponible"
-                        : `${formatNumber(credits)} créditos`}
-                  </dd>
+                  <dd>{creditsLabel}</dd>
                 </div>
               </dl>
 
@@ -252,30 +290,7 @@ export default function OfertaPage() {
                   {actionError}
                 </p>
               )}
-
-              {isOwner && isPending ? (
-                <button
-                  type="button"
-                  className="market-action-button market-action-button--secondary"
-                  onClick={handleCancel}
-                  disabled={submitting}
-                >
-                  {submitting ? "Cancelando..." : "Cancelar oferta"}
-                </button>
-              ) : !isOwner && isPending ? (
-                <button
-                  type="button"
-                  className="market-action-button"
-                  onClick={openBuyDialog}
-                  disabled={submitting || creditsLoading}
-                >
-                  Comprar
-                </button>
-              ) : (
-                <p className="offer-not-available">
-                  Esta oferta ya no está disponible.
-                </p>
-              )}
+              {offerAction}
             </>
           )}
         </section>
@@ -283,9 +298,8 @@ export default function OfertaPage() {
 
       {buyDialogOpen && listing && (
         <div className="offer-dialog-backdrop">
-          <section
+          <dialog
             className="offer-buy-dialog"
-            role="dialog"
             aria-modal="true"
             aria-labelledby="offer-buy-title"
           >
@@ -346,7 +360,7 @@ export default function OfertaPage() {
                 </button>
               </div>
             </form>
-          </section>
+          </dialog>
         </div>
       )}
     </main>

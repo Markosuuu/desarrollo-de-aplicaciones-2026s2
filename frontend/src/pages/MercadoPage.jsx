@@ -90,9 +90,7 @@ const MercadoPage = () => {
           </div>
 
           {loading && (
-            <div className="catalog-state" role="status">
-              Cargando anuncios...
-            </div>
+            <output className="catalog-state">Cargando anuncios...</output>
           )}
 
           {error && (

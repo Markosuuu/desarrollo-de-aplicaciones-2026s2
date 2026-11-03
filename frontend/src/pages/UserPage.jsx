@@ -129,7 +129,7 @@ function UserPage() {
         },
         token,
       );
-      navigate(`/mercado/${listing.id}`, {
+      void navigate(`/mercado/${listing.id}`, {
         state: { listing },
       });
     } catch (createError) {
@@ -161,9 +161,7 @@ function UserPage() {
       <article className="inventario-container user-page-card">
         <h2>Inventario</h2>
         {loading ? (
-          <p className="user-page-message" role="status">
-            Cargando inventario...
-          </p>
+          <output className="user-page-message">Cargando inventario...</output>
         ) : (
           <div className="user-page-table-scroll">
             <table>
@@ -230,9 +228,7 @@ function UserPage() {
       <article className="historial-container user-page-card">
         <h2>Historial de operaciones</h2>
         {loading ? (
-          <p className="user-page-message" role="status">
-            Cargando historial...
-          </p>
+          <output className="user-page-message">Cargando historial...</output>
         ) : (
           <div className="user-page-table-scroll">
             <table>
@@ -289,9 +285,8 @@ function UserPage() {
 
       {selectedInventoryItem && (
         <div className="user-page-dialog-backdrop">
-          <section
+          <dialog
             className="user-page-sell-dialog"
-            role="dialog"
             aria-modal="true"
             aria-labelledby="user-page-sell-title"
           >
@@ -335,7 +330,7 @@ function UserPage() {
                 </button>
               </div>
             </form>
-          </section>
+          </dialog>
         </div>
       )}
     </main>
