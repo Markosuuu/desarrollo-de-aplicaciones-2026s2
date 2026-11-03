@@ -1,0 +1,229 @@
+.user-page-container {
+  width: min(1200px, 85%);
+  margin: 2rem auto;
+}
+
+.user-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.user-page-header h1 {
+  font-size: 2rem;
+}
+
+.user-page-credits {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  border: 1px solid var(--border-color, #dedede);
+  border-radius: 999px;
+  background: var(--card-background, #fff);
+  color: var(--text-color, #212121);
+  white-space: nowrap;
+}
+
+.user-page-credits strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.user-page-card {
+  min-width: 0;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border-color, #dedede);
+  border-radius: 16px;
+  background: var(--card-background, #fff);
+  color: var(--text-color, #212121);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 8%);
+}
+
+.user-page-card h2 {
+  margin: 0 0 1rem;
+  color: inherit;
+  font-size: 1.35rem;
+}
+
+.user-page-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.user-page-card table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.user-page-card th,
+.user-page-card td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--border-color, #dedede);
+  vertical-align: middle;
+}
+
+.user-page-card th {
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+.user-page-card tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.user-page-message {
+  padding: 1.25rem;
+  text-align: center;
+  opacity: 0.75;
+}
+
+.user-page-amount {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.user-page-amount--sale {
+  color: #16803c;
+}
+
+.user-page-amount--purchase {
+  color: #c62828;
+}
+
+.user-page-sell-button,
+.user-page-error button {
+  padding: 0.45rem 0.8rem;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent, #9333ea);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+.user-page-sell-button:hover,
+.user-page-error button:hover {
+  filter: brightness(0.9);
+}
+
+.user-page-sell-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.user-page-dialog-backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 55%);
+}
+
+.user-page-sell-dialog {
+  width: min(100%, 440px);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color, #dedede);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--text-color, #212121);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 25%);
+}
+
+body[data-theme="dark"] .user-page-sell-dialog {
+  background: #212121;
+}
+
+.user-page-sell-dialog h2 {
+  margin: 0 0 0.75rem;
+  color: inherit;
+}
+
+.user-page-sell-dialog form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.user-page-sell-dialog input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border-color, #dedede);
+  border-radius: 8px;
+  background: var(--card-background, #fff);
+  color: inherit;
+}
+
+.user-page-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.user-page-dialog-actions button {
+  padding: 0.55rem 0.9rem;
+  border: 0;
+  border-radius: 7px;
+  background: var(--accent, #9333ea);
+  color: #fff;
+  font: inherit;
+}
+
+.user-page-dialog-actions .user-page-cancel-button {
+  border: 1px solid var(--border-color, #dedede);
+  background: transparent;
+  color: inherit;
+}
+
+.user-page-dialog-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.user-page-sell-error {
+  color: #c62828;
+}
+
+.user-page-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid #c62828;
+  border-radius: 8px;
+  color: #c62828;
+}
+
+@media (max-width: 600px) {
+  .user-page-container {
+    width: 92%;
+    margin: 1rem auto;
+  }
+
+  .user-page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .user-page-header h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .user-page-card {
+    padding: 0.75rem;
+  }
+
+  .user-page-error {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

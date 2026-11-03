@@ -19,6 +19,7 @@ import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,6 +48,13 @@ class QuoteRecalculationServiceIntegrationTest extends AbstractIntegrationTest {
     void setup() {
         historialCotizacionDAO.deleteAll();
     }
+
+        @BeforeEach
+        void clearExistingBolsas() {
+            jdbcTemplate.update("DELETE FROM anuncios_venta");
+            jdbcTemplate.update("DELETE FROM inventarios_usuarios");
+            jdbcTemplate.update("DELETE FROM bolsas_de_jugadores");
+        }
 
     /** Actualiza jugadores válidos y omite aquellos sin todas las métricas ponderadas. */
     @Test

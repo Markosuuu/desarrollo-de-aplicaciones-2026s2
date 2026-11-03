@@ -153,13 +153,15 @@ button {
   background: rgba(255, 255, 255, 0.12);
 }
 
-.sidebar__user {
+.sidebar__user,
+.sidebar__logo {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   min-width: 0;
   padding: 0.5rem 0.25rem;
   font-weight: 700;
+  text-decoration: none;
 }
 
 .sidebar__avatar {
@@ -176,6 +178,16 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.sidebar__username,
+.sidebar__home {
+  color: #111827;
+}
+
+body[data-theme="dark"] .sidebar__username,
+body[data-theme="dark"] .sidebar__home {
+  color: #f3f4f6;
 }
 
 .sidebar__actions {
