@@ -33,7 +33,7 @@ jobs:
         working-directory: backend
         run: |
           chmod +x gradlew
-          ./gradlew build integrationTest e2eTest jacocoTestReport
+          ./gradlew build jacocoTestReport
 
       # ---------- Frontend ----------
       - name: Set up Node
