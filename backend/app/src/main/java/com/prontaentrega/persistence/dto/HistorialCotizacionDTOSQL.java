@@ -41,7 +41,6 @@ public class HistorialCotizacionDTOSQL {
     }
 
     public HistorialCotizacion aModelo() {
-        HistorialCotizacion historial = new HistorialCotizacion(id, bolsaDeJugador.aModelo().getId(), precio, fecha);
-        return historial;
+        return new HistorialCotizacion(id, bolsaDeJugador.aModelo().getId(), precio, fecha);
     }
 }

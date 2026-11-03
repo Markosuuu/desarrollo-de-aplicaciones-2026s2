@@ -11,6 +11,7 @@ import com.prontaentrega.services.exceptions.QuoteRequestValidationException;
 import com.prontaentrega.services.exceptions.QuoteStrategyNotFoundException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -215,7 +216,7 @@ public class CotizacionService {
                     "No se pudieron actualizar todas las cotizaciones calculadas");
         }
 
-        LocalDateTime fechaActualizacion = LocalDateTime.now();
+        LocalDateTime fechaActualizacion = LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires"));
 
         List<HistorialCotizacion> historial = updates.stream()
                 .map(update -> new HistorialCotizacion(
