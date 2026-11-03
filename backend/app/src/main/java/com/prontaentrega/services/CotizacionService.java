@@ -1,17 +1,17 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.DatosValoracion;
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.models.EstrategiaCotizacion;
+import com.prontaentrega.models.*;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.CotizacionRepository.ActualizacionCotizacion;
+import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
 import com.prontaentrega.services.exceptions.QuoteRequestValidationException;
 import com.prontaentrega.services.exceptions.QuoteStrategyNotFoundException;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,6 +31,7 @@ public class CotizacionService {
     private static final int PAGE_SIZE = 200;
 
     private final CotizacionRepository cotizacionRepository;
+    private final HistorialCotizacionRepository historialRepository;
     private final Map<String, EstrategiaCotizacion> estrategias;
 
     /**
@@ -39,8 +40,10 @@ public class CotizacionService {
      * @param estrategias
      */
     public CotizacionService(CotizacionRepository cotizacionRepository,
+                             HistorialCotizacionRepository historialRepository,
                              List<EstrategiaCotizacion> estrategias) {
         this.cotizacionRepository = cotizacionRepository;
+        this.historialRepository = historialRepository;
         this.estrategias = new HashMap<>();
 
         validacionesConstructor(cotizacionRepository, estrategias);
@@ -212,6 +215,20 @@ public class CotizacionService {
             throw new QuoteOperationConflictException(
                     "No se pudieron actualizar todas las cotizaciones calculadas");
         }
+
+        LocalDateTime fechaActualizacion = LocalDateTime.now(ZoneId.of("America/Argentina/Buenos_Aires"));
+
+        List<HistorialCotizacion> historial = updates.stream()
+                .map(update -> new HistorialCotizacion(
+                        null,
+                        update.bolsaId(),
+                        update.cotizacionCalculada(),
+                        fechaActualizacion
+                ))
+                .toList();
+
+        historialRepository.guardarHistorial(historial);
+
         return updatedPlayers;
     }
 

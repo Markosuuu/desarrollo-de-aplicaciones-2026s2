@@ -6,6 +6,7 @@ import PlayerPage from '../pages/PlayerPage';
 
 const mocks = vi.hoisted(() => ({
     fetchPlayer: vi.fn(),
+    fetchPlayerQuotesHistory: vi.fn(),
     useAuth: vi.fn(),
     PlayerRadar: vi.fn(),
     QuoteHistoryChart: vi.fn(),
@@ -13,6 +14,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('../api/playerApi', () => ({
     fetchPlayer: mocks.fetchPlayer,
+    fetchPlayerQuotesHistory: mocks.fetchPlayerQuotesHistory,
 }));
 
 vi.mock('../context/AuthContext', () => ({
@@ -67,6 +69,8 @@ beforeEach(() => {
     });
 
     mocks.fetchPlayer.mockResolvedValue(jugadorPrueba);
+
+    mocks.fetchPlayerQuotesHistory.mockResolvedValue([]);
 
     mocks.PlayerRadar.mockImplementation(() => (
         <div data-testid="player-radar" />

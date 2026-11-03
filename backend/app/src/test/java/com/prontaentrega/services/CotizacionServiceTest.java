@@ -15,6 +15,7 @@ import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderadaPena
 import com.prontaentrega.models.estrategias.EstrategiaPonderada;
 import com.prontaentrega.models.estrategias.EstrategiaPonderadaConPenalizacion;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
+import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import java.math.BigDecimal;
 import java.util.List;
@@ -36,7 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class CotizacionServiceTest {
     @Mock
     private CotizacionRepository strategyRepository;
-
+    private HistorialCotizacionRepository historialRepository;
     private CotizacionService administrationService;
 
     /** Registra las dos estrategias y valida su asociación tipada con los providers. */
@@ -50,7 +51,7 @@ class CotizacionServiceTest {
                 .when(strategyRepository).tipoConfiguracion("ponderada-con-penalizacion");
         when(strategyRepository.estrategiaIdsConfigurables())
                 .thenReturn(java.util.Set.of("ponderada", "ponderada-con-penalizacion"));
-        administrationService = new CotizacionService(strategyRepository,
+        administrationService = new CotizacionService(strategyRepository, historialRepository,
                 List.of(new EstrategiaPonderada(), new EstrategiaPonderadaConPenalizacion()));
     }
 
