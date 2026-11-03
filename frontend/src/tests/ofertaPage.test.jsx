@@ -361,8 +361,8 @@ test("muestra un error cuando falla la cancelación", async () => {
     );
 
     expect(
-        await screen.findAllByText("No se pudo cancelar"),
-    );
+        await screen.findByText("No se pudo cancelar"),
+    ).toBeInTheDocument();
 
     expect(mocks.cancelListing).toHaveBeenCalledTimes(1);
 });
