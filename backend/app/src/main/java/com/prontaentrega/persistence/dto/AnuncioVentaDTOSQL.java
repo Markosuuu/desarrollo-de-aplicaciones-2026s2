@@ -1,6 +1,8 @@
 package com.prontaentrega.persistence.dto;
 
 import com.prontaentrega.models.AnuncioVenta;
+import com.prontaentrega.models.BolsaDeJugador;
+import com.prontaentrega.models.Usuario;
 import com.prontaentrega.models.enums.EstadoAnuncioVenta;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -75,16 +77,16 @@ public class AnuncioVentaDTOSQL {
     }
 
     public AnuncioVenta aModelo() {
-        AnuncioVenta anuncio = new AnuncioVenta();
-        anuncio.setId(id);
-        anuncio.setVendedor(UsuarioDTOSQL.aUsuario(vendedor));
-        anuncio.setBolsaDeJugador(bolsaDeJugador.aModelo());
-        anuncio.setCantidadTokens(cantidadTokens);
-        anuncio.setPrecioPorToken(precioPorToken);
-        anuncio.setPrecioTotal(precioTotal);
-        anuncio.setEstado(estado);
-        anuncio.setCreadoEn(creadoEn);
-        anuncio.setActualizadoEn(actualizadoEn);
-        return anuncio;
+        return AnuncioVenta.builder()
+                .id(id)
+                .vendedor(UsuarioDTOSQL.aUsuario(vendedor))
+                .bolsaDeJugador(bolsaDeJugador.aModelo())
+                .cantidadTokens(cantidadTokens)
+                .precioPorToken(precioPorToken)
+                .precioTotal(precioTotal)
+                .estado(estado)
+                .creadoEn(creadoEn)
+                .actualizadoEn(actualizadoEn)
+                .build();
     }
 }

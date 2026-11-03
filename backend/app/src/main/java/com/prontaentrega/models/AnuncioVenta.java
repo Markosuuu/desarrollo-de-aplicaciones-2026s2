@@ -5,9 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.prontaentrega.models.enums.EstadoAnuncioVenta;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * La clase está bien, quizás haría falta darle una vuelta al tema de los anuncios
@@ -16,16 +14,17 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class AnuncioVenta {
     private UUID id;
-    private Usuario vendedor;
-    private BolsaDeJugador bolsaDeJugador;
+    private final Usuario vendedor;
+    private final BolsaDeJugador bolsaDeJugador;
     private Integer cantidadTokens;
-    private BigDecimal precioPorToken;
+    private final BigDecimal precioPorToken;
     private BigDecimal precioTotal;
     private EstadoAnuncioVenta estado;
-    private LocalDateTime creadoEn;
+    private final LocalDateTime creadoEn;
     private LocalDateTime actualizadoEn;
 
     /**
