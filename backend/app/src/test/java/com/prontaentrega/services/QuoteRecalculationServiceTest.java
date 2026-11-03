@@ -12,6 +12,7 @@ import com.prontaentrega.models.EstadoEstrategiaCotizacion;
 import com.prontaentrega.models.EstrategiaCotizacion;
 import com.prontaentrega.models.estrategias.EstrategiaPonderada;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
+import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,6 +31,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class QuoteRecalculationServiceTest {
     @Mock
     private CotizacionRepository strategyRepository;
+    @Mock
+    private HistorialCotizacionRepository historialCotizacionRepository;
 
     /** Usa la configuración activa, actualiza cotización vigente y cuenta jugadores omitidos. */
     @Test
@@ -39,7 +42,7 @@ class QuoteRecalculationServiceTest {
         org.mockito.Mockito.doReturn(ConfiguracionEstrategiaPonderada.class)
                 .when(strategyRepository).tipoConfiguracion("ponderada");
         CotizacionService recalculationService = new CotizacionService(
-                strategyRepository, List.of(strategy));
+                strategyRepository, historialCotizacionRepository, List.of(strategy));
         ConfiguracionEstrategiaPonderada config = new ConfiguracionEstrategiaPonderada(
                 BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("2"));

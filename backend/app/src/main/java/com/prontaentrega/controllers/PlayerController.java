@@ -1,9 +1,11 @@
 package com.prontaentrega.controllers;
 
 import com.prontaentrega.controllers.dtos.jugadores.CatalogResponse;
+import com.prontaentrega.controllers.dtos.jugadores.HistorialCotizacionResponse;
 import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
 import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.services.HistorialCotizacionService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.PlayerCatalogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,12 +28,13 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class PlayerController {
     private final PlayerCatalogService playerCatalogService;
-
+    private final HistorialCotizacionService historialService;
     /**
      * Recibe el servicio de catalogo usado por los endpoints de jugadores.
      */
-    public PlayerController(PlayerCatalogService playerCatalogService) {
+    public PlayerController(PlayerCatalogService playerCatalogService, HistorialCotizacionService historialService) {
         this.playerCatalogService = playerCatalogService;
+        this.historialService = historialService;
     }
 
     /**
@@ -94,5 +97,18 @@ public class PlayerController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(PlayerResponse.from(playerCatalogService.searchById(id)));
+    }
+
+    @GetMapping("/players/{id}/quotes")
+    public ResponseEntity<List<HistorialCotizacionResponse>> buscarHistorial(
+            @PathVariable UUID id
+    ) {
+        List<HistorialCotizacionResponse> response =
+                historialService.buscarHistorial(id)
+                        .stream()
+                        .map(HistorialCotizacionResponse::from)
+                        .toList();
+
+        return ResponseEntity.ok(response);
     }
 }

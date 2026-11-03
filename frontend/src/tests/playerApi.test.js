@@ -1,6 +1,6 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { fetchPlayers, fetchPlayer } from '../api/playerApi.js';
+import { fetchPlayers, fetchPlayer, fetchPlayerQuotesHistory } from '../api/playerApi.js';
 
 describe('fetchPlayers', () => {
     beforeEach(() => {
@@ -145,6 +145,51 @@ describe('fetchPlayer', () => {
         });
 
         const result = await fetchPlayer(1, 'token-test');
+
+        expect(result).toEqual({});
+    });
+});
+
+describe('fetchPlayerQuotesHistory', () => {
+    beforeEach(() => {
+        vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    test('obtiene el historial de cotizaciones utilizando el ID y token del jugador', async () => {
+        const historial = [
+            { fecha: '2026-10-01', precio: 250 },
+            { fecha: '2026-10-08', precio: 275 },
+        ];
+
+        fetch.mockResolvedValue({
+            json: vi.fn().mockResolvedValue(historial),
+        });
+
+        const result = await fetchPlayerQuotesHistory(1, 'token-test');
+
+        expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/players/1/quotes'),
+            {
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: 'Bearer token-test',
+                },
+            },
+        );
+
+        expect(result).toEqual(historial);
+    });
+
+    test('devuelve un objeto vacío cuando la respuesta no contiene JSON válido', async () => {
+        fetch.mockResolvedValue({
+            json: vi.fn().mockRejectedValue(new Error('Invalid JSON')),
+        });
+
+        const result = await fetchPlayerQuotesHistory(1, 'token-test');
 
         expect(result).toEqual({});
     });
