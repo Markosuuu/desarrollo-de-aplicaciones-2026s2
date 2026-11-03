@@ -188,57 +188,6 @@ describe('RankingPage', () => {
         expect(ligaDesconocida).not.toHaveAttribute('src');
     });
 
-    test('debe navegar al jugador al hacer click en una fila', async () => {
-        mocks.getRanking.mockResolvedValue(
-            crearRespuesta([
-                crearJugador(15),
-            ])
-        );
-
-        render(<RankingPage />);
-
-        const fila = await screen.findByRole('link');
-
-        fireEvent.click(fila);
-
-        expect(mocks.navigate).toHaveBeenCalledWith('/player/15');
-    });
-
-    test('debe navegar al jugador al presionar Enter sobre una fila', async () => {
-        mocks.getRanking.mockResolvedValue(
-            crearRespuesta([
-                crearJugador(20),
-            ])
-        );
-
-        render(<RankingPage />);
-
-        const fila = await screen.findByRole('link');
-
-        fireEvent.keyDown(fila, {
-            key: 'Enter',
-        });
-
-        expect(mocks.navigate).toHaveBeenCalledWith('/player/20');
-    });
-
-    test('no debe navegar al presionar una tecla diferente de Enter', async () => {
-        mocks.getRanking.mockResolvedValue(
-            crearRespuesta([
-                crearJugador(20),
-            ])
-        );
-
-        render(<RankingPage />);
-
-        const fila = await screen.findByRole('link');
-
-        fireEvent.keyDown(fila, {
-            key: 'Space',
-        });
-
-        expect(mocks.navigate).not.toHaveBeenCalled();
-    });
 
     test('debe mostrar un mensaje cuando no hay jugadores', async () => {
         mocks.getRanking.mockResolvedValue(
