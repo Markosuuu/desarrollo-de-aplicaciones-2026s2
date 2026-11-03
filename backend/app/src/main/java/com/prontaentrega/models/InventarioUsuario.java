@@ -2,9 +2,8 @@ package com.prontaentrega.models;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.*;
 
 /**
  * Clase que representa el inventario de un usuario en el sistema.
@@ -12,11 +11,12 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class InventarioUsuario {
     private UUID id;
-    private Usuario usuario;
-    private BolsaDeJugador bolsaDeJugador;
+    private final Usuario usuario;
+    private final BolsaDeJugador bolsaDeJugador;
     private Integer tokensDisponibles;
     private Integer tokensEnVenta;
     private LocalDateTime actualizadoEn;

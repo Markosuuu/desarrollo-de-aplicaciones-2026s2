@@ -59,13 +59,13 @@ public class InventarioUsuarioDTOSQL {
     }
 
     public InventarioUsuario aModelo() {
-        InventarioUsuario token = new InventarioUsuario();
-        token.setId(id);
-        token.setUsuario(UsuarioDTOSQL.aUsuario(usuario));
-        token.setBolsaDeJugador(bolsaDeJugador.aModelo());
-        token.setTokensDisponibles(tokensDisponibles);
-        token.setTokensEnVenta(tokensEnVenta);
-        token.setActualizadoEn(actualizadoEn);
-        return token;
+        return InventarioUsuario.builder()
+                .id(id)
+                .usuario(UsuarioDTOSQL.aUsuario(usuario))
+                .bolsaDeJugador(bolsaDeJugador.aModelo())
+                .tokensDisponibles(tokensDisponibles)
+                .tokensEnVenta(tokensEnVenta)
+                .actualizadoEn(actualizadoEn)
+                .build();
     }
 }
