@@ -1,6 +1,7 @@
 package com.prontaentrega.models;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 import lombok.*;
@@ -30,7 +31,7 @@ public class InventarioUsuario {
         this.bolsaDeJugador = bolsaDeJugador;
         this.tokensDisponibles = tokensDisponibles;
         this.tokensEnVenta = tokensEnVenta;
-        this.actualizadoEn = LocalDateTime.now();
+        this.actualizadoEn = LocalDateTime.now(ZoneId.systemDefault());
     }
 
     public void agregarTokens(Integer cantidadTokens) {

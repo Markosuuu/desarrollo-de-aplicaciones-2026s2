@@ -42,7 +42,7 @@ public class MercadoController {
 
         AnuncioVenta anuncio = mercadoService.vender(sellerId, request.jugadorId(), request.cantidad());
 
-        AnuncioVentaResponse response = AnuncioVentaResponse.from(anuncio);;
+        AnuncioVentaResponse response = AnuncioVentaResponse.from(anuncio);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(response);

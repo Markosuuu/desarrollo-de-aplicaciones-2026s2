@@ -216,8 +216,8 @@ class MercadoServiceTest extends AbstractIntegrationTest {
                 "WhoScored",
                 100
         );
-        BolsaDeJugador persistida = jugadorRepository.save(bolsa);
-        return persistida;
+        
+        return jugadorRepository.save(bolsa);
     }
 
     private String uniqueEmail(String base) {

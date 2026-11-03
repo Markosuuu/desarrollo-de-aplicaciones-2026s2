@@ -2,6 +2,7 @@ package com.prontaentrega.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 import com.prontaentrega.models.enums.EstadoOperacion;
@@ -39,6 +40,6 @@ public class Operacion {
         this.total = total;
         this.tipo = tipo;
         this.estado = estado;
-        this.creadaEn = LocalDateTime.now();
+        this.creadaEn = LocalDateTime.now(ZoneId.systemDefault());
     }
 }

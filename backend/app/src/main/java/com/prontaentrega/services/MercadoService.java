@@ -18,6 +18,7 @@ import com.prontaentrega.services.exceptions.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,6 +38,8 @@ public class MercadoService {
     private final UsuarioRepository usuarioRepository;
     private final JugadorRepository jugadorRepository;
     private final OperacionRepository operacionRepository;
+
+    private static final String JUGADOR_NO_ENCONTRADO = "Jugador no encontrado con el id: ";
 
     public MercadoService(AnuncioVentaRepository anuncioVentaRepository,
                           InventarioUsuarioRepository inventarioUsuarioRepository,
@@ -80,7 +83,7 @@ public class MercadoService {
                 .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id" + usuarioId.toString()));
 
         BolsaDeJugador bolsa = Optional.ofNullable(jugadorRepository.findById(jugadorId))
-                .orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado con el id" + jugadorId.toString()));
+                .orElseThrow(() -> new JugadorNoEncontradoException(JUGADOR_NO_ENCONTRADO + jugadorId.toString()));
 
         if (cantidad == null || cantidad <= 0) {
             throw new CantidadDeTokensException("La cantidad debe ser mayor a cero");
@@ -101,7 +104,7 @@ public class MercadoService {
         // Estos setters son medio raretes, quizás se podría pasar a service?
         saldo.setTokensDisponibles(disponibles - cantidad);
         saldo.setTokensEnVenta((saldo.getTokensEnVenta() == null ? 0 : saldo.getTokensEnVenta()) + cantidad);
-        saldo.setActualizadoEn(LocalDateTime.now());
+        saldo.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(saldo);
 
         return anuncio;
@@ -157,7 +160,7 @@ public class MercadoService {
 
         BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(jugadorId))
                 .orElseThrow(() -> new JugadorNoEncontradoException(
-                        "Jugador no encontrado con el id" + jugadorId));
+                        JUGADOR_NO_ENCONTRADO + jugadorId));
 
         BigDecimal precioCompra = anuncio.getPrecioPorToken()
                 .multiply(BigDecimal.valueOf(cantidadCompra));
@@ -185,11 +188,11 @@ public class MercadoService {
         InventarioUsuario tokenComprador = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(compradorId, jugadorId)
                 .orElse(new InventarioUsuario(comprador, bolsaJugador, 0, 0));
         tokenComprador.agregarTokens(cantidadCompra);
-        tokenComprador.setActualizadoEn(LocalDateTime.now());
+        tokenComprador.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(tokenComprador);
 
         tokenVendedor.quitarTokens(cantidadCompra);
-        tokenVendedor.setActualizadoEn(LocalDateTime.now());
+        tokenVendedor.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(tokenVendedor);
 
         int cantidadRestante = anuncio.getCantidadTokens() - cantidadCompra;
@@ -199,7 +202,7 @@ public class MercadoService {
         if (cantidadRestante == 0) {
             anuncio.setEstado(EstadoAnuncioVenta.COMPLETADA);
         }
-        anuncio.setActualizadoEn(LocalDateTime.now());
+        anuncio.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         anuncioVentaRepository.save(anuncio);
 
         Jugador jugador = bolsaJugador.getEstadisticasDeportivas().getJugador();
@@ -251,18 +254,18 @@ public class MercadoService {
 
         BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(jugadorId))
                 .orElseThrow(() -> new JugadorNoEncontradoException(
-                        "Jugador no encontrado con el id" + jugadorId));
+                        JUGADOR_NO_ENCONTRADO + jugadorId));
 
         InventarioUsuario saldo = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(vendedorId, jugadorId)
                 .orElse(new InventarioUsuario(vendedor, bolsaJugador, 0, 0));
 
         saldo.setTokensDisponibles(saldo.getTokensDisponibles() + anuncio.getCantidadTokens());
         saldo.setTokensEnVenta(saldo.getTokensEnVenta() - anuncio.getCantidadTokens());
-        saldo.setActualizadoEn(LocalDateTime.now());
+        saldo.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(saldo);
 
         anuncio.setEstado(EstadoAnuncioVenta.CANCELADA);
-        anuncio.setActualizadoEn(LocalDateTime.now());
+        anuncio.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         anuncioVentaRepository.save(anuncio);
     }
 
@@ -285,7 +288,7 @@ public class MercadoService {
 
         BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(jugadorId))
                 .orElseThrow(() -> new JugadorNoEncontradoException(
-                        "Jugador no encontrado con el id" + jugadorId));
+                        JUGADOR_NO_ENCONTRADO + jugadorId));
 
         if (bolsaJugador.getTokensRestantes() < cantidad) {
             throw new CantidadDeTokensException("El jugador ya no tiene suficientes tokens disponibles");
@@ -303,7 +306,7 @@ public class MercadoService {
         InventarioUsuario tokenComprador = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(compradorId, jugadorId)
                 .orElse(new InventarioUsuario(comprador, bolsaJugador, 0, 0));
         tokenComprador.agregarTokens(cantidad);
-        tokenComprador.setActualizadoEn(LocalDateTime.now());
+        tokenComprador.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(tokenComprador);
 
 

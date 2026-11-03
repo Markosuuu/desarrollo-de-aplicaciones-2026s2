@@ -2,6 +2,7 @@ package com.prontaentrega.models;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 import com.prontaentrega.models.enums.EstadoAnuncioVenta;
@@ -40,7 +41,7 @@ public class AnuncioVenta {
         this.precioPorToken = bolsaDeJugador.getCotizacionActual();
         this.precioTotal = this.precioPorToken.multiply(BigDecimal.valueOf(cantidadTokens));
         this.estado = EstadoAnuncioVenta.PENDIENTE;
-        this.creadoEn = LocalDateTime.now();
+        this.creadoEn = LocalDateTime.now(ZoneId.systemDefault());
         this.actualizadoEn = this.creadoEn;
     }
 }
