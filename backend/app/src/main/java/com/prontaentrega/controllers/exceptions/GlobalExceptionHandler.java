@@ -90,6 +90,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(RefreshCatalogResponse.failure(ex.getMessage()));
     }
 
+    // t_odo: hay que volar este
     @ExceptionHandler(PlayerNotFoundException.class)
     public ResponseEntity<ErrorResponse> handlePlayerNotFound(PlayerNotFoundException ex) {
         return error(HttpStatus.NOT_FOUND, "JUGADOR NO ENCONTRADO", ex.getMessage());
@@ -100,24 +101,29 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, "CANTIDAD_DE_TOKENS_INVALIDA", ex.getMessage());
     }
 
+    @ExceptionHandler(UsuarioNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handleUsuarioNoEncontrado(UsuarioNoEncontradoException ex) {
+        return error(HttpStatus.NOT_FOUND, "USUARIO_NO_ENCONTRADO", ex.getMessage());
+    }
+
     @ExceptionHandler(JugadorNoEncontradoException.class)
     public ResponseEntity<ErrorResponse> handleValidation(JugadorNoEncontradoException ex) {
-        return error(HttpStatus.BAD_REQUEST, "JUGADOR_NO_ENCONTRADO", ex.getMessage());
+        return error(HttpStatus.NOT_FOUND, "JUGADOR_NO_ENCONTRADO", ex.getMessage());
     }
 
     @ExceptionHandler(AnuncioNoEncontradoException.class)
     public ResponseEntity<ErrorResponse> handleValidation(AnuncioNoEncontradoException ex) {
-        return error(HttpStatus.BAD_REQUEST, "ANUNCIO_NO_ENCONTRADO", ex.getMessage());
+        return error(HttpStatus.NOT_FOUND, "ANUNCIO_NO_ENCONTRADO", ex.getMessage());
     }
 
     @ExceptionHandler(SinAutorizacionExpcetion.class)
     public ResponseEntity<ErrorResponse> handleValidation(SinAutorizacionExpcetion ex) {
-        return error(HttpStatus.BAD_REQUEST, "SIN_AUTORIZACION", ex.getMessage());
+        return error(HttpStatus.FORBIDDEN, "SIN_AUTORIZACION", ex.getMessage());
     }
 
     @ExceptionHandler(AnuncioNoPendienteException.class)
     public ResponseEntity<ErrorResponse> handleValidation(AnuncioNoPendienteException ex) {
-        return error(HttpStatus.BAD_REQUEST, "ANUNCIO_NO_PENDIENTE", ex.getMessage());
+        return error(HttpStatus.CONFLICT, "ANUNCIO_NO_PENDIENTE", ex.getMessage());
     }
 
     @ExceptionHandler(VendedorComprandoTokensPropiosException.class)
@@ -127,7 +133,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CreditosInsuficientesException.class)
     public ResponseEntity<ErrorResponse> handleValidation(CreditosInsuficientesException ex) {
-        return error(HttpStatus.BAD_REQUEST, "CREDITOS_INSUFICIENTES_PARA_COMPRAR", ex.getMessage());
+        return error(HttpStatus.UNPROCESSABLE_ENTITY, "CREDITOS_INSUFICIENTES_PARA_COMPRAR", ex.getMessage());
     }
 
     private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message) {
