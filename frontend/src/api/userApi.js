@@ -1,22 +1,29 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
-const ALLOWED_API_HOSTS = new Set(["transactions", "inventario"]);
+const USER_RESOURCES = Object.freeze({
+  inventario: "inventario",
+  transactions: "transactions",
+});
+
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 async function fetchUserData(userId, resource, token) {
-  if (!ALLOWED_API_HOSTS.includes(resource)) {
-    throw new Error("API inválida");
+  if (!UUID_PATTERN.test(String(userId))) {
+    throw new Error("Id de usuario inválido.");
   }
 
-  const response = await fetch(
-    `${API_BASE_URL}/users/${encodeURIComponent(userId)}/${resource}`,
-    {
-      headers: {
-        Accept: "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
+  if (!Object.hasOwn(USER_RESOURCES, resource)) {
+    throw new Error("Recurso de usuario no permitido.");
+  }
+
+  const response = await fetch(`${API_BASE_URL}/users/${userId}/${resource}`, {
+    headers: {
+      Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-  );
+  });
 
   const payload = await response.json().catch(() => ({}));
 
