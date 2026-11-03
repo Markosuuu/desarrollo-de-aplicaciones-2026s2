@@ -15,7 +15,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @SpringBootTest
-@Tag("integracion")
+@Tag("modelo")
 public class PersistenceManagerTest extends AbstractIntegrationTest {
 
     @Mock
