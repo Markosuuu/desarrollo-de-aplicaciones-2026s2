@@ -158,3 +158,273 @@ describe("OfertaPage", () => {
     expect(screen.queryByRole("button", { name: "Comprar" })).toBeNull();
   });
 });
+
+test("muestra un error cuando la API no encuentra la oferta", async () => {
+    mocks.fetchListings.mockResolvedValue([]);
+
+    renderOffer({ withNavigationState: false });
+
+    expect(
+        await screen.findByText("No se encontró el anuncio solicitado."),
+    ).toBeInTheDocument();
+});
+
+test("muestra el mensaje del error cuando falla la carga de la oferta", async () => {
+    mocks.fetchListings.mockRejectedValue(
+        new Error("Error del servidor"),
+    );
+
+    renderOffer({ withNavigationState: false });
+
+    expect(
+        await screen.findByText("Error del servidor"),
+    ).toBeInTheDocument();
+});
+
+test("muestra el mensaje predeterminado cuando falla la carga sin un mensaje de error", async () => {
+    mocks.fetchListings.mockRejectedValue({});
+
+    renderOffer({ withNavigationState: false });
+
+    expect(
+        await screen.findByText(
+            "No se pudo cargar la información del anuncio.",
+        ),
+    ).toBeInTheDocument();
+});
+
+test("permite reintentar la carga de una oferta", async () => {
+    mocks.fetchListings
+        .mockRejectedValueOnce(new Error("Error temporal"))
+        .mockResolvedValueOnce([listing]);
+
+    renderOffer({ withNavigationState: false });
+
+    expect(await screen.findByText("Error temporal")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+
+    expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
+
+    expect(mocks.fetchListings).toHaveBeenCalledTimes(2);
+});
+
+test("muestra un error cuando no se puede identificar al usuario", async () => {
+    mocks.useAuth.mockReturnValue({
+        user: { nombre: "Usuario" },
+        token: "token-test",
+    });
+
+    renderOffer();
+
+    expect(
+        await screen.findByText("No se pudo identificar al usuario."),
+    ).toBeInTheDocument();
+
+    expect(mocks.fetchUserInventory).not.toHaveBeenCalled();
+
+    expect(screen.getByText("No disponible")).toBeInTheDocument();
+});
+
+test("utiliza los créditos del usuario cuando no aparece en el inventario", async () => {
+    mocks.fetchUserInventory.mockResolvedValue([]);
+
+    renderOffer();
+
+    expect(await screen.findByText("100 créditos")).toBeInTheDocument();
+});
+
+test("muestra un error cuando falla la carga de créditos y permite reintentar", async () => {
+    mocks.fetchUserInventory
+        .mockRejectedValueOnce(new Error("Error temporal"))
+        .mockResolvedValueOnce(userInventory);
+
+    renderOffer();
+
+    expect(
+        await screen.findByText(
+            "No se pudieron cargar los créditos actuales.",
+        ),
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+
+    expect(await screen.findByText("75 créditos")).toBeInTheDocument();
+
+    expect(mocks.fetchUserInventory).toHaveBeenCalledTimes(2);
+});
+
+test("rechaza cantidades que no sean números enteros", async () => {
+    renderOffer();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Comprar" }));
+
+    const input = screen.getByLabelText(/Cantidad \(máximo 4\)/);
+
+    fireEvent.change(input, {
+        target: { value: "1.5" },
+    });
+
+    fireEvent.submit(input.closest("form"));
+
+    expect(
+        await screen.findAllByText("Ingresa una cantidad entre 1 y 4."),
+    ).toHaveLength(2);
+
+    expect(mocks.buyListing).not.toHaveBeenCalled();
+});
+
+test("rechaza la compra cuando el usuario no tiene créditos suficientes", async () => {
+    mocks.fetchUserInventory.mockResolvedValue([
+        {
+            usuario: { id: "user-1", creditosDisponibles: 10 },
+        },
+    ]);
+
+    renderOffer();
+
+    await screen.findByText("10 créditos");
+
+    fireEvent.click(screen.getByRole("button", { name: "Comprar" }));
+
+    const input = screen.getByLabelText(/Cantidad \(máximo 4\)/);
+
+    fireEvent.submit(input.closest("form"));
+
+    expect(
+        await screen.findAllByText(
+            "No tienes créditos suficientes para esa cantidad.",
+        ),
+    ).toHaveLength(2);
+
+    expect(mocks.buyListing).not.toHaveBeenCalled();
+});
+
+test("muestra el error cuando falla la compra", async () => {
+    mocks.buyListing.mockRejectedValue(
+        new Error("No se pudo procesar la compra"),
+    );
+
+    renderOffer();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Comprar" }));
+
+    const input = screen.getByLabelText(/Cantidad \(máximo 4\)/);
+
+    fireEvent.submit(input.closest("form"));
+
+    expect(
+        await screen.findAllByText("No se pudo procesar la compra"),
+    ).toHaveLength(2);
+
+    expect(mocks.buyListing).toHaveBeenCalledTimes(1);
+});
+
+test("muestra el mensaje predeterminado cuando falla la compra sin un mensaje de error", async () => {
+    mocks.buyListing.mockRejectedValue({});
+
+    renderOffer();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Comprar" }));
+
+    fireEvent.click(
+        screen.getByRole("button", { name: "Confirmar compra" }),
+    );
+
+    expect(
+        await screen.findAllByText("No se pudo completar la compra."),
+    ).toHaveLength(2);
+});
+
+test("no cancela la oferta cuando el usuario rechaza la confirmación", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => false));
+
+    renderOffer({ asOwner: true });
+
+    fireEvent.click(
+        await screen.findByRole("button", { name: "Cancelar oferta" }),
+    );
+
+    expect(window.confirm).toHaveBeenCalled();
+    expect(mocks.cancelListing).not.toHaveBeenCalled();
+});
+
+test("muestra un error cuando falla la cancelación", async () => {
+    mocks.cancelListing.mockRejectedValue(
+        new Error("No se pudo cancelar"),
+    );
+
+    renderOffer({ asOwner: true });
+
+    fireEvent.click(
+        await screen.findByRole("button", { name: "Cancelar oferta" }),
+    );
+
+    expect(
+        await screen.findAllByText("No se pudo cancelar"),
+    );
+
+    expect(mocks.cancelListing).toHaveBeenCalledTimes(1);
+});
+
+test("muestra el mensaje predeterminado cuando falla la cancelación sin un mensaje de error", async () => {
+    mocks.cancelListing.mockRejectedValue({});
+
+    renderOffer({ asOwner: true });
+
+    fireEvent.click(
+        await screen.findByRole("button", { name: "Cancelar oferta" }),
+    );
+
+    expect(
+        await screen.findByText("No se pudo cancelar la oferta."),
+    ).toBeInTheDocument();
+});
+
+test("muestra que la oferta no está disponible cuando fue cancelada", async () => {
+    const cancelledListing = {
+        ...listing,
+        estado: "CANCELADA",
+    };
+
+    render(
+        <MemoryRouter
+            initialEntries={[
+                {
+                    pathname: "/mercado/listing-1",
+                    state: { listing: cancelledListing },
+                },
+            ]}
+        >
+            <Routes>
+                <Route path="/mercado/:id" element={<OfertaPage />} />
+            </Routes>
+        </MemoryRouter>,
+    );
+
+    expect(
+        await screen.findByText(
+            "Esta oferta ya no está disponible.",
+        ),
+    ).toBeInTheDocument();
+
+    expect(
+        screen.queryByRole("button", { name: "Comprar" }),
+    ).not.toBeInTheDocument();
+
+    expect(
+        screen.queryByRole("button", { name: "Cancelar oferta" }),
+    ).not.toBeInTheDocument();
+});
+
+test("permite cerrar el diálogo de compra con el botón Volver", async () => {
+    renderOffer();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Comprar" }));
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Volver" }));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
