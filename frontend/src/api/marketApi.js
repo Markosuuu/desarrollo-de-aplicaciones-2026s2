@@ -29,7 +29,7 @@ export async function fetchListings(token) {
   const payload = await request("/marketplace/listings", { token });
 
   if (!Array.isArray(payload)) {
-    throw new Error("La API devolvió un listado de anuncios inválido.");
+    throw new TypeError("La API devolvió un listado de anuncios inválido.");
   }
 
   return payload;

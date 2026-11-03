@@ -1,20 +1,15 @@
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
-const USER_RESOURCES = Object.freeze({
-  inventario: "inventario",
-  transactions: "transactions",
-});
+const ALLOWED_API_HOSTS = new Set(["transactions", "inventario"]);
 
 async function fetchUserData(userId, resource, token) {
-  const resourcePath = USER_RESOURCES[resource];
-
-  if (!resourcePath || !Object.hasOwn(USER_RESOURCES, resource)) {
-    throw new Error("Recurso de usuario no permitido.");
+  if (!ALLOWED_API_HOSTS.has(resource)) {
+    throw new Error("Invalid API host");
   }
 
   const response = await fetch(
-    `${API_BASE_URL}/users/${encodeURIComponent(userId)}/${resourcePath}`,
+    `${API_BASE_URL}/users/${encodeURIComponent(userId)}/${resource}`,
     {
       headers: {
         Accept: "application/json",
@@ -34,7 +29,7 @@ async function fetchUserData(userId, resource, token) {
   }
 
   if (!Array.isArray(payload)) {
-    throw new Error("La API devolvió un formato de datos inválido.");
+    throw new TypeError("La API devolvió un formato de datos inválido.");
   }
 
   return payload;
