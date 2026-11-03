@@ -138,7 +138,7 @@ public class PlayerCatalogService {
         int safePage = Math.max(page, 1);
         int safePerPage = Math.clamp(perPage, 1, 50);
 
-        Pageable pageable = PageRequest.of(safePage, safePerPage);
+        Pageable pageable = PageRequest.of(safePage-1, safePerPage);
 
         return jugadorRepository.getRanking(pageable);
     }

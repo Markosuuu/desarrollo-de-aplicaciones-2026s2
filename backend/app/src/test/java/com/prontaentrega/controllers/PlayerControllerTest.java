@@ -442,7 +442,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 BigDecimal.valueOf(5.5), 2200
         );
         BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
-
+        jugadorRepository.save(bolsaJugador);
         mockMvc.perform(get("/api/players/ranking")
                         .header("Authorization", "Bearer "+result.token()))
                 .andExpect(status().isOk())
@@ -453,7 +453,10 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.paginacion.pagina").value(1))
                 .andExpect(jsonPath("$.paginacion.porPagina").value(20))
                 .andExpect(jsonPath("$.paginacion.total").value(1))
-                .andExpect(jsonPath("$.paginacion.totalPaginas").value(1));
+                .andExpect(jsonPath("$.paginacion.totalPaginas").value(1))
+                // Contenido de jugadores
+                .andExpect(jsonPath("$.jugadores").isNotEmpty())
+                .andExpect(jsonPath("$.jugadores[0].nombre").value("Riquelme"));
     }
 
     private static @NotNull EstadisticasDeportivas getEstadisticas() {
