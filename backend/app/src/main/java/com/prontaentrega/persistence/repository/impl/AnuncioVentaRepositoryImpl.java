@@ -58,11 +58,6 @@ public class AnuncioVentaRepositoryImpl implements AnuncioVentaRepository {
     }
 
     @Override
-    public Long count() {
-        return dao.count();
-    }
-
-    @Override
     public void deleteAll() {
         dao.deleteAll();
     }

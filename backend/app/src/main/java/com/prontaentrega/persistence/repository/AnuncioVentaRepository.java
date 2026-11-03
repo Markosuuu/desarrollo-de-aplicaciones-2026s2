@@ -12,6 +12,5 @@ public interface AnuncioVentaRepository {
     Optional<AnuncioVenta> findById(UUID id);
     Optional<AnuncioVenta> findByIdForUpdate(UUID id);
     Page<AnuncioVenta> findByEstado(EstadoAnuncioVenta estado, Pageable pageable);
-    Long count();
     void deleteAll();
 }

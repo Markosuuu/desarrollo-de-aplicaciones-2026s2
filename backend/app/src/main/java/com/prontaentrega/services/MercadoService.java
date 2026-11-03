@@ -168,13 +168,13 @@ public class MercadoService {
             throw new CreditosInsuficientesException("No tienes suficientes créditos");
         }
 
-        InventarioUsuario tokenVendedor = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(
+        InventarioUsuario inventarioVendedor = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(
                 vendedor.getId(), jugadorId)
                 .orElse(new InventarioUsuario(vendedor, bolsaJugador, 0, 0));
 
-        int enVenta = tokenVendedor.getTokensEnVenta() == null ? 0 : tokenVendedor.getTokensEnVenta();
+        int tokensEnVentaDeJugador = inventarioVendedor.getTokensEnVenta() == null ? 0 : inventarioVendedor.getTokensEnVenta();
 
-        if (anuncio.getCantidadTokens() > enVenta) {
+        if (anuncio.getCantidadTokens() > tokensEnVentaDeJugador) {
             throw new CantidadDeTokensException("La publicación ya no tiene tokens disponibles");
         }
 
@@ -191,9 +191,9 @@ public class MercadoService {
         tokenComprador.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(tokenComprador);
 
-        tokenVendedor.quitarTokens(cantidadCompra);
-        tokenVendedor.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
-        inventarioUsuarioRepository.save(tokenVendedor);
+        inventarioVendedor.quitarTokens(cantidadCompra);
+        inventarioVendedor.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+        inventarioUsuarioRepository.save(inventarioVendedor);
 
         int cantidadRestante = anuncio.getCantidadTokens() - cantidadCompra;
         anuncio.setCantidadTokens(cantidadRestante);
@@ -278,6 +278,19 @@ public class MercadoService {
         return operacionRepository.findByUsuarioId(usuarioId);
     }
 
+    /**
+     * Metodo para comprar al super usuario
+     * <p>
+     * Idea: quizás pasar un boolean al metodo solo para admitir el super y así tener un único metodo de compra?
+     *
+     * @param compradorId Id del comprador
+     * @param jugadorId Id del jugador
+     * @param cantidad Cantidad a comprar
+     * @throws UsuarioNoEncontradoException Si el comprador o vendedor no existen
+     * @throws JugadorNoEncontradoException Si el jugador no existen
+     * @throws CreditosInsuficientesException Si el comprador no tiene suficientes créditos
+     * @throws CantidadDeTokensException Si la cantidad de tokens en el anuncio es mayor a la cantidad de tokens en venta del vendedor o si la cantidad pedida es menor a 1
+     */
     public void comprarSuper(UUID compradorId, UUID jugadorId, Integer cantidad) {
         if (cantidad == null || cantidad <= 0) {
             throw new CantidadDeTokensException("La cantidad debe ser mayor a cero");
@@ -309,7 +322,6 @@ public class MercadoService {
         tokenComprador.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(tokenComprador);
 
-
         bolsaJugador.setTokensRestantes(bolsaJugador.getTokensRestantes() - cantidad);
         jugadorRepository.save(bolsaJugador);
 
@@ -324,7 +336,17 @@ public class MercadoService {
         operacionRepository.save(compra);
     }
 
+    /**
+     * Metodo para obtener el inventario de un usuario específico
+     * @param usuarioId Un usuario
+     * @return Una lista con el inventario del usuario dado.
+     * @throws UsuarioNoEncontradoException Si el usuario dado no existe.
+     */
     public List<InventarioUsuario> getInventarioById(UUID usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new UsuarioNoEncontradoException("Uusario no encontrado con el id: " + usuarioId.toString());
+        }
+
         return inventarioUsuarioRepository.findAllByUsuarioId(usuarioId);
     }
 }

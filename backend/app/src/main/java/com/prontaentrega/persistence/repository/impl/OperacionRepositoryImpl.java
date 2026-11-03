@@ -49,18 +49,6 @@ public class OperacionRepositoryImpl implements OperacionRepository {
     }
 
     @Override
-    public List<Operacion> findByUsuarioIdOrContraparteId(UUID usuarioId) {
-        List<Operacion> resultados = new ArrayList<>();
-        resultados.addAll(dao.findAllByUsuario_IdOrderByCreadaEnDesc(usuarioId).stream()
-                .map(OperacionDTOSQL::aModelo)
-                .toList());
-        resultados.addAll(dao.findAllByContraparte_IdOrderByCreadaEnDesc(usuarioId).stream()
-                .map(OperacionDTOSQL::aModelo)
-                .toList());
-        return resultados.stream().distinct().sorted((a, b) -> b.getCreadaEn().compareTo(a.getCreadaEn())).toList();
-    }
-
-    @Override
     public Long count() {
         return dao.count();
     }
