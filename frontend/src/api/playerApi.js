@@ -50,3 +50,15 @@ export async function fetchPlayer(id, token) {
 
   return payload;
 }
+
+  export async function fetchPlayerQuotesHistory(id, token) {
+  const response = await fetch(`${API_BASE_URL}/players/${id}/quotes`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: 'Bearer '+ token
+    },
+  });
+  const payload = await response.json().catch(() => ({}));
+
+  return payload;
+}

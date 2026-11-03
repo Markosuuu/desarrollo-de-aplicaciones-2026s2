@@ -1,26 +1,11 @@
 import { useParams } from "react-router-dom";
-import { fetchPlayer } from "../api/playerApi";
+import { fetchPlayer, fetchPlayerQuotesHistory} from "../api/playerApi";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import PlayerRadar from "../components/PlayerRadarStats";
 import "../styles/playerPage.css"
 
 import QuoteHistoryChart from '../components/QuoteHistoryChart';
-
-const historialPrueba = [
-    { fecha: '2026-09-21', precio: 250 },
-    { fecha: '2026-09-28', precio: 275 },
-    { fecha: '2026-10-05', precio: 265 },
-    { fecha: '2026-10-12', precio: 250 },
-    { fecha: '2026-10-19', precio: 190 },
-    { fecha: '2026-10-30', precio: 250 },
-    { fecha: '2026-11-10', precio: 350 },
-    { fecha: '2026-11-21', precio: 50 },
-    { fecha: '2026-11-28', precio: 95 },
-    { fecha: '2026-12-05', precio: 265 },
-    { fecha: '2026-12-12', precio: 310 },
-    { fecha: '2026-12-19', precio: 290 },
-];
 
 export default function PlayerPage() {
     const [player, setPlayer] = useState(null);
@@ -29,6 +14,7 @@ export default function PlayerPage() {
     const { token } = useAuth();
     const { id } = useParams();
     const [retry, setRetry] = useState(0);
+    const [quoteHistory, setQuoteHistory] = useState([]);
 
     useEffect(() => {
         let active = true;
@@ -39,13 +25,13 @@ export default function PlayerPage() {
 
             try {
                 const response = await fetchPlayer(id, token);
-
+                const history = await fetchPlayerQuotesHistory(id, token)
                 if (active) {
                     setPlayer(response);
+                    setQuoteHistory(history)
+
                 }
             } catch (error) {
-                console.error("Error al cargar el jugador:", error);
-
                 if (active) {
                     setError(
                         error.message || "No se pudo cargar la información del jugador."
@@ -175,7 +161,7 @@ export default function PlayerPage() {
 
                         <div className="playerPage-quote-chart">
                             <div className="playerPage-quote-chart">
-                                <QuoteHistoryChart data={historialPrueba} />
+                                <QuoteHistoryChart data={quoteHistory} />
                             </div>
                         </div>
                     </div>
