@@ -48,27 +48,19 @@ public class MercadoController {
     }
 
     @PostMapping("/orders/buy")
-    public ResponseEntity<Map<String, Object>> buy(@RequestBody ComprarTokensRequest request) {
+    public ResponseEntity<ComprarTokensResponse> buy(@RequestBody ComprarTokensRequest request) {
         UUID vendedorId = currentUserId();
         mercadoService.comprar(vendedorId, request.anuncioId());
 
-        // TODO: Mejorar response
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Compra completada correctamente",
-                "anuncioId", request.anuncioId()
-        ));
+        return ResponseEntity.ok(ComprarTokensResponse.from(true, "Compra completada correctamente", request.anuncioId()));
     }
 
     @DeleteMapping("/orders/{anuncioId}")
-    public ResponseEntity<Map<String, Object>> cancelSell(@PathVariable UUID anuncioId) {
+    public ResponseEntity<CancelarVentaResponse> cancelSell(@PathVariable UUID anuncioId) {
         UUID vendedorId = currentUserId();
         mercadoService.cancelarVenta(vendedorId, anuncioId);
 
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Anuncio cancelado correctamente"
-        ));
+        return ResponseEntity.ok(CancelarVentaResponse.from(true, "Anuncio cancelado correctamente"));
     }
 
     @GetMapping("/users/{id}/transactions")
@@ -84,17 +76,11 @@ public class MercadoController {
     }
 
     @PostMapping("/orders/super/buy")
-    public ResponseEntity<Map<String, Object>> comprarSuper(@RequestBody ComprarTokensSuperRequest request) {
+    public ResponseEntity<ComprarTokensSuperResponse> comprarSuper(@RequestBody ComprarTokensSuperRequest request) {
         UUID buyerId = currentUserId();
         mercadoService.comprarSuper(buyerId, request.jugadorId(), request.cantidad());
 
-        // TODO: Mejorar response
-        return ResponseEntity.ok(Map.of(
-                "success", true,
-                "message", "Compra completada correctamente",
-                "jugadorId", request.jugadorId(),
-                "cantidad", request.cantidad()
-        ));
+        return ResponseEntity.ok(ComprarTokensSuperResponse.from(true, "Compra completada correctamente", request.jugadorId(), request.cantidad()));
     }
 
     @GetMapping("/users/{id}/inventario")

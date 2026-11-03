@@ -125,6 +125,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, "VENDEDOR_COMPRANDO_TOKENS_PROPIOS", ex.getMessage());
     }
 
+    @ExceptionHandler(CreditosInsuficientesException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(CreditosInsuficientesException ex) {
+        return error(HttpStatus.BAD_REQUEST, "CREDITOS_INSUFICIENTES_PARA_COMPRAR", ex.getMessage());
+    }
+
     private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message) {
         ErrorResponse response = new ErrorResponse(
                 new ErrorResponse.ErrorDetail(code, message)

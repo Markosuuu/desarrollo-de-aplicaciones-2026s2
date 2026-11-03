@@ -68,19 +68,20 @@ beforeEach(() => {
 });
 
 describe("MercadoPage", () => {
-  test("muestra anuncios de otros usuarios y omite los propios", async () => {
+  test("muestra anuncios de otros usuarios y los propios", async () => {
     renderMarket();
 
     expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
     expect(screen.getByText("Vendedor Uno")).toBeInTheDocument();
-    expect(screen.queryByText("Jude Bellingham")).not.toBeInTheDocument();
+    expect(screen.getByText("Jude Bellingham")).toBeInTheDocument();
     expect(screen.getByText("50 créditos")).toBeInTheDocument();
   });
 
   test("navega al detalle de la oferta al elegir Comprar", async () => {
     renderMarket();
 
-    fireEvent.click(await screen.findByRole("button", { name: "Comprar" }));
+    let botones = await screen.findAllByRole("button", { name: "Comprar" });
+    fireEvent.click(botones[0]);
 
     expect(await screen.findByTestId("offer-route")).toBeInTheDocument();
   });
@@ -89,9 +90,12 @@ describe("MercadoPage", () => {
     renderMarket();
 
     await screen.findByText("Lionel Messi");
-    fireEvent.change(screen.getByRole("searchbox", { name: "Buscar anuncios" }), {
-      target: { value: "inexistente" },
-    });
+    fireEvent.change(
+      screen.getByRole("searchbox", { name: "Buscar anuncios" }),
+      {
+        target: { value: "inexistente" },
+      },
+    );
 
     await waitFor(() => {
       expect(
