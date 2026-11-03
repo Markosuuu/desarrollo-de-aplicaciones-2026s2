@@ -66,4 +66,9 @@ public class HistorialCotizacionRepositoryImpl implements HistorialCotizacionRep
                 .map(HistorialCotizacionDTOSQL::aModelo)
                 .toList();
     }
+
+    @Override
+    public void deleteAll() {
+        historialDAO.deleteAll();
+    }
 }

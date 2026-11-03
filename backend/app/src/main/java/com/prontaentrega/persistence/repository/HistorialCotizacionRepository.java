@@ -9,4 +9,5 @@ public interface HistorialCotizacionRepository {
     void guardarHistorial(List<HistorialCotizacion> actualizaciones);
 
     List<HistorialCotizacion> buscarPorBolsaId(UUID bolsaId);
+    void deleteAll();
 }
