@@ -442,7 +442,6 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 BigDecimal.valueOf(5.5), 2200
         );
         BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
-        BolsaDeJugador savedBolsa = jugadorRepository.save(bolsaJugador);
 
         mockMvc.perform(get("/api/players/ranking")
                         .header("Authorization", "Bearer "+result.token()))
