@@ -71,18 +71,18 @@ const subasta = {
   vencimiento: "2026-11-15T15:35:00",
 };
 
-function renderAuction(user = { id: "user-1", nombre: "Usuario" }) {
-  return render(
-    <MemoryRouter initialEntries={["/subasta/auction-1"]}>
-      <Routes>
-        <Route path="/subasta/:id" element={<SubastaPage />} />
-        <Route
-          path="/profile"
-          element={<div data-testid="profile-route">Perfil</div>}
-        />
-      </Routes>
-    </MemoryRouter>,
-  );
+function renderAuction() {
+    return render(
+        <MemoryRouter initialEntries={["/subasta/auction-1"]}>
+            <Routes>
+                <Route path="/subasta/:id" element={<SubastaPage />} />
+                <Route
+                    path="/profile"
+                    element={<div data-testid="profile-route">Perfil</div>}
+                />
+            </Routes>
+        </MemoryRouter>
+    );
 }
 
 beforeEach(() => {
