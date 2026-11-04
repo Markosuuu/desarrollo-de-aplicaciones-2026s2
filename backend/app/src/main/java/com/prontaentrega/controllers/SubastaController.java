@@ -1,12 +1,6 @@
 package com.prontaentrega.controllers;
 
-import com.prontaentrega.controllers.dtos.subastas.CerrarSubastaRequest;
-import com.prontaentrega.controllers.dtos.subastas.CerrarSubastaResponse;
-import com.prontaentrega.controllers.dtos.subastas.CrearSubastaRequest;
-import com.prontaentrega.controllers.dtos.subastas.SubastaDetalleResponse;
-import com.prontaentrega.controllers.dtos.subastas.OfertaResponse;
-import com.prontaentrega.controllers.dtos.subastas.OfertarSubastaRequest;
-import com.prontaentrega.controllers.dtos.subastas.SubastaResponse;
+import com.prontaentrega.controllers.dtos.subastas.*;
 import com.prontaentrega.models.Oferta;
 import com.prontaentrega.models.Subasta;
 import com.prontaentrega.services.SubastaService;
@@ -50,7 +44,7 @@ public class SubastaController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> listarSubastas(
+    public ResponseEntity<SubastaPagedResponse> listarSubastas(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<Subasta> subastas = subastaService.listarSubastas(page, size);
@@ -58,11 +52,9 @@ public class SubastaController {
                 .map(SubastaResponse::from)
                 .toList();
 
-        // TODO: Cambiar response
-        return ResponseEntity.ok(Map.of(
-                "items", items,
-                "page", page,
-                "size", size));
+        SubastaPagedResponse pages = new SubastaPagedResponse(items, page, size);
+
+        return ResponseEntity.ok(pages);
     }
 
     @GetMapping("/{id}")
