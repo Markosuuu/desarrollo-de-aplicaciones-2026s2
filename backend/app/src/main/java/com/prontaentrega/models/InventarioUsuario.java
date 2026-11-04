@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
-import com.prontaentrega.services.exceptions.CantidadDeTokensException;
+import com.prontaentrega.models.exception.CantidadDeTokensException;
 import lombok.*;
 
 /**
@@ -46,8 +46,6 @@ public class InventarioUsuario {
     public void ponerTokensEnVenta(Integer cantidad) {
 
         if (getTokensDisponibles() < cantidad) {
-            // TODO: Cambiar esta excepción porque es de service
-            // y estamos en modelo
             throw new CantidadDeTokensException("No posees suficientes tokens para subastar");
         }
 

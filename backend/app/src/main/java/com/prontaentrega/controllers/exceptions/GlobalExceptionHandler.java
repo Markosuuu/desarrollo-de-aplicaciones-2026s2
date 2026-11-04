@@ -1,5 +1,6 @@
 package com.prontaentrega.controllers.exceptions;
 
+import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.services.exceptions.*;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
