@@ -67,7 +67,7 @@ public class SubastaService {
 
     public Subasta obtenerSubasta(UUID subastaId) {
         return subastaRepository.findById(subastaId)
-                .orElseThrow(() -> new SubastaNoEncontradaException("Subasta no encontrada: " + subastaId));
+                .orElseThrow(() -> new SubastaNoEncontradaException(subastaId));
     }
 
     public List<Oferta> obtenerOfertas(UUID subastaId) {
@@ -82,7 +82,7 @@ public class SubastaService {
             BigDecimal precioInicial,
             LocalDateTime vencimiento) {
         Usuario vendedor = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id: " + usuarioId));
+                .orElseThrow(() -> new UsuarioNoEncontradoException(usuarioId));
 
         BolsaDeJugador bolsa = Optional.ofNullable(jugadorRepository.findById(jugadorId))
                 .orElseThrow(() -> new RuntimeException("Jugador no encontrado con el id: " + jugadorId));
@@ -122,7 +122,7 @@ public class SubastaService {
     @Transactional
     public Oferta ofertar(UUID usuarioId, UUID subastaId, BigDecimal puja, String idempotencyKey) {
         Subasta subasta = subastaRepository.findByIdForUpdate(subastaId)
-                .orElseThrow(() -> new SubastaNoEncontradaException("Subasta no encontrada: " + subastaId));
+                .orElseThrow(() -> new SubastaNoEncontradaException(subastaId));
 
         if (subasta.getEstado() != EstadoSubasta.ACTIVA) {
             throw new SubastaNoActivaException("La subasta ya no está activa");
@@ -153,7 +153,7 @@ public class SubastaService {
         }
 
         Usuario comprador = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id: " + usuarioId));
+                .orElseThrow(() -> new UsuarioNoEncontradoException(usuarioId));
 
         if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(puja) < 0) {
             throw new CreditosInsuficientesException("No tienes suficientes créditos para ofertar");
@@ -184,7 +184,7 @@ public class SubastaService {
     @Transactional
     public Subasta cerrarSubasta(UUID usuarioId, UUID subastaId, String motivo) {
         Subasta subasta = subastaRepository.findByIdForUpdate(subastaId)
-                .orElseThrow(() -> new SubastaNoEncontradaException("Subasta no encontrada: " + subastaId));
+                .orElseThrow(() -> new SubastaNoEncontradaException(subastaId));
 
         if (!subasta.getPropietario().getId().equals(usuarioId)) {
             throw new SinAutorizacionExpcetion("No puedes cerrar una subasta ajena");
@@ -217,7 +217,7 @@ public class SubastaService {
         Oferta ofertaGanadora = null;
         for (Oferta oferta : ofertas) {
             Usuario postor = usuarioRepository.findById(oferta.getUsuarioId())
-                    .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id: " + oferta.getUsuarioId()));
+                    .orElseThrow(() -> new UsuarioNoEncontradoException(oferta.getUsuarioId()));
             if (postor.getCreditosDisponibles() != null && postor.getCreditosDisponibles().compareTo(oferta.getPuja()) >= 0) {
                 ofertaGanadora = oferta;
                 break;
@@ -241,7 +241,7 @@ public class SubastaService {
 
     private void devolverTokensAlPropietario(Subasta subasta) {
         Usuario vendedor = usuarioRepository.findById(subasta.getPropietarioId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id: " + subasta.getPropietarioId()));
+                .orElseThrow(() -> new UsuarioNoEncontradoException(subasta.getPropietarioId()));
 
         UUID jugadorId = subasta.getJugadorId();
         BolsaDeJugador bolsa = subasta.getBolsaDeJugador();
@@ -258,10 +258,10 @@ public class SubastaService {
 
     private void liquidarVenta(Subasta subasta, Oferta ofertaGanadora) {
         Usuario vendedor = usuarioRepository.findById(subasta.getPropietarioId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id: " + subasta.getPropietarioId()));
+                .orElseThrow(() -> new UsuarioNoEncontradoException(subasta.getPropietarioId()));
 
         Usuario ganador = usuarioRepository.findById(ofertaGanadora.getUsuarioId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id: " + ofertaGanadora.getUsuarioId()));
+                .orElseThrow(() -> new UsuarioNoEncontradoException(ofertaGanadora.getUsuarioId()));
 
         BigDecimal totalPuja = ofertaGanadora.getPuja();
         BigDecimal precioPorToken = totalPuja.divide(
