@@ -1,6 +1,6 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { fetchPlayers, fetchPlayer, fetchPlayerQuotesHistory } from '../api/playerApi.js';
+import { fetchPlayers, fetchPlayer, fetchPlayerQuotesHistory, getRanking } from '../api/playerApi.js';
 
 describe('fetchPlayers', () => {
     beforeEach(() => {
@@ -192,5 +192,123 @@ describe('fetchPlayerQuotesHistory', () => {
         const result = await fetchPlayerQuotesHistory(1, 'token-test');
 
         expect(result).toEqual({});
+    });
+});
+
+describe('getRanking', () => {
+
+    beforeEach(() => {
+        vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+    });
+
+    test('debe obtener el ranking con parámetros por defecto', async () => {
+        const payload = [{ id: 1, nombre: 'Jugador 1' }];
+
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue(payload),
+        });
+
+        const result = await getRanking({ token: 'token-test' });
+
+        expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/players/ranking?page=1&perPage=50'),
+            {
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: 'Bearer token-test',
+                },
+            }
+        );
+
+        expect(result).toEqual(payload);
+    });
+
+    test('debe obtener el ranking con parámetros personalizados', async () => {
+        const payload = [{ id: 2, nombre: 'Jugador 2' }];
+
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue(payload),
+        });
+
+        const result = await getRanking({
+            page: 3,
+            perPage: 20,
+            token: 'token-test',
+        });
+
+        expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/players/ranking?page=3&perPage=20'),
+            expect.any(Object)
+        );
+
+        expect(result).toEqual(payload);
+    });
+
+    test('debe devolver un objeto vacío si falla el parseo del JSON', async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockRejectedValue(new Error('JSON inválido')),
+        });
+
+        const result = await getRanking({ token: 'token-test' });
+
+        expect(result).toEqual({});
+    });
+
+    test('debe lanzar el error recibido en error.message', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({
+                error: {
+                    message: 'Error al obtener el ranking',
+                },
+            }),
+        });
+
+        await expect(
+            getRanking({ token: 'token-test' })
+        ).rejects.toThrow('Error al obtener el ranking');
+    });
+
+    test('debe lanzar el error recibido en message si no existe error.message', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({
+                message: 'Acceso denegado',
+            }),
+        });
+
+        await expect(
+            getRanking({ token: 'token-test' })
+        ).rejects.toThrow('Acceso denegado');
+    });
+
+    test('debe lanzar el mensaje por defecto si no existe un mensaje de error', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({}),
+        });
+
+        await expect(
+            getRanking({ token: 'token-test' })
+        ).rejects.toThrow('No se pudo cargar el catálogo de jugadores.');
+    });
+
+    test('debe lanzar el mensaje por defecto si falla el parseo del JSON y la respuesta no es exitosa', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockRejectedValue(new Error('JSON inválido')),
+        });
+
+        await expect(
+            getRanking({ token: 'token-test' })
+        ).rejects.toThrow('No se pudo cargar el catálogo de jugadores.');
     });
 });

@@ -16,4 +16,5 @@ public interface JugadorRepository {
     Optional<BolsaDeJugador> findByWhoscoredId(Integer whoscoredId);
     void deleteAll();
     Long count();
+    Page<BolsaDeJugador> getRanking(Pageable page);
 }

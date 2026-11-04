@@ -7,6 +7,7 @@ import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import PlayerPage from "./pages/PlayerPage";
+import RankingPage from "./pages/RankingPage";
 import UserPage from "./pages/UserPage";
 import MercadoPage from "./pages/MercadoPage";
 import OfertaPage from "./pages/OfertaPage";
@@ -80,6 +81,17 @@ export default function App() {
             <ProtectedRoute requireAuth>
               <Sidebar>
                 <OfertaPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ranking"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <RankingPage />
               </Sidebar>
             </ProtectedRoute>
           }
