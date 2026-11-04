@@ -27,7 +27,7 @@
 ### 3. Realizar una oferta válida
 
 1. Autenticar como otro usuario distinto del propietario.
-2. Ejecutar `POST /api/subastas/ofertar` con `subastaId`, `puja` superior a la vigente y `idempotencyKey`.
+2. Ejecutar `POST /api/subastas/ofertar` con `subastaId`, `puja` superior al precio inicial o a la oferta vigente y `idempotencyKey`.
 3. Esperado: respuesta exitosa y la nueva oferta pasa a ser la más alta.
 
 ### 4. Rechazar una oferta inválida
@@ -39,7 +39,7 @@
 
 ### 5. Cierre por tiempo o manual
 
-1. Cerrar la subasta manualmente o dejar que expire el vencimiento.
+1. Cerrar la subasta manualmente o dejar que expire el vencimiento; el backend resuelve las vencidas automáticamente.
 2. Esperado: estado de la subasta pasa a cerrada; si hubiese ganador válido, se transferirá el paquete de tokens y se sumará el valor al crédito del vendedor.
 
 ### 6. Resolución con oferta inválida por créditos
@@ -51,8 +51,8 @@
 
 ### 7. Ver historial de ofertas y operaciones
 
-1. Ejecutar `GET /api/subastas/{id}/ofertas`.
-2. Ejecutar `GET /api/usuarios/{id}/operaciones` o el endpoint equivalente del proyecto.
+1. Ejecutar `GET /api/subastas/{id}/ofertas` o consultar el mismo historial dentro de `GET /api/subastas/{id}`.
+2. Ejecutar `GET /api/users/{id}/transactions`.
 3. Esperado: el historial refleja el valor de cada oferta y la operación final de compra/venta de cada parte.
 
 ## Criterios de éxito

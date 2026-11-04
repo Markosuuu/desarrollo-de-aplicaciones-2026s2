@@ -18,9 +18,9 @@
 
 **Purpose**: Prepare the existing Spring Boot project for the auction feature and confirm integration points with the marketplace domain.
 
-- [ ] T001 Review existing marketplace patterns and confirm package structure in `backend/app/src/main/java/com/prontaentrega/`
-- [ ] T002 [P] Add auction DTOs and request validation contracts in `backend/app/src/main/java/com/prontaentrega/controllers/dtos/` and `backend/app/src/main/java/com/prontaentrega/controllers/`
-- [ ] T003 [P] Add repository stubs and persistence contracts for auctions and offers in `backend/app/src/main/java/com/prontaentrega/persistence/repository/`
+- [x] T001 Review existing marketplace patterns and confirm package structure in `backend/app/src/main/java/com/prontaentrega/`
+- [x] T002 [P] Add auction DTOs and request validation contracts in `backend/app/src/main/java/com/prontaentrega/controllers/dtos/` and `backend/app/src/main/java/com/prontaentrega/controllers/`
+- [x] T003 [P] Add repository stubs and persistence contracts for auctions and offers in `backend/app/src/main/java/com/prontaentrega/persistence/repository/`
 
 ---
 
@@ -30,12 +30,12 @@
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel.
 
-- [ ] T004 Create `Subasta` domain model in `backend/app/src/main/java/com/prontaentrega/models/Subasta.java`
-- [ ] T005 Create `Oferta` domain model in `backend/app/src/main/java/com/prontaentrega/models/Oferta.java`
-- [ ] T006 [P] Add validation and status logic for auction lifecycle in `backend/app/src/main/java/com/prontaentrega/models/`
-- [ ] T007 [P] Add persistence mapping and repository support for `Subasta` and `Oferta` in `backend/app/src/main/java/com/prontaentrega/persistence/`
-- [ ] T008 Create auction service exceptions and domain error handling in `backend/app/src/main/java/com/prontaentrega/services/exceptions/`
-- [ ] T009 Create `SubastaService` skeleton and transaction boundaries in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
+- [x] T004 Create `Subasta` domain model in `backend/app/src/main/java/com/prontaentrega/models/Subasta.java`
+- [x] T005 Create `Oferta` domain model in `backend/app/src/main/java/com/prontaentrega/models/Oferta.java`
+- [x] T006 [P] Add validation and status logic for auction lifecycle in `backend/app/src/main/java/com/prontaentrega/models/`
+- [x] T007 [P] Add persistence mapping and repository support for `Subasta` and `Oferta` in `backend/app/src/main/java/com/prontaentrega/persistence/`
+- [x] T008 Create auction service exceptions and domain error handling in `backend/app/src/main/java/com/prontaentrega/services/exceptions/`
+- [x] T009 Create `SubastaService` skeleton and transaction boundaries in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
 
 ---
 
@@ -47,12 +47,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T010 [P] [US1] Add controller endpoint contract for auction creation in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
-- [ ] T011 [P] [US1] Implement create-auction flow in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
-- [ ] T012 [US1] Validate minimum quantity, future deadline, and owner token availability in `backend/app/src/main/java/com/prontaentrega/models/Subasta.java`
-- [ ] T013 [US1] Persist auction state and lock token availability in `backend/app/src/main/java/com/prontaentrega/persistence/repository/` and `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
-- [ ] T014 [US1] Add `GET /api/subastas` listing support and pagination in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
-- [ ] T015 [US1] Add `GET /api/subastas/{id}` detail retrieval in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
+- [x] T010 [P] [US1] Add controller endpoint contract for auction creation in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
+- [x] T011 [P] [US1] Implement create-auction flow in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
+- [x] T012 [US1] Validate minimum quantity, future deadline, and owner token availability in `backend/app/src/main/java/com/prontaentrega/models/Subasta.java`
+- [x] T013 [US1] Persist auction state and lock token availability in `backend/app/src/main/java/com/prontaentrega/persistence/repository/` and `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
+- [x] T014 [US1] Add `GET /api/subastas` listing support and pagination in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
+- [x] T015 [US1] Add `GET /api/subastas/{id}` detail retrieval in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently.
 
@@ -66,12 +66,12 @@
 
 ### Implementation for User Story 2
 
-- [ ] T016 [P] [US2] Add bid request DTOs and validation rules in `backend/app/src/main/java/com/prontaentrega/controllers/dtos/`
-- [ ] T017 [P] [US2] Implement `POST /api/subastas/ofertar` in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
-- [ ] T018 [US2] Implement bidding rules in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java` (owner cannot bid, open auction only, higher offer required)
-- [ ] T019 [US2] Enforce idempotence by user + auction in `backend/app/src/main/java/com/prontaentrega/models/Oferta.java` and `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
-- [ ] T020 [US2] Add optimistic concurrency handling for simultaneous bids in `backend/app/src/main/java/com/prontaentrega/models/Subasta.java` and service transaction logic
-- [ ] T021 [US2] Add `GET /api/subastas/{id}/ofertas` history endpoint in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
+- [x] T016 [P] [US2] Add bid request DTOs and validation rules in `backend/app/src/main/java/com/prontaentrega/controllers/dtos/`
+- [x] T017 [P] [US2] Implement `POST /api/subastas/ofertar` in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
+- [x] T018 [US2] Implement bidding rules in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java` (owner cannot bid, open auction only, higher offer required)
+- [x] T019 [US2] Enforce idempotence by user + auction in `backend/app/src/main/java/com/prontaentrega/models/Oferta.java` and `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
+- [x] T020 [US2] Add optimistic concurrency handling for simultaneous bids in `backend/app/src/main/java/com/prontaentrega/models/Subasta.java` and service transaction logic
+- [x] T021 [US2] Add `GET /api/subastas/{id}/ofertas` history endpoint in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
 
 **Checkpoint**: At this point, User Stories 1 and 2 should both work independently.
 
@@ -85,12 +85,12 @@
 
 ### Implementation for User Story 3
 
-- [ ] T022 [P] [US3] Add close-auction request/response contracts in `backend/app/src/main/java/com/prontaentrega/controllers/dtos/`
-- [ ] T023 [P] [US3] Implement `PATCH /api/subastas/{id}/cerrar` in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
-- [ ] T024 [US3] Implement auction close logic in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java` for time expiration and owner-driven close
-- [ ] T025 [US3] Resolve winner selection including fallback to the next valid highest offer and rejection of insufficient-credit bids in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
-- [ ] T026 [US3] Update token inventory and credit balances for seller and winner in `backend/app/src/main/java/com/prontaentrega/models/` and `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
-- [ ] T027 [US3] Generate final transaction records for both parties in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java` and `backend/app/src/main/java/com/prontaentrega/persistence/`
+- [x] T022 [P] [US3] Add close-auction request/response contracts in `backend/app/src/main/java/com/prontaentrega/controllers/dtos/`
+- [x] T023 [P] [US3] Implement `PATCH /api/subastas/{id}/cerrar` in `backend/app/src/main/java/com/prontaentrega/controllers/SubastaController.java`
+- [x] T024 [US3] Implement auction close logic in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java` for time expiration and owner-driven close
+- [x] T025 [US3] Resolve winner selection including fallback to the next valid highest offer and rejection of insufficient-credit bids in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
+- [x] T026 [US3] Update token inventory and credit balances for seller and winner in `backend/app/src/main/java/com/prontaentrega/models/` and `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java`
+- [x] T027 [US3] Generate final transaction records for both parties in `backend/app/src/main/java/com/prontaentrega/services/SubastaService.java` and `backend/app/src/main/java/com/prontaentrega/persistence/`
 
 **Checkpoint**: All user stories should now be independently functional.
 
@@ -100,10 +100,10 @@
 
 **Purpose**: Final validation, cleanup, and consistency checks for the full auction feature.
 
-- [ ] T028 [P] Add integration test coverage for edge cases in `backend/app/src/test/java/com/prontaentrega/services/SubastaServiceTest.java`
-- [ ] T029 [P] Add controller tests for closed auctions, invalid offers, and final settlement in `backend/app/src/test/java/com/prontaentrega/controllers/SubastaControllerTest.java`
-- [ ] T030 Documentation pass over `specs/007-token-auction/quickstart.md`, `research.md`, and `contracts/subasta-api.md` for final consistency
-- [ ] T031 Run the auction quickstart validation and verify the complete flow in `backend/app` and `frontend/src` if the UI is connected
+- [x] T028 [P] Add integration test coverage for edge cases in `backend/app/src/test/java/com/prontaentrega/services/SubastaServiceTest.java`
+- [x] T029 [P] Add controller tests for closed auctions, invalid offers, and final settlement in `backend/app/src/test/java/com/prontaentrega/controllers/SubastaControllerTest.java`
+- [x] T030 Documentation pass over `specs/007-token-auction/quickstart.md`, `research.md`, and `contracts/subasta-api.md` for final consistency
+- [x] T031 Run the auction quickstart validation and verify the complete flow in `backend/app` and `frontend/src` if the UI is connected
 
 ---
 

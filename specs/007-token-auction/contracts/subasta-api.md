@@ -87,10 +87,11 @@
 ```
 
 **Validaciones**:
-- `puja` debe ser mayor que la oferta actual más alta
+- `puja` debe superar el precio inicial o la oferta actual más alta
 - el usuario no puede ser propietario de la subasta
-- la subasta no puede estar cerrada
-- la misma clave de idempotencia no debe duplicar ofertas por usuario y subasta
+- la subasta debe estar activa y no vencida
+- la misma identidad de usuario y subasta no genera ofertas duplicadas en reintentos
+- el postor debe tener créditos suficientes para la puja, que no se reservan hasta el cierre
 
 **Response**:
 ```json
@@ -126,9 +127,11 @@
   "estado": "CERRADA",
   "ganadorId": "uuid",
   "montoFinal": 200.00,
-  "resultado": "VENTA_O_RETORNO"
+  "resultado": "VENTA"
 }
 ```
+
+Sin ganador válido, `ganadorId` y `montoFinal` son `null` y `resultado` es `RETORNO_TOKENS`.
 
 ## 6. Historial de ofertas
 

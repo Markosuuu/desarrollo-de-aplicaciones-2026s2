@@ -9,6 +9,7 @@ import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -134,6 +135,27 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CreditosInsuficientesException.class)
     public ResponseEntity<ErrorResponse> handleValidation(CreditosInsuficientesException ex) {
         return error(HttpStatus.UNPROCESSABLE_ENTITY, "CREDITOS_INSUFICIENTES_PARA_COMPRAR", ex.getMessage());
+    }
+
+    @ExceptionHandler(SubastaNoEncontradaException.class)
+    public ResponseEntity<ErrorResponse> handleSubastaNoEncontrada(SubastaNoEncontradaException ex) {
+        return error(HttpStatus.NOT_FOUND, "SUBASTA_NO_ENCONTRADA", ex.getMessage());
+    }
+
+    @ExceptionHandler(SubastaNoActivaException.class)
+    public ResponseEntity<ErrorResponse> handleSubastaNoActiva(SubastaNoActivaException ex) {
+        return error(HttpStatus.CONFLICT, "SUBASTA_NO_ACTIVA", ex.getMessage());
+    }
+
+    @ExceptionHandler(OfertaInvalidaException.class)
+    public ResponseEntity<ErrorResponse> handleOfertaInvalida(OfertaInvalidaException ex) {
+        return error(HttpStatus.BAD_REQUEST, "OFERTA_INVALIDA", ex.getMessage());
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleAuctionConflict(RuntimeException ex) {
+        return error(HttpStatus.CONFLICT, "SUBASTA_MODIFICADA_CONCURRENTEMENTE",
+                "La subasta cambió mientras se procesaba la solicitud; vuelve a intentarlo");
     }
 
     private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message) {
