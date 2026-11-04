@@ -5,13 +5,6 @@ plugins {
     id 'jacoco'
 }
 
-jacocoTestReport {
-    dependsOn test
-    reports {
-        xml.required = true
-    }
-}
-
 group = 'com.prontaentrega'
 version = '0.0.1-SNAPSHOT'
 
@@ -56,6 +49,41 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
-tasks.named('test') {
-    useJUnitPlatform()
+tasks.named('test', Test) {
+    useJUnitPlatform {
+        includeTags 'modelo'
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'integracion'
+    }
+    shouldRunAfter tasks.named('test')
+}
+
+tasks.register('e2eTest', Test) {
+    group = 'verification'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'e2e'
+    }
+    shouldRunAfter tasks.named('integrationTest')
+}
+jacocoTestReport {
+    dependsOn test, integrationTest
+
+    executionData.from(
+            fileTree(layout.buildDirectory.dir('jacoco')) {
+                include '*.exec'
+            }
+    )
+
+    reports {
+        xml.required = true
+    }
 }

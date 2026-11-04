@@ -46,6 +46,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String path = request.getRequestURI();
 
         return "/api/keys".equals(path)
+            || ("POST".equals(request.getMethod())
+            && ("/quotes/recalculate".equals(path) || "/api/quotes/recalculate".equals(path)))
+            || ("PUT".equals(request.getMethod())
+            && ("/quotes/strategy".equals(path) || "/api/quotes/strategy".equals(path)
+            || path.matches("^/(api/)?quotes/strategies/[^/]+/config$")))
                 || ("POST".equals(request.getMethod())
                 && "/api/players/update".equals(path));
     }

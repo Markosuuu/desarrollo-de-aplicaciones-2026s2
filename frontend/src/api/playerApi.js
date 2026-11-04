@@ -38,3 +38,52 @@ export async function fetchPlayers({ page = 1, perPage = 20, nombre, equipo, lig
 
   return payload;
 }
+
+export async function fetchPlayer(id, token) {
+  const response = await fetch(`${API_BASE_URL}/players/${id}`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: 'Bearer '+ token
+    },
+  });
+  const payload = await response.json().catch(() => ({}));
+
+  return payload;
+}
+
+  export async function fetchPlayerQuotesHistory(id, token) {
+  const response = await fetch(`${API_BASE_URL}/players/${id}/quotes`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: 'Bearer '+ token
+    },
+  });
+  const payload = await response.json().catch(() => ({}));
+
+  return payload;
+}
+
+export async function getRanking({ page = 1, perPage = 50, token } = {}) {
+  const params = new URLSearchParams();
+
+  params.set('page', String(page));
+  params.set('perPage', String(perPage));
+
+
+  const queryString = params.toString();
+  const response = await fetch(`${API_BASE_URL}/players/ranking?${queryString}`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: 'Bearer '+token
+    },
+  });
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message = payload?.error?.message || payload?.message || 'No se pudo cargar el catálogo de jugadores.';
+    throw new Error(message);
+  }
+
+  return payload;
+}

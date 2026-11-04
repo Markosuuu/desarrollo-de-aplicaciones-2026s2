@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.Posicion;
+import com.prontaentrega.models.enums.Posicion;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

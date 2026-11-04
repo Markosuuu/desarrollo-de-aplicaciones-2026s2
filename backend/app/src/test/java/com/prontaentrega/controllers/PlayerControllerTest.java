@@ -6,6 +6,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.prontaentrega.models.*;
+import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
@@ -19,6 +22,8 @@ import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,6 +31,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -39,6 +45,7 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
+@Tag("integracion")
 class PlayerControllerTest extends AbstractIntegrationTest {
     private static final AtomicInteger providerStatus = new AtomicInteger(200);
     private static final AtomicReference<String> providerBody = new AtomicReference<>(payload());
@@ -55,6 +62,9 @@ class PlayerControllerTest extends AbstractIntegrationTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private HistorialCotizacionRepository historialCotizacionRepository;
 
     @Autowired
     private ApiKeyService apiKeyService;
@@ -76,6 +86,7 @@ class PlayerControllerTest extends AbstractIntegrationTest {
      */
     @BeforeEach
     void cleanDatabase() {
+        historialCotizacionRepository.deleteAll();
         jugadorRepository.deleteAll();
         usuarioRepository.deleteAll();
         apiKeyDao.deleteAll();
@@ -305,6 +316,151 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.source").value("WhoScored"));
     }
 
+    @Test
+    void searchByIdShouldReturnPlayerResponseWhenFound() throws Exception {
+        AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        Jugador jugador = new Jugador(11, "Riquelme", "Boquita",
+                Liga.LALIGA, Posicion.MIDFIELDER, 25, 180, 75
+        );
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador, true, 10, 5, BigDecimal.valueOf(3.5),
+                BigDecimal.valueOf(5.2), BigDecimal.valueOf(1.5), BigDecimal.valueOf(0.5),
+                BigDecimal.valueOf(5.5), 2200
+        );
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+        BolsaDeJugador savedBolsa = jugadorRepository.save(bolsaJugador);
+        UUID id = savedBolsa.getEstadisticasDeportivas().getJugador().getId();
+
+
+        mockMvc.perform(get("/api/players/"+id.toString())
+                .header("Authorization", "Bearer "+result.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nombre").value("Riquelme"))
+                .andExpect(jsonPath("$.equipo").value("Boquita"))
+                .andExpect(jsonPath("$.liga").value("LaLiga"))
+        ;
+    }
+
+    @Test
+    void searchByIdWithoutAutorizationShouldReturnForbiden() throws Exception {
+        Jugador jugador = new Jugador(11, "Riquelme", "Boquita",
+                Liga.LALIGA, Posicion.MIDFIELDER, 25, 180, 75
+        );
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador, true, 10, 5, BigDecimal.valueOf(3.5),
+                BigDecimal.valueOf(5.2), BigDecimal.valueOf(1.5), BigDecimal.valueOf(0.5),
+                BigDecimal.valueOf(5.5), 2200
+        );
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+        BolsaDeJugador savedBolsa = jugadorRepository.save(bolsaJugador);
+        UUID id = savedBolsa.getEstadisticasDeportivas().getJugador().getId();
+
+        mockMvc.perform(get("/api/players/"+id.toString()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void searchByIdWithInvalidAutorizationShouldReturnUnauthorized() throws Exception {
+        Jugador jugador = new Jugador(11, "Riquelme", "Boquita",
+                Liga.LALIGA, Posicion.MIDFIELDER, 25, 180, 75
+        );
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador, true, 10, 5, BigDecimal.valueOf(3.5),
+                BigDecimal.valueOf(5.2), BigDecimal.valueOf(1.5), BigDecimal.valueOf(0.5),
+                BigDecimal.valueOf(5.5), 2200
+        );
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+        BolsaDeJugador savedBolsa = jugadorRepository.save(bolsaJugador);
+        UUID id = savedBolsa.getEstadisticasDeportivas().getJugador().getId();
+
+        mockMvc.perform(get("/api/players/"+id.toString())
+                .header("Authorization", "Bearer saraza"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void searchByIdWNonExistentReturns404() throws Exception {
+        AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(get("/api/players/21f22743-a0fe-4139-ad82-60df4096")
+                        .header("Authorization", "Bearer "+result.token()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void buscarHistorialShouldReturnPlayerQuoteHistory() throws Exception {
+        AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        BolsaDeJugador bolsa = crearJugadorDePrueba();
+        UUID idJugador = bolsa.getEstadisticasDeportivas().getJugador().getId();
+        LocalDateTime fecha = LocalDateTime.of(2026, 10, 1, 12, 0);
+
+        historialCotizacionRepository.guardarHistorial(List.of(
+                new HistorialCotizacion(null, bolsa.getId(),
+                        new BigDecimal("150.00"), fecha),
+                new HistorialCotizacion(null, bolsa.getId(),
+                        new BigDecimal("175.50"), fecha.plusDays(1))
+        ));
+
+        mockMvc.perform(get("/api/players/{id}/quotes", idJugador)
+                        .header("Authorization","Bearer "+result.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].precio").value(150.00))
+                .andExpect(jsonPath("$[0].fecha").exists())
+                .andExpect(jsonPath("$[1].precio").value(175.50))
+                .andExpect(jsonPath("$[1].fecha").exists());
+    }
+
+    @Test
+    void buscarHistorialSinAutorizacionShouldReturnForbidden() throws Exception {
+        BolsaDeJugador bolsa = crearJugadorDePrueba();
+        UUID idJugador = bolsa.getEstadisticasDeportivas().getJugador().getId();
+        LocalDateTime fecha = LocalDateTime.of(2026, 10, 1, 12, 0);
+
+        historialCotizacionRepository.guardarHistorial(List.of(
+                new HistorialCotizacion(null, bolsa.getId(),
+                        new BigDecimal("150.00"), fecha),
+                new HistorialCotizacion(null, bolsa.getId(),
+                        new BigDecimal("175.50"), fecha.plusDays(1))
+        ));
+
+        mockMvc.perform(get("/api/players/{id}/quotes", idJugador))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getRankingWithAutorizationShouldReturnPaginatedResponse() throws Exception {
+        AuthResult result= authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        Jugador jugador = new Jugador(11, "Riquelme", "Boquita",
+                Liga.LALIGA, Posicion.MIDFIELDER, 25, 180, 75
+        );
+        EstadisticasDeportivas estadisticas = new EstadisticasDeportivas(
+                jugador, true, 10, 5, BigDecimal.valueOf(3.5),
+                BigDecimal.valueOf(5.2), BigDecimal.valueOf(1.5), BigDecimal.valueOf(0.5),
+                BigDecimal.valueOf(5.5), 2200
+        );
+        BolsaDeJugador bolsaJugador = BolsaDeJugador.desdeEstadisticas(estadisticas, LocalDateTime.now());
+        jugadorRepository.save(bolsaJugador);
+        mockMvc.perform(get("/api/players/ranking")
+                        .header("Authorization", "Bearer "+result.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.paginacion").exists())
+                .andExpect(jsonPath("$.jugadores").isArray())
+
+                // Datos de paginación
+                .andExpect(jsonPath("$.paginacion.pagina").value(1))
+                .andExpect(jsonPath("$.paginacion.porPagina").value(20))
+                .andExpect(jsonPath("$.paginacion.total").value(1))
+                .andExpect(jsonPath("$.paginacion.totalPaginas").value(1))
+                // Contenido de jugadores
+                .andExpect(jsonPath("$.jugadores").isNotEmpty())
+                .andExpect(jsonPath("$.jugadores[0].nombre").value("Riquelme"));
+    }
+
     private static @NotNull EstadisticasDeportivas getEstadisticas() {
         Jugador jugador = new Jugador(
                 101,
@@ -387,5 +543,32 @@ class PlayerControllerTest extends AbstractIntegrationTest {
               }
             }
             """;
+    }
+
+    private BolsaDeJugador crearJugadorDePrueba() {
+        Jugador jugador = new Jugador(
+                15,
+                "Jugador Test",
+                "Equipo Test",
+                Liga.LALIGA, Posicion.MIDFIELDER,
+                25, 180, 90
+        );
+
+        EstadisticasDeportivas estadisticas =
+                new EstadisticasDeportivas(jugador,
+                        true, 1,1,
+                        BigDecimal.ONE,BigDecimal.ONE,
+                        BigDecimal.ONE, BigDecimal.ONE,
+                        BigDecimal.ONE, 50);
+
+        BolsaDeJugador bolsa = new BolsaDeJugador(
+                estadisticas,
+                BigDecimal.valueOf(100),
+                LocalDateTime.now(),
+                "TEST",
+                100
+        );
+
+        return jugadorRepository.save(bolsa);
     }
 }

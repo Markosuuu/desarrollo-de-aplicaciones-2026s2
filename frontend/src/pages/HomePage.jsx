@@ -3,12 +3,12 @@ import { fetchPlayers } from "../api/playerApi";
 import { useAuth } from "../context/AuthContext";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
-
 import liga_es from "../assets/liga-es.png";
 import liga_al from "../assets/liga-al.png";
 import liga_fr from "../assets/liga-fr.png";
 import liga_it from "../assets/liga-it.png";
 import liga_en from "../assets/liga-en.png";
+import { useNavigate, Link } from "react-router-dom";
 
 const PAGE_SIZE = 20;
 
@@ -25,6 +25,7 @@ export default function HomePage() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     let active = true;
@@ -178,9 +179,10 @@ export default function HomePage() {
 
               <div className="player-grid">
                 {filteredPlayers.map((player) => (
-                  <article
+                  <Link
                     key={player.id ?? `${player.nombre}-${player.equipo}`}
                     className="player-card"
+                    onClick={() => navigate('/player/'+player.id)}
                   >
                     <div className="player-card__top">
                       <span className="player-position">
@@ -216,7 +218,7 @@ export default function HomePage() {
                         <strong>{player.posicion || "—"}</strong>
                       </li>
                     </ul>
-                  </article>
+                  </Link>
                 ))}
               </div>
 

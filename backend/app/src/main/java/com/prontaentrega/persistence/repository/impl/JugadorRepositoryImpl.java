@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.enums.Liga;
 import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;
@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public class JugadorRepositoryImpl implements JugadorRepository {
@@ -34,6 +35,12 @@ public class JugadorRepositoryImpl implements JugadorRepository {
         bolsa.getEstadisticasDeportivas().getJugador().setId(
                 persistida.getEstadisticasDeportivas().getJugador().getId());
         return bolsa;
+    }
+
+    @Override
+    public BolsaDeJugador findById(UUID id) {
+        Optional<BolsaDeJugadorDTOSQL> response = daosql.findBolsaByPlayerId(id);
+        return response.map(BolsaDeJugadorDTOSQL::aModelo).orElse(null);
     }
 
     /**
@@ -70,5 +77,11 @@ public class JugadorRepositoryImpl implements JugadorRepository {
     @Override
     public Long count() {
         return daosql.count();
+    }
+
+    @Override
+    public Page<BolsaDeJugador> getRanking(Pageable page) {
+        Page<BolsaDeJugadorDTOSQL> pageDTO = daosql.getRanking(page);
+        return pageDTO.map(BolsaDeJugadorDTOSQL::aModelo);
     }
 }

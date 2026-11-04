@@ -1,6 +1,5 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.controllers.dtos.LoginRequest;
 import com.prontaentrega.models.TokenEstado;
 import com.prontaentrega.models.Usuario;
 import com.prontaentrega.persistence.repository.TokenEstadoRepository;
@@ -10,6 +9,7 @@ import com.prontaentrega.services.exceptions.DuplicateUserException;
 import com.prontaentrega.services.exceptions.ValidationException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,6 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
+@Tag("integracion")
 public class AuthServiceTest extends AbstractIntegrationTest {
     @Autowired
     private AuthService authService;

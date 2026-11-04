@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { Blobatar } from "@blobatar/react";
@@ -7,6 +7,10 @@ import "blobatar/motion.css";
 
 import sol from "../assets/icono-theme-sol.png";
 import luna from "../assets/icono-theme-luna.png";
+import casa from "../assets/casa.png";
+import pelota from "../assets/pelota-futbol.png";
+import ranking from "../assets/copa-ranking.png";
+import subastaIcon from "../assets/subastaIcon.png";
 
 export default function Sidebar({ children }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -31,7 +35,19 @@ export default function Sidebar({ children }) {
         >
           <span aria-hidden="true">{collapsed ? "»" : "«"}</span>
         </button>
-        <div className="sidebar__user" title={user?.nombre || "Usuario"}>
+
+        {/* Enlace al inicio */}
+        <Link to="/" className="sidebar__logo" title="Inicio">
+          <img src={casa} alt="Home" width={50} height={50} />
+          <span className="sidebar__username">Inicio</span>
+        </Link>
+
+        {/* Enlace al perfil de usuario */}
+        <Link
+          to="/profile"
+          className="sidebar__user"
+          title={user?.nombre || "Usuario"}
+        >
           <span className="sidebar__avatar" aria-hidden="true">
             <Blobatar
               name={user?.nombre || "Usuario"}
@@ -40,7 +56,31 @@ export default function Sidebar({ children }) {
             />
           </span>
           <span className="sidebar__username">{user?.nombre || "Usuario"}</span>
-        </div>
+        </Link>
+
+        {/* Enlace al mercado */}
+        <Link to="/mercado" className="sidebar__user" title="Mercado">
+          <span className="sidebar__avatar" aria-hidden="true">
+            <img src={pelota} alt="mercado" width={50} />
+          </span>
+          <span className="sidebar__username">Mercado</span>
+        </Link>
+        
+        {/* Enlace al ranking de jugadores */}
+        <Link to="/ranking" className="sidebar__user" title="Mercado">
+          <span className="sidebar__avatar" aria-hidden="true">
+            <img src={ranking} alt="mercado" width={50} />
+          </span>
+          <span className="sidebar__username">Ranking</span>
+        </Link>
+
+        {/* Enlace al ranking de jugadores */}
+        <Link to="/subasta" className="sidebar__user" title="Mercado">
+          <span className="sidebar__avatar" aria-hidden="true">
+            <img src={subastaIcon} alt="mercado" width={50} />
+          </span>
+          <span className="sidebar__username">Subasta</span>
+        </Link>
 
         <div className="sidebar__actions">
           <button

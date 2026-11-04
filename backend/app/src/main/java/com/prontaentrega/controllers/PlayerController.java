@@ -1,25 +1,24 @@
 package com.prontaentrega.controllers;
 
-import com.prontaentrega.controllers.dtos.CatalogResponse;
-import com.prontaentrega.controllers.dtos.PlayerResponse;
+import com.prontaentrega.controllers.dtos.jugadores.CatalogResponse;
+import com.prontaentrega.controllers.dtos.jugadores.HistorialCotizacionResponse;
+import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
 import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.services.HistorialCotizacionService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.PlayerCatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import java.util.List;
+import java.util.UUID;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller HTTP del catalogo de jugadores.
@@ -29,12 +28,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class PlayerController {
     private final PlayerCatalogService playerCatalogService;
-
+    private final HistorialCotizacionService historialService;
     /**
      * Recibe el servicio de catalogo usado por los endpoints de jugadores.
      */
-    public PlayerController(PlayerCatalogService playerCatalogService) {
+    public PlayerController(PlayerCatalogService playerCatalogService, HistorialCotizacionService historialService) {
         this.playerCatalogService = playerCatalogService;
+        this.historialService = historialService;
     }
 
     /**
@@ -90,5 +90,44 @@ public class PlayerController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(playerCatalogService.refreshFromWhoScored());
+    }
+
+    @GetMapping("/players/{id}")
+    public ResponseEntity<PlayerResponse> searchById(@PathVariable UUID id) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(PlayerResponse.from(playerCatalogService.searchById(id)));
+    }
+
+    @GetMapping("/players/{id}/quotes")
+    public ResponseEntity<List<HistorialCotizacionResponse>> buscarHistorial(
+            @PathVariable UUID id
+    ) {
+        List<HistorialCotizacionResponse> response =
+                historialService.buscarHistorial(id)
+                        .stream()
+                        .map(HistorialCotizacionResponse::from)
+                        .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/players/ranking")
+    public ResponseEntity<CatalogResponse> getRanking(@RequestParam(defaultValue = "1") int page,
+                                                      @RequestParam(defaultValue = "20") int perPage) {
+        Page<BolsaDeJugador> jugadores = playerCatalogService.getRanking(page, perPage);
+
+        List<PlayerResponse> players = jugadores.getContent().stream()
+                .map(PlayerResponse::from)
+                .toList();
+
+        var response = new CatalogResponse(players, new CatalogResponse.Paginacion(
+                page,
+                perPage,
+                jugadores.getTotalElements(),
+                jugadores.getTotalPages()
+        ));
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

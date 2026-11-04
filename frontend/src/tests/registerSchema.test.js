@@ -1,5 +1,4 @@
-import assert from 'node:assert/strict';
-import test from 'node:test';
+import { expect, test } from 'vitest';
 import { registerSchema } from '../validation/registerSchema.js';
 
 test('registerSchema acepta nombre, correo y contraseña válidos', async () => {
@@ -7,19 +6,25 @@ test('registerSchema acepta nombre, correo y contraseña válidos', async () => 
 
   const result = await registerSchema.validate(input);
 
-  assert.deepEqual(result, input);
+  expect(result).toEqual(input);
 });
 
 test('registerSchema rechaza correo inválido', async () => {
-  await assert.rejects(
-    () => registerSchema.validate({ nombre: 'Ana', correo: 'ana', password: 'clave123' }),
-    /formato inválido/i,
-  );
+  await expect(
+    registerSchema.validate({
+      nombre: 'Ana',
+      correo: 'ana',
+      password: 'clave123',
+    }),
+  ).rejects.toThrow(/formato inválido/i);
 });
 
 test('registerSchema exige contraseña segura', async () => {
-  await assert.rejects(
-    () => registerSchema.validate({ nombre: 'Ana', correo: 'ana@ejemplo.com', password: 'short' }),
-    /contraseña/i,
-  );
+  await expect(
+    registerSchema.validate({
+      nombre: 'Ana',
+      correo: 'ana@ejemplo.com',
+      password: 'short',
+    }),
+  ).rejects.toThrow(/contraseña/i);
 });

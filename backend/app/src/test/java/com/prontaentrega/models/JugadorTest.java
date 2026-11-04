@@ -4,9 +4,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.prontaentrega.models.builders.EstadisticasDeportivasDatos;
-import com.prontaentrega.models.exception.CampoFaltanteException;
-import com.prontaentrega.models.exception.ValorNegativoException;
+import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.models.enums.Posicion;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 /**
  * Tests unitarios de dominio para las invariantes de Jugador.
  */
+@Tag("modelo")
 class JugadorTest {
     @Test
     void actualizarEstadisticasShouldReplaceSportValues() {

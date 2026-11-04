@@ -6,6 +6,13 @@ import { useAuth } from "./context/AuthContext";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import PlayerPage from "./pages/PlayerPage";
+import RankingPage from "./pages/RankingPage";
+import UserPage from "./pages/UserPage";
+import MercadoPage from "./pages/MercadoPage";
+import OfertaPage from "./pages/OfertaPage";
+import ListaSubastasPage from "./pages/ListaSubastaPage";
+import SubastaPage from "./pages/SubastaPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -36,6 +43,77 @@ export default function App() {
             <ProtectedRoute requireAuth>
               <Sidebar>
                 <HomePage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/player/:id"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <PlayerPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <UserPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mercado"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <MercadoPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/mercado/:id"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <OfertaPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/ranking"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <RankingPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subasta/:id"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <SubastaPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subasta"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <ListaSubastasPage />
               </Sidebar>
             </ProtectedRoute>
           }

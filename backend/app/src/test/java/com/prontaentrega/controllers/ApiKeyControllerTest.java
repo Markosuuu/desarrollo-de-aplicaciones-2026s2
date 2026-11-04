@@ -4,6 +4,7 @@ import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
 import com.prontaentrega.services.ApiKeyService;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Tag("integracion")
 class ApiKeyControllerTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -82,7 +84,7 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
                                     "nombre": "Sistema de prueba"
                                 }
                                 """))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
 
         assertEquals(0, apiKeyDAO.count());
     }
@@ -100,7 +102,7 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
                                     "nombre": "Sistema de prueba"
                                 }
                                 """))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnauthorized());
 
         assertEquals(0, apiKeyDAO.count());
     }

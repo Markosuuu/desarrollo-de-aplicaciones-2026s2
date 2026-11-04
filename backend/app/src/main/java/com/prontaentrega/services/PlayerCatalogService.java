@@ -1,17 +1,20 @@
 package com.prontaentrega.services;
 
 import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.persistence.PersistenceManager;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
+import com.prontaentrega.services.exceptions.PlayerNotFoundException;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
 import com.prontaentrega.services.scraping.PlayerScrapper;
 import com.prontaentrega.services.scraping.whoscoredscrapper.ScrappedPlayerMapper;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
+import java.util.UUID;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -28,19 +31,18 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 public class PlayerCatalogService {
-    @PersistenceContext
-    private EntityManager entityManager;
-
+    private final PersistenceManager playerPersistenceManager;
     private final JugadorRepository jugadorRepository;
     private final PlayerScrapper playerScrapper;
     private final ScrappedPlayerMapper scrappedPlayerMapper;
 
     public PlayerCatalogService(JugadorRepository jugadorRepository,
                                 PlayerScrapper playerScrapper,
-                                ScrappedPlayerMapper scrappedPlayerMapper) {
+                                ScrappedPlayerMapper scrappedPlayerMapper, PersistenceManager playerPersistenceManager) {
         this.jugadorRepository = jugadorRepository;
         this.playerScrapper = playerScrapper;
         this.scrappedPlayerMapper = scrappedPlayerMapper;
+        this.playerPersistenceManager = playerPersistenceManager;
     }
 
     /**
@@ -69,7 +71,7 @@ public class PlayerCatalogService {
     @Transactional
     public RefreshCatalogResponse refreshFromWhoScored() {
         LocalDateTime updatedAt = LocalDateTime.now(ZoneId.systemDefault());
-        final int pageSize = 20;
+        final int pageSize = 200;
 
         // 1. Descargar la primera página para obtener la paginación.
         PlayerScrapperResponse firstPage =
@@ -102,8 +104,7 @@ public class PlayerCatalogService {
             updated += pageResults[1];
             skipped += pageResults[2];
 
-            entityManager.flush();
-            entityManager.clear();
+            playerPersistenceManager.flushAndClear();
         }
 
         if (created + updated == 0) {
@@ -119,6 +120,27 @@ public class PlayerCatalogService {
                 skipped,
                 playerScrapper.source()
         );
+    }
+
+    @Transactional
+    public BolsaDeJugador searchById(UUID id) {
+        BolsaDeJugador response = jugadorRepository.findById(id);
+        if (response != null) {
+            return response;
+        }
+        else {
+            throw new PlayerNotFoundException("No se encontro un jugador con el id dado.");
+        }
+    }
+
+    @Transactional
+    public Page<BolsaDeJugador> getRanking(int page, int perPage) {
+        int safePage = Math.max(page, 1);
+        int safePerPage = Math.clamp(perPage, 1, 50);
+
+        Pageable pageable = PageRequest.of(safePage-1, safePerPage);
+
+        return jugadorRepository.getRanking(pageable);
     }
 
     /**
