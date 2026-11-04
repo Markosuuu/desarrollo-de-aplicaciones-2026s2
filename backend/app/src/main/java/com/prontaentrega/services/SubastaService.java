@@ -201,15 +201,27 @@ public class SubastaService {
 
     @Transactional
     public void resolverSubastasVencidas() {
-        // TODO: Ver que onda esto. Resolver en base de datos de alguna manera si se puede para no hacer un for en memoria
-        for (Subasta vencida : subastaRepository.findVencidas(LocalDateTime.now(ZoneId.systemDefault()))) {
-            subastaRepository.findByIdForUpdate(vencida.getId()).ifPresent(subasta -> {
-                if (subasta.getEstado() == EstadoSubasta.ACTIVA
-                        && !subasta.getVencimiento().isAfter(LocalDateTime.now(ZoneId.systemDefault()))) {
-                    resolverCierre(subasta, "POR_TIEMPO");
-                }
-            });
-        }
+        LocalDateTime ahora = LocalDateTime.now(ZoneId.systemDefault());
+        int batchSize = 100;
+
+        List<UUID> idsVencidas;
+
+        do {
+            idsVencidas = subastaRepository.findIdsVencidas(
+                    ahora,
+                    PageRequest.of(0, batchSize)
+            );
+
+            for (UUID id : idsVencidas) {
+                subastaRepository.findByIdForUpdate(id).ifPresent(subasta -> {
+                    if (subasta.getEstado() == EstadoSubasta.ACTIVA
+                            && !subasta.getVencimiento().isAfter(ahora)) {
+                        resolverCierre(subasta, "POR_TIEMPO");
+                    }
+                });
+            }
+
+        } while (!idsVencidas.isEmpty());
     }
 
     private Subasta resolverCierre(Subasta subasta, String motivo) {

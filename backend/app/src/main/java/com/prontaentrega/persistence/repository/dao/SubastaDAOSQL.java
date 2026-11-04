@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -22,4 +23,17 @@ public interface SubastaDAOSQL extends JpaRepository<SubastaDTOSQL, UUID> {
     @Lock(LockModeType.OPTIMISTIC)
     @Query("select s from Subasta s where s.id = :id")
     Optional<SubastaDTOSQL> findByIdForUpdate(@Param("id") UUID id);
+
+    @Query("""
+    SELECT s.id
+    FROM Subasta s
+    WHERE s.estado = :estado
+      AND s.vencimiento <= :fecha
+    ORDER BY s.vencimiento ASC
+    """)
+    List<UUID> findIdsVencidas(
+            @Param("estado") EstadoSubasta estado,
+            @Param("fecha") LocalDateTime fecha,
+            Pageable pageable
+    );
 }

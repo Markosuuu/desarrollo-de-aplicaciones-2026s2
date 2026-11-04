@@ -14,7 +14,7 @@ public interface SubastaRepository {
     Optional<Subasta> findById(UUID id);
     Optional<Subasta> findByIdForUpdate(UUID id);
     Page<Subasta> findByEstado(EstadoSubasta estado, Pageable pageable);
-    List<Subasta> findVencidas(LocalDateTime fecha);
+    List<UUID> findIdsVencidas(LocalDateTime fecha, Pageable page);
     void deleteAll();
     Long count();
 }

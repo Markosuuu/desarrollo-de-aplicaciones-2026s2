@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
@@ -84,10 +85,12 @@ public class SubastaRepositoryImpl implements SubastaRepository {
     }
 
     @Override
-    public List<Subasta> findVencidas(LocalDateTime fecha) {
-        return dao.findByEstadoAndVencimientoLessThanEqual(EstadoSubasta.ACTIVA, fecha).stream()
-                .map(SubastaDTOSQL::aModelo)
-                .toList();
+    public List<UUID> findIdsVencidas(LocalDateTime fecha, Pageable page) {
+        return dao.findIdsVencidas(
+                EstadoSubasta.ACTIVA,
+                fecha,
+                PageRequest.of(0, 100)
+        );
     }
 
     @Override
