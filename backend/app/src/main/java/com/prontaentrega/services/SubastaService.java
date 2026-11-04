@@ -230,6 +230,10 @@ public class SubastaService {
             ofertaGanadora.setEstado(com.prontaentrega.models.enums.EstadoOferta.GANADORA);
             ofertaRepository.save(ofertaGanadora);
             liquidarVenta(subasta, ofertaGanadora);
+        /*
+        Mas alla de los cambios que surjan, aca  en este elsehabria que clavar aca un save de operacion
+        para generar un historial y que se pueda ver ese historial desde el portafolio
+        * */
         }
 
         subasta.setMotivoCierre(motivo);
