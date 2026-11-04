@@ -177,11 +177,12 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         Usuario seller = saveUser("Vendedor retorno", "seller-return@test.com");
         BolsaDeJugador bolsa = saveJugador("Jugador retorno");
         UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
-        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 4, 0));
+        InventarioUsuario inventario = new InventarioUsuario(seller, bolsa, 4, 0);
+        inventario.ponerTokensEnVenta(3);
+        inventarioUsuarioRepository.save(inventario);
 
-        Subasta subasta = subastaService.crearSubasta(
-            seller.getId(), jugadorId, 3, BigDecimal.valueOf(10), futureDeadline());
-        subasta.cerrarPorVencimiento();
+        Subasta subasta = new Subasta(
+            seller, bolsa, 3, BigDecimal.valueOf(10), LocalDateTime.now().minusMinutes(1));
         subastaRepository.save(subasta);
         subastaService.resolverSubastasVencidas();
 

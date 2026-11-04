@@ -17,8 +17,6 @@ import org.springframework.data.repository.query.Param;
 public interface SubastaDAOSQL extends JpaRepository<SubastaDTOSQL, UUID> {
     Page<SubastaDTOSQL> findByActiva(Boolean activa, Pageable pageable);
 
-    List<SubastaDTOSQL> findByActivaAndVencimientoLessThanEqual(Boolean activa, LocalDateTime fecha);
-
     @Lock(LockModeType.OPTIMISTIC)
     @Query("select s from Subasta s where s.id = :id")
     Optional<SubastaDTOSQL> findByIdForUpdate(@Param("id") UUID id);
@@ -31,8 +29,6 @@ public interface SubastaDAOSQL extends JpaRepository<SubastaDTOSQL, UUID> {
     ORDER BY s.vencimiento ASC
     """)
     List<UUID> findIdsVencidas(
-            @Param("estado") Boolean activo,
-            @Param("fecha") LocalDateTime fecha,
-            Pageable pageable
+            @Param("fecha") LocalDateTime fecha
     );
 }

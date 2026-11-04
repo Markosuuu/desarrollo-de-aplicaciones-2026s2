@@ -13,7 +13,7 @@ public interface SubastaRepository {
     Optional<Subasta> findById(UUID id);
     Optional<Subasta> findByIdForUpdate(UUID id);
     Page<Subasta> findByActiva(Boolean activa, Pageable pageable);
-    List<UUID> findIdsVencidas(LocalDateTime fecha, Pageable page);
+    List<UUID> findIdsVencidas(LocalDateTime fecha);
     void deleteAll();
     Long count();
 }

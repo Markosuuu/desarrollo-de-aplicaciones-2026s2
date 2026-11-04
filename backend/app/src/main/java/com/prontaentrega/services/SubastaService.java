@@ -199,27 +199,19 @@ public class SubastaService {
 
     @Transactional
     public void resolverSubastasVencidas() {
+        // TODO: Ver que onda esto
         LocalDateTime ahora = LocalDateTime.now(ZoneId.systemDefault());
-        int batchSize = 100;
 
-        List<UUID> idsVencidas;
+        List<UUID> idsVencidas = subastaRepository.findIdsVencidas(ahora);;
 
-        do {
-            idsVencidas = subastaRepository.findIdsVencidas(
-                    ahora,
-                    PageRequest.of(0, batchSize)
-            );
-
-            for (UUID id : idsVencidas) {
-                subastaRepository.findByIdForUpdate(id).ifPresent(subasta -> {
-                    if (subasta.getActiva()
-                            && !subasta.getVencimiento().isAfter(ahora)) {
-                        resolverCierre(subasta, "POR_TIEMPO");
-                    }
-                });
-            }
-
-        } while (!idsVencidas.isEmpty());
+        for (UUID id : idsVencidas) {
+            subastaRepository.findByIdForUpdate(id).ifPresent(subasta -> {
+                if (Boolean.TRUE.equals(subasta.getActiva())
+                        && !subasta.getVencimiento().isAfter(ahora)) {
+                    resolverCierre(subasta, "POR_TIEMPO");
+                }
+            });
+        }
     }
 
     private Subasta resolverCierre(Subasta subasta, String motivo) {
@@ -247,7 +239,7 @@ public class SubastaService {
 
         subasta.setMotivoCierre(motivo);
         subasta.setActiva(false);
-        subasta.setActualizadoEn(LocalDateTime.now());
+        subasta.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         subastaRepository.save(subasta);
         return subasta;
     }
@@ -265,7 +257,7 @@ public class SubastaService {
         int enVenta = inventario.getTokensEnVenta() == null ? 0 : inventario.getTokensEnVenta();
         inventario.setTokensDisponibles(actuales + subasta.getCantidadOfrecida());
         inventario.setTokensEnVenta(Math.max(0, enVenta - subasta.getCantidadOfrecida()));
-        inventario.setActualizadoEn(LocalDateTime.now());
+        inventario.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(inventario);
     }
 
@@ -297,8 +289,8 @@ public class SubastaService {
 
         inventarioGanador.setTokensDisponibles((inventarioGanador.getTokensDisponibles() == null ? 0 : inventarioGanador.getTokensDisponibles()) + subasta.getCantidadOfrecida());
         inventarioVendedor.setTokensEnVenta(Math.max(0, (inventarioVendedor.getTokensEnVenta() == null ? 0 : inventarioVendedor.getTokensEnVenta()) - subasta.getCantidadOfrecida()));
-        inventarioGanador.setActualizadoEn(LocalDateTime.now());
-        inventarioVendedor.setActualizadoEn(LocalDateTime.now());
+        inventarioGanador.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+        inventarioVendedor.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(inventarioGanador);
         inventarioUsuarioRepository.save(inventarioVendedor);
 
@@ -329,11 +321,11 @@ public class SubastaService {
     }
 
     private static void validarOferta(UUID usuarioId, BigDecimal puja, Subasta subasta) {
-        if (!subasta.getActiva()) {
+        if (Boolean.FALSE.equals(subasta.getActiva())) {
             throw new SubastaNoActivaException("La subasta ya no está activa");
         }
 
-        if (!subasta.getVencimiento().isAfter(LocalDateTime.now())) {
+        if (!subasta.getVencimiento().isAfter(LocalDateTime.now(ZoneId.systemDefault()))) {
             throw new SubastaNoActivaException("La subasta ya venció");
         }
 
@@ -359,9 +351,10 @@ public class SubastaService {
             throw new OfertaInvalidaException("El precio inicial debe ser mayor a cero");
         }
 
-        if (vencimiento == null || !vencimiento.isAfter(LocalDateTime.now())) {
+        if (vencimiento == null || !vencimiento.isAfter(LocalDateTime.now(ZoneId.systemDefault()))) {
             throw new OfertaInvalidaException("La fecha de cierre debe ser futura");
         }
+
         if (vencimiento.getSecond() != 0 || vencimiento.getNano() != 0) {
             throw new OfertaInvalidaException("La fecha de cierre solo admite precisión de minutos");
         }
@@ -377,7 +370,7 @@ public class SubastaService {
             throw new SinAutorizacionExpcetion("No puedes cerrar una subasta ajena");
         }
 
-        if (!subasta.getActiva()) {
+        if (Boolean.FALSE.equals(subasta.getActiva())) {
             throw new SubastaNoActivaException("La subasta ya está cerrada");
         }
     }
