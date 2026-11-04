@@ -1,4 +1,4 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

@@ -4,7 +4,7 @@ import com.prontaentrega.controllers.dtos.jugadores.CatalogResponse;
 import com.prontaentrega.controllers.dtos.jugadores.HistorialCotizacionResponse;
 import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
 import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.enums.Liga;
 import com.prontaentrega.services.HistorialCotizacionService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.PlayerCatalogService;

@@ -1,6 +1,6 @@
 package com.prontaentrega.controllers.converters;
 
-import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.enums.Liga;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 

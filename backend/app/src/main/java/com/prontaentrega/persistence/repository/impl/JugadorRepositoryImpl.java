@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.enums.Liga;
 import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;

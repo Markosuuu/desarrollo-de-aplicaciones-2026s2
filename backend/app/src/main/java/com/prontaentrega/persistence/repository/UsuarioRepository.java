@@ -8,6 +8,7 @@ import java.util.UUID;
 public interface UsuarioRepository {
     Usuario save(Usuario usuario);
     void deleteAll();
+    Optional<Usuario> findById(UUID id);
     Optional<Usuario> findByCorreoIgnoreCase(String correo);
     boolean existsByCorreoIgnoreCase(String correo);
     boolean existsById(UUID id);

@@ -2,6 +2,8 @@ package com.prontaentrega.services.scraping.whoscoredscrapper;
 
 import com.prontaentrega.models.*;
 import com.prontaentrega.models.builders.EstadisticasDeportivasDatos;
+import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.models.enums.Posicion;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;

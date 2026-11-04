@@ -2,6 +2,8 @@ package com.prontaentrega.models;
 
 import java.util.UUID;
 
+import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.models.enums.Posicion;
 import com.prontaentrega.models.exception.CampoFaltanteException;
 import com.prontaentrega.models.exception.ValorNegativoException;
 import lombok.Getter;

@@ -31,6 +31,11 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     }
 
     @Override
+    public Optional<Usuario> findById(UUID id) {
+        return daosql.findById(id).map(UsuarioDTOSQL::aUsuario);
+    }
+
+    @Override
     public Optional<Usuario> findByCorreoIgnoreCase(String correo) {
         return daosql.findUsuarioDTOSQLSByCorreoIgnoreCase(correo)
                 .map(UsuarioDTOSQL::aUsuario);

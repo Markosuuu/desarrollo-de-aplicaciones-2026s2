@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository;
 
 import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Liga;
+import com.prontaentrega.models.enums.Liga;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

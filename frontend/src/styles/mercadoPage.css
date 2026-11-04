@@ -1,0 +1,238 @@
+.mercado-shell {
+  align-items: flex-start;
+  padding-top: 2rem;
+}
+
+.mercado-shell .home-panel {
+  align-items: stretch;
+}
+
+.mercado-shell .topbar {
+  width: 100%;
+}
+
+.market-listing-card {
+  justify-content: space-between;
+}
+
+.market-listing-card .player-card__name {
+  gap: 0.75rem;
+}
+
+.market-listing-card .player-meta li {
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.market-listing-card .player-meta strong {
+  text-align: right;
+}
+
+.market-action-button {
+  width: 100%;
+  margin-top: auto;
+  padding: 0.75rem 1rem;
+  border: 0;
+  border-radius: 10px;
+  background: #9333ea;
+  color: #fff;
+  font-weight: 700;
+}
+
+.market-action-button:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.market-action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.market-action-button--secondary {
+  background: #b91c1c;
+}
+
+.offer-detail-card {
+  width: 100%;
+  max-width: 760px;
+}
+
+.offer-back-link {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: inherit;
+  font-weight: 600;
+}
+
+.offer-detail-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.offer-detail-heading .welcome {
+  margin-bottom: 0.25rem;
+}
+
+.offer-detail-heading h2 {
+  margin: 0;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+}
+
+.offer-status {
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e40af;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.offer-detail-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+  margin: 0 0 1.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.offer-detail-list > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.offer-detail-list dt {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+  text-transform: uppercase;
+}
+
+.offer-detail-list dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.offer-detail-card > .market-action-button {
+  max-width: 320px;
+}
+
+.offer-inline-error {
+  margin: 0.75rem 0;
+  color: #b91c1c;
+}
+
+.offer-retry-button {
+  margin-top: 0.35rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.offer-dialog-backdrop {
+  position: fixed;
+  z-index: 20;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  background: rgb(0 0 0 / 55%);
+}
+
+.offer-buy-dialog {
+  width: min(100%, 460px);
+  padding: 1.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--text-color, #111827);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 25%);
+}
+
+body[data-theme="dark"] .offer-buy-dialog {
+  background: #212121;
+}
+
+.offer-buy-dialog h2 {
+  margin: 0 0 0.5rem;
+  color: inherit;
+}
+
+.offer-buy-dialog form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.offer-buy-dialog input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 8px;
+  background: var(--card-background, #fff);
+  color: inherit;
+}
+
+.offer-buy-total,
+.offer-buy-balance {
+  margin: 0;
+}
+
+.offer-buy-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.offer-buy-actions .market-action-button {
+  width: auto;
+  margin: 0;
+}
+
+.offer-buy-cancel {
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+}
+
+.offer-not-available {
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+@media (max-width: 560px) {
+  .mercado-shell {
+    padding: 1rem;
+  }
+
+  .market-listing-card .player-meta li {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .market-listing-card .player-meta strong {
+    text-align: left;
+  }
+
+  .offer-detail-list {
+    grid-template-columns: 1fr;
+  }
+
+  .offer-detail-heading {
+    flex-direction: column;
+  }
+}
