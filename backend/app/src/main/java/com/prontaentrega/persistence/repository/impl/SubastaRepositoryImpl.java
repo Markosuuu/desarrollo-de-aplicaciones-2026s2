@@ -84,12 +84,8 @@ public class SubastaRepositoryImpl implements SubastaRepository {
     }
 
     @Override
-    public List<UUID> findIdsVencidas(LocalDateTime fecha, Pageable page) {
-        return dao.findIdsVencidas(
-                true,
-                fecha,
-                PageRequest.of(0, 100)
-        );
+    public List<UUID> findIdsVencidas(LocalDateTime fecha) {
+        return dao.findIdsVencidas(fecha);
     }
 
     @Override

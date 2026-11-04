@@ -200,15 +200,11 @@ public class SubastaService {
     @Transactional
     public void resolverSubastasVencidas() {
         LocalDateTime ahora = LocalDateTime.now(ZoneId.systemDefault());
-        int batchSize = 100;
 
         List<UUID> idsVencidas;
 
         do {
-            idsVencidas = subastaRepository.findIdsVencidas(
-                    ahora,
-                    PageRequest.of(0, batchSize)
-            );
+            idsVencidas = subastaRepository.findIdsVencidas(ahora);
 
             for (UUID id : idsVencidas) {
                 subastaRepository.findByIdForUpdate(id).ifPresent(subasta -> {
