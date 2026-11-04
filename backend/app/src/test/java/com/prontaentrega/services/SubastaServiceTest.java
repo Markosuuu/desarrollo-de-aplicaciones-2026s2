@@ -131,7 +131,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         Subasta subasta = subastaService.crearSubasta(
             seller.getId(), jugadorId, 2, BigDecimal.valueOf(50), futureDeadline());
         subastaService.ofertar(buyer.getId(), subasta.getId(), BigDecimal.valueOf(80), "winner-bid");
-        subastaService.cerrarSubasta(seller.getId(), subasta.getId());
+        subastaService.cerrarSubasta(seller.getId(), subasta.getId(), "Por propietario");
 
         Usuario savedSeller = usuarioRepository.findById(seller.getId()).orElseThrow();
         Usuario savedBuyer = usuarioRepository.findById(buyer.getId()).orElseThrow();
@@ -165,7 +165,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         highestBidder.setCreditosDisponibles(BigDecimal.ZERO);
         usuarioRepository.save(highestBidder);
 
-        subastaService.cerrarSubasta(seller.getId(), subasta.getId());
+        subastaService.cerrarSubasta(seller.getId(), subasta.getId(), "Por propietario");
 
         Subasta cerrada = subastaService.obtenerSubasta(subasta.getId());
         assertEquals(nextBidder.getId(), cerrada.getOfertanteActual().getId());

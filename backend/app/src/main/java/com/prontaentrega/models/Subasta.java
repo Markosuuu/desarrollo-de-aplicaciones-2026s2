@@ -18,8 +18,10 @@ public class Subasta {
     private BolsaDeJugador bolsaDeJugador;
     private Integer cantidadOfrecida;
     private BigDecimal precioInicial;
+    // TODO: Cambiar por oferta
     private BigDecimal ofertaActual;
     private Usuario ofertanteActual;
+
     private EstadoSubasta estado;
     private LocalDateTime vencimiento;
     private LocalDateTime creadoEn;
@@ -52,15 +54,13 @@ public class Subasta {
         return propietario.getId();
     }
 
-    public Integer getCantidadTokens() {
-        return cantidadOfrecida;
+    public BigDecimal obtenerOfertaMinima() {
+        return getOfertaActual() == null ? getPrecioInicial() : getOfertaActual();
     }
 
-    public void setCantidadTokens(Integer cantidadTokens) {
-        this.cantidadOfrecida = cantidadTokens;
-    }
-
-    public BigDecimal getPujaActual() {
-        return ofertaActual;
+    public void actualizarPostorMasGrande(BigDecimal puja, Usuario comprador) {
+        setOfertaActual(puja);
+        setOfertanteActual(comprador);
+        setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 }

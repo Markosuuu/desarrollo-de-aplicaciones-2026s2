@@ -41,6 +41,7 @@ public class SubastaRepositoryImpl implements SubastaRepository {
         if (subasta.getId() == null) {
             dto = SubastaDTOSQL.desdeModelo(subasta, propietario, bolsa, ofertante);
         } else {
+            // TODO: CHECK THA SHI
             dto = dao.findById(subasta.getId()).orElseGet(SubastaDTOSQL::new);
             dto.setId(subasta.getId());
             dto.setPropietario(propietario);

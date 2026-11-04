@@ -16,6 +16,8 @@ public record CerrarSubastaResponse(
         return new CerrarSubastaResponse(
                 subasta.getId(),
                 subasta.getEstado().name(),
+
+                // TODO: check this
                 huboVenta ? subasta.getOfertanteActual().getId() : null,
                 huboVenta ? subasta.getOfertaActual() : null,
                 huboVenta ? "VENTA" : "RETORNO_TOKENS");

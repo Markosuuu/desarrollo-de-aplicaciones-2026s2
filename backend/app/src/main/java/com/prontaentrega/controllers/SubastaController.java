@@ -58,6 +58,7 @@ public class SubastaController {
                 .map(SubastaResponse::from)
                 .toList();
 
+        // TODO: Cambiar response
         return ResponseEntity.ok(Map.of(
                 "items", items,
                 "page", page,
@@ -83,7 +84,10 @@ public class SubastaController {
     @PatchMapping("/{id}/cerrar")
     public ResponseEntity<CerrarSubastaResponse> cerrarSubasta(@PathVariable UUID id, @RequestBody(required = false) CerrarSubastaRequest request) {
         UUID usuarioId = currentUserId();
+
+        // TODO: Mu' feo esto de acá
         String motivo = request == null || request.motivo() == null ? "POR_PROPIETARIO" : request.motivo();
+
         Subasta subasta = subastaService.cerrarSubasta(usuarioId, id, motivo);
         return ResponseEntity.ok(CerrarSubastaResponse.from(subasta));
     }
@@ -91,7 +95,10 @@ public class SubastaController {
     @GetMapping("/{id}/ofertas")
     public ResponseEntity<List<OfertaResponse>> obtenerOfertas(@PathVariable UUID id) {
         List<Oferta> ofertas = subastaService.obtenerOfertas(id);
-        return ResponseEntity.ok(ofertas.stream().map(OfertaResponse::from).toList());
+
+        List<OfertaResponse> response = ofertas.stream().map(OfertaResponse::from).toList();
+
+        return ResponseEntity.ok(response);
     }
 
     private UUID currentUserId() {

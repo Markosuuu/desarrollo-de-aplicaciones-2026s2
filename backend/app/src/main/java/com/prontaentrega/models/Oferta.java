@@ -17,7 +17,7 @@ public class Oferta {
     private Subasta subasta;
     private Usuario usuario;
     private BigDecimal puja;
-    private EstadoOferta estado;
+    private EstadoOferta estado; // TODO: Quizas cambiar a boolean? esLaMaxima/esSuperior
     private LocalDateTime creadoEn;
 
     public Oferta(Subasta subasta, Usuario usuario, BigDecimal puja) {

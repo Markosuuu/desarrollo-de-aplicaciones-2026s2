@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
+import com.prontaentrega.services.exceptions.CantidadDeTokensException;
 import lombok.*;
 
 /**
@@ -40,5 +41,18 @@ public class InventarioUsuario {
 
     public void quitarTokens(Integer cantidadTokens) {
         this.tokensEnVenta = this.tokensEnVenta - cantidadTokens;
+    }
+
+    public void ponerTokensEnVenta(Integer cantidad) {
+
+        if (getTokensDisponibles() < cantidad) {
+            // TODO: Cambiar esta excepción porque es de service
+            // y estamos en modelo
+            throw new CantidadDeTokensException("No posees suficientes tokens para subastar");
+        }
+
+        setTokensDisponibles(getTokensDisponibles() - cantidad);
+        setTokensEnVenta(getTokensEnVenta() + cantidad);
+        setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 }
