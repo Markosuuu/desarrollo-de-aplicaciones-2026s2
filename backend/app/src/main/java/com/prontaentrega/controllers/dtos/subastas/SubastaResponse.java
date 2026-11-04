@@ -20,7 +20,7 @@ public record SubastaResponse(
                 subasta.getPropietarioId(),
                 subasta.getJugadorId(),
                 subasta.getCantidadOfrecida(),
-                subasta.getOfertaActual(),
+                subasta.getOfertaActual() == null ? null : subasta.getOfertaActual().getPuja(),
                 subasta.getEstado().name(),
                 subasta.getVencimiento());
     }

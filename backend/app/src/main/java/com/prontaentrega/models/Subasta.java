@@ -18,9 +18,7 @@ public class Subasta {
     private BolsaDeJugador bolsaDeJugador;
     private Integer cantidadOfrecida;
     private BigDecimal precioInicial;
-    // TODO: Cambiar por oferta
-    private BigDecimal ofertaActual;
-    private Usuario ofertanteActual;
+    private Oferta ofertaActual;
 
     private EstadoSubasta estado;
     private LocalDateTime vencimiento;
@@ -39,7 +37,6 @@ public class Subasta {
         this.cantidadOfrecida = cantidadOfrecida;
         this.precioInicial = precioInicial;
         this.ofertaActual = null;
-        this.ofertanteActual = null;
         this.estado = EstadoSubasta.ACTIVA;
         this.vencimiento = vencimiento;
         this.creadoEn = LocalDateTime.now(ZoneId.systemDefault());
@@ -55,12 +52,11 @@ public class Subasta {
     }
 
     public BigDecimal obtenerOfertaMinima() {
-        return getOfertaActual() == null ? getPrecioInicial() : getOfertaActual();
+        return getOfertaActual() == null ? getPrecioInicial() : getOfertaActual().getPuja();
     }
 
-    public void actualizarPostorMasGrande(BigDecimal puja, Usuario comprador) {
-        setOfertaActual(puja);
-        setOfertanteActual(comprador);
+    public void actualizarPostorMasGrande(Oferta oferta) {
+        setOfertaActual(oferta);
         setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 }

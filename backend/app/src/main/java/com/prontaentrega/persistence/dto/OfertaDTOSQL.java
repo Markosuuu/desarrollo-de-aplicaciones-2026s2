@@ -1,6 +1,7 @@
 package com.prontaentrega.persistence.dto;
 
 import com.prontaentrega.models.Oferta;
+import com.prontaentrega.models.Subasta;
 import com.prontaentrega.models.enums.EstadoOferta;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,7 +62,11 @@ public class OfertaDTOSQL {
     }
 
     public Oferta aModelo() {
-        Oferta oferta = new Oferta(subasta.aModelo(), UsuarioDTOSQL.aUsuario(usuario), puja);
+        return aModelo(subasta.aModelo());
+    }
+
+    public Oferta aModelo(Subasta subastaModelo) {
+        Oferta oferta = new Oferta(subastaModelo, UsuarioDTOSQL.aUsuario(usuario), puja);
         oferta.setId(id);
         oferta.setEstado(estado);
         oferta.setCreadoEn(creadoEn);

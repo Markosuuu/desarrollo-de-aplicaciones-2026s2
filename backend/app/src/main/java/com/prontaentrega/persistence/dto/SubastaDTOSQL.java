@@ -45,12 +45,9 @@ public class SubastaDTOSQL {
     @Column(name = "precio_inicial", nullable = false)
     private BigDecimal precioInicial;
 
-    @Column(name = "oferta_actual")
-    private BigDecimal ofertaActual;
-
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ofertante_actual_id")
-    private UsuarioDTOSQL ofertanteActual;
+    @JoinColumn(name = "oferta_actual_id")
+    private OfertaDTOSQL ofertaActual;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -75,15 +72,14 @@ public class SubastaDTOSQL {
             Subasta subasta,
             UsuarioDTOSQL propietario,
             BolsaDeJugadorDTOSQL bolsaDeJugador,
-            UsuarioDTOSQL ofertanteActual) {
+            OfertaDTOSQL ofertaActual) {
         SubastaDTOSQL dto = new SubastaDTOSQL();
         dto.id = subasta.getId();
         dto.propietario = propietario;
         dto.bolsaDeJugador = bolsaDeJugador;
         dto.cantidadOfrecida = subasta.getCantidadOfrecida();
         dto.precioInicial = subasta.getPrecioInicial();
-        dto.ofertaActual = subasta.getOfertaActual();
-        dto.ofertanteActual = ofertanteActual;
+        dto.ofertaActual = ofertaActual;
         dto.estado = subasta.getEstado();
         dto.vencimiento = subasta.getVencimiento();
         dto.creadoEn = subasta.getCreadoEn();
@@ -100,8 +96,9 @@ public class SubastaDTOSQL {
                 precioInicial,
                 vencimiento);
         subasta.setId(id);
-        subasta.setOfertaActual(ofertaActual);
-        subasta.setOfertanteActual(ofertanteActual == null ? null : UsuarioDTOSQL.aUsuario(ofertanteActual));
+        if (ofertaActual != null) {
+            subasta.setOfertaActual(ofertaActual.aModelo(subasta));
+        }
         subasta.setEstado(estado);
         subasta.setCreadoEn(creadoEn);
         subasta.setActualizadoEn(actualizadoEn);

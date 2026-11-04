@@ -1,6 +1,7 @@
 package com.prontaentrega.controllers.dtos.subastas;
 
 import com.prontaentrega.models.Subasta;
+import com.prontaentrega.models.enums.EstadoOferta;
 import java.math.BigDecimal;
 import java.util.UUID;
 
@@ -12,12 +13,13 @@ public record CerrarSubastaResponse(
         String resultado) {
 
     public static CerrarSubastaResponse from(Subasta subasta) {
-        boolean huboVenta = subasta.getOfertanteActual() != null;
+        boolean huboVenta = subasta.getOfertaActual() != null
+                && subasta.getOfertaActual().getEstado() == EstadoOferta.GANADORA;
         return new CerrarSubastaResponse(
                 subasta.getId(),
                 subasta.getEstado().name(),
-                huboVenta ? subasta.getOfertanteActual().getId() : null,
-                huboVenta ? subasta.getOfertaActual() : null,
+                huboVenta ? subasta.getOfertaActual().getUsuarioId() : null,
+                huboVenta ? subasta.getOfertaActual().getPuja() : null,
                 huboVenta ? "VENTA" : "RETORNO_TOKENS");
     }
 }

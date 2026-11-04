@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public class OfertaRepositoryImpl implements OfertaRepository {
@@ -56,7 +57,12 @@ public class OfertaRepositoryImpl implements OfertaRepository {
     }
 
     @Override
+    @Transactional
     public void deleteAll() {
+        List<SubastaDTOSQL> subastas = subastaDao.findAll();
+        subastas.forEach(subasta -> subasta.setOfertaActual(null));
+        subastaDao.saveAll(subastas);
+        subastaDao.flush();
         dao.deleteAll();
     }
 

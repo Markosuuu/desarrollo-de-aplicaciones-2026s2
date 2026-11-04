@@ -168,7 +168,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         subastaService.cerrarSubasta(seller.getId(), subasta.getId(), "Por propietario");
 
         Subasta cerrada = subastaService.obtenerSubasta(subasta.getId());
-        assertEquals(nextBidder.getId(), cerrada.getOfertanteActual().getId());
+        assertEquals(nextBidder.getId(), cerrada.getOfertaActual().getUsuarioId());
         assertEquals(0, usuarioRepository.findById(seller.getId()).orElseThrow()
             .getCreditosDisponibles().compareTo(BigDecimal.valueOf(1070)));
         }
