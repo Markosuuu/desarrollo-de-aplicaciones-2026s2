@@ -12,7 +12,7 @@ public class SubastaScheduler {
         this.subastaService = subastaService;
     }
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedRate = 60 * 60 * 1000)
     public void resolverSubastasVencidas() {
         subastaService.resolverSubastasVencidas();
     }
