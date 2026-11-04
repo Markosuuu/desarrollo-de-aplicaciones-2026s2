@@ -23,7 +23,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity(name = "Oferta")
-@Table(name = "ofertas_subasta", uniqueConstraints = @UniqueConstraint(columnNames = {"subasta_id", "usuario_id"}))
+@Table(name = "ofertas_subasta", uniqueConstraints = @UniqueConstraint(
+        name = "uk_oferta_usuario_idempotency_key",
+        columnNames = {"usuario_id", "idempotency_key"}))
 @Getter
 @Setter
 @NoArgsConstructor
@@ -46,6 +48,9 @@ public class OfertaDTOSQL {
     @Column(nullable = false)
     private Boolean esSuperior;
 
+    @Column(name = "idempotency_key", length = 255)
+    private String idempotencyKey;
+
     @Column(name = "creado_en", nullable = false)
     private LocalDateTime creadoEn;
 
@@ -56,6 +61,7 @@ public class OfertaDTOSQL {
         dto.usuario = usuario;
         dto.puja = oferta.getPuja();
         dto.esSuperior = oferta.getEsSuperior();
+        dto.idempotencyKey = oferta.getIdempotencyKey();
         dto.creadoEn = oferta.getCreadoEn();
         return dto;
     }
@@ -65,7 +71,12 @@ public class OfertaDTOSQL {
     }
 
     public Oferta aModelo(Subasta subastaModelo) {
-        Oferta oferta = new Oferta(subastaModelo, UsuarioDTOSQL.aUsuario(usuario), puja, creadoEn);
+        Oferta oferta = new Oferta(
+                subastaModelo,
+                UsuarioDTOSQL.aUsuario(usuario),
+                puja,
+                creadoEn,
+                idempotencyKey);
         oferta.setId(id);
         oferta.setEsSuperior(esSuperior);
         return oferta;

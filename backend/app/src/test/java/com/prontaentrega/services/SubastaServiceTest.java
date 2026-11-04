@@ -15,6 +15,7 @@ import com.prontaentrega.persistence.repository.SubastaRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.services.exceptions.OfertaInvalidaException;
+import com.prontaentrega.services.exceptions.IdempotencyKeyException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -112,6 +113,16 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         Oferta primeraOferta = subastaService.ofertar(buyer.getId(), subasta.getId(), BigDecimal.valueOf(150), "bid-1");
         Oferta reintento = subastaService.ofertar(buyer.getId(), subasta.getId(), BigDecimal.valueOf(150), "bid-1");
         assertEquals(primeraOferta.getId(), reintento.getId());
+        assertEquals(1, ofertaRepository.findBySubastaId(subasta.getId()).size());
+        assertThrows(
+                IdempotencyKeyException.class,
+                () -> subastaService.ofertar(
+                        buyer.getId(), subasta.getId(), BigDecimal.valueOf(160), "bid-1"));
+
+        Oferta nuevaOferta = subastaService.ofertar(
+                buyer.getId(), subasta.getId(), BigDecimal.valueOf(160), "bid-2");
+        assertNotEquals(primeraOferta.getId(), nuevaOferta.getId());
+        assertEquals(2, ofertaRepository.findBySubastaId(subasta.getId()).size());
         assertThrows(OfertaInvalidaException.class,
             () -> subastaService.ofertar(secondBuyer.getId(), subasta.getId(), BigDecimal.valueOf(120), "bid-2"));
 

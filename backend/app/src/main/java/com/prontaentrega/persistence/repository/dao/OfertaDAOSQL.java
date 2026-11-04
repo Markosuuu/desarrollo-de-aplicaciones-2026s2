@@ -10,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface OfertaDAOSQL extends JpaRepository<OfertaDTOSQL, UUID> {
-    Optional<OfertaDTOSQL> findByUsuario_IdAndSubasta_Id(UUID usuarioId, UUID subastaId);
+    Optional<OfertaDTOSQL> findByUsuario_IdAndIdempotencyKey(UUID usuarioId, String idempotencyKey);
     List<OfertaDTOSQL> findBySubasta_Id(UUID subastaId);
     List<OfertaDTOSQL> findBySubasta_IdOrderByPujaDesc(UUID subastaId);
 

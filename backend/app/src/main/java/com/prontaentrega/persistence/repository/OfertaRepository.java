@@ -8,7 +8,7 @@ import java.util.UUID;
 public interface OfertaRepository {
     Oferta save(Oferta oferta);
     Optional<Oferta> findById(UUID id);
-    Optional<Oferta> findByUsuarioIdAndSubastaId(UUID usuarioId, UUID subastaId);
+    Optional<Oferta> findByUsuarioIdAndIdempotencyKey(UUID usuarioId, String idempotencyKey);
     List<Oferta> findBySubastaId(UUID subastaId);
     List<Oferta> findBySubastaIdOrderByPujaDesc(UUID subastaId);
     void deleteAll();

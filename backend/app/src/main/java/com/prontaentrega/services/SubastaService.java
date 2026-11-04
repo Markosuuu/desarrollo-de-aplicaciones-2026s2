@@ -27,6 +27,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -142,16 +143,14 @@ public class SubastaService {
      */
     @Transactional
     public Oferta ofertar(UUID usuarioId, UUID subastaId, BigDecimal puja, String idempotencyKey) {
-        // TODO: Revisar clave de idem
+
+        Oferta ofertaPrevia = validarIdempotencia(usuarioId, subastaId, puja, idempotencyKey);
+        if (ofertaPrevia != null) return ofertaPrevia;
+
         Subasta subasta = subastaRepository.findByIdForUpdate(subastaId)
                 .orElseThrow(() -> new SubastaNoEncontradaException(subastaId));
 
         validarOferta(usuarioId, puja, subasta);
-
-        Optional<Oferta> ofertaExistente = ofertaRepository.findByUsuarioIdAndSubastaId(usuarioId, subastaId);
-        if (ofertaExistente.isPresent() && ofertaExistente.get().esLaMasAltaDeSubasta()) {
-            return ofertaExistente.get();
-        }
 
         BigDecimal ofertaMinima = subasta.obtenerOfertaMinima();
 
@@ -168,7 +167,7 @@ public class SubastaService {
 
         ofertaRepository.actualizarSuperior(subastaId);
 
-        Oferta oferta = new Oferta(subasta, comprador, puja);
+        Oferta oferta = new Oferta(subasta, comprador, puja, idempotencyKey);
         ofertaRepository.save(oferta);
 
         subasta.actualizarPostorMasGrande(oferta);
@@ -202,7 +201,7 @@ public class SubastaService {
         // TODO: Ver que onda esto
         LocalDateTime ahora = LocalDateTime.now(ZoneId.systemDefault());
 
-        List<UUID> idsVencidas = subastaRepository.findIdsVencidas(ahora);;
+        List<UUID> idsVencidas = subastaRepository.findIdsVencidas(ahora);
 
         for (UUID id : idsVencidas) {
             subastaRepository.findByIdForUpdate(id).ifPresent(subasta -> {
@@ -373,5 +372,23 @@ public class SubastaService {
         if (Boolean.FALSE.equals(subasta.getActiva())) {
             throw new SubastaNoActivaException("La subasta ya está cerrada");
         }
+    }
+
+    private Oferta validarIdempotencia(UUID usuarioId, UUID subastaId, BigDecimal puja, String idempotencyKey) {
+        if (idempotencyKey == null || idempotencyKey.isBlank() || idempotencyKey.length() > 255) {
+            throw new OfertaInvalidaException("La clave de idempotencia es obligatoria y debe tener hasta 255 caracteres");
+        }
+
+        Optional<Oferta> ofertaPrevia = ofertaRepository.findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
+        if (ofertaPrevia.isPresent()) {
+            Oferta oferta = ofertaPrevia.get();
+
+            if (!oferta.getSubastaId().equals(subastaId) || oferta.getPuja().compareTo(puja) != 0) {
+                throw new IdempotencyKeyException(
+                        "La clave de idempotencia ya fue utilizada con otros datos");
+            }
+            return oferta;
+        }
+        return null;
     }
 }
