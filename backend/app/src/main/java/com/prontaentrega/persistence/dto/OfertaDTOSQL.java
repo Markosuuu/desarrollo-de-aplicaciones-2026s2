@@ -43,9 +43,8 @@ public class OfertaDTOSQL {
     @Column(nullable = false)
     private BigDecimal puja;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EstadoOferta estado;
+    private Boolean esSuperior;
 
     @Column(name = "creado_en", nullable = false)
     private LocalDateTime creadoEn;
@@ -56,7 +55,7 @@ public class OfertaDTOSQL {
         dto.subasta = subasta;
         dto.usuario = usuario;
         dto.puja = oferta.getPuja();
-        dto.estado = oferta.getEstado();
+        dto.esSuperior = oferta.getEsSuperior();
         dto.creadoEn = oferta.getCreadoEn();
         return dto;
     }
@@ -68,7 +67,7 @@ public class OfertaDTOSQL {
     public Oferta aModelo(Subasta subastaModelo) {
         Oferta oferta = new Oferta(subastaModelo, UsuarioDTOSQL.aUsuario(usuario), puja);
         oferta.setId(id);
-        oferta.setEstado(estado);
+        oferta.setEsSuperior(esSuperior);
         oferta.setCreadoEn(creadoEn);
         return oferta;
     }

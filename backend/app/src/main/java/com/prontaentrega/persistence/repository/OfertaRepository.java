@@ -13,4 +13,5 @@ public interface OfertaRepository {
     List<Oferta> findBySubastaIdOrderByPujaDesc(UUID subastaId);
     void deleteAll();
     Long count();
+    void actualizarSuperior(UUID subastaId);
 }
