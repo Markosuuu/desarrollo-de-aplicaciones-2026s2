@@ -122,7 +122,7 @@ class SubastaControllerTest extends AbstractIntegrationTest {
                                 "puja", 80,
                                 "idempotencyKey", "buyer-auction-1"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.estado").value("VIGENTE"));
+                .andExpect(jsonPath("$.estado").value(true));
 
         mockMvc.perform(get("/api/subastas/{id}", auctionId)
                         .header("Authorization", bearer(buyer)))

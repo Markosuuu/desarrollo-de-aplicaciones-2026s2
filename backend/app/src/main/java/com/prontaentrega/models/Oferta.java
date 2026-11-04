@@ -1,6 +1,5 @@
 package com.prontaentrega.models;
 
-import com.prontaentrega.models.enums.EstadoOferta;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -17,14 +16,14 @@ public class Oferta {
     private Subasta subasta;
     private Usuario usuario;
     private BigDecimal puja;
-    private EstadoOferta estado; // TODO: Quizas cambiar a boolean? esLaMaxima/esSuperior
+    private Boolean esSuperior;
     private LocalDateTime creadoEn;
 
     public Oferta(Subasta subasta, Usuario usuario, BigDecimal puja) {
         this.subasta = subasta;
         this.usuario = usuario;
         this.puja = puja;
-        this.estado = EstadoOferta.VIGENTE;
+        this.esSuperior = true;
         this.creadoEn = LocalDateTime.now(ZoneId.systemDefault());
     }
 

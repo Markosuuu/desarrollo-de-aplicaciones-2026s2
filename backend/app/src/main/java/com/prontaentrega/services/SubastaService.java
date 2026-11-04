@@ -168,10 +168,10 @@ public class SubastaService {
             throw new CreditosInsuficientesException("No tienes suficientes créditos para ofertar");
         }
 
+        ofertaRepository.actualizarSuperior(subastaId);
+
         Oferta oferta = new Oferta(subasta, comprador, puja);
         ofertaRepository.save(oferta);
-
-        actualizarOfertasDeSubasta(subastaId);
 
         subasta.actualizarPostorMasGrande(oferta);
         subastaRepository.save(subasta);
@@ -230,7 +230,7 @@ public class SubastaService {
         if (ofertaGanadora == null) {
             devolverTokensAlPropietario(subasta);
         } else {
-            ofertaGanadora.setEstado(com.prontaentrega.models.enums.EstadoOferta.GANADORA);
+            ofertaGanadora.setEsSuperior(true);
             ofertaRepository.save(ofertaGanadora);
             liquidarVenta(subasta, ofertaGanadora);
         }
@@ -316,15 +316,6 @@ public class SubastaService {
 
         operacionRepository.save(operacionCompra);
         operacionRepository.save(operacionVenta);
-    }
-
-    private void actualizarOfertasDeSubasta(UUID subastaId) {
-        ofertaRepository.findBySubastaId(subastaId).stream()
-                .filter(anterior -> anterior.getEstado() == EstadoOferta.VIGENTE)
-                .forEach(anterior -> {
-                    anterior.setEstado(EstadoOferta.SUPERADA);
-                    ofertaRepository.save(anterior);
-                });
     }
 
     private static void validarOferta(UUID usuarioId, BigDecimal puja, Subasta subasta) {

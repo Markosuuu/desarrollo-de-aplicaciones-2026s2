@@ -11,7 +11,7 @@ public record OfertaResponse(
         UUID usuarioId,
         BigDecimal puja,
         LocalDateTime timestamp,
-        String estado) {
+        Boolean estado) {
 
     public static OfertaResponse from(Oferta oferta) {
         return new OfertaResponse(
@@ -20,6 +20,6 @@ public record OfertaResponse(
                 oferta.getUsuarioId(),
                 oferta.getPuja(),
                 oferta.getCreadoEn(),
-                oferta.getEstado().name());
+                oferta.getEsSuperior());
     }
 }

@@ -70,4 +70,9 @@ public class OfertaRepositoryImpl implements OfertaRepository {
     public Long count() {
         return dao.count();
     }
+
+    @Override
+    public void actualizarSuperior(UUID subastaId) {
+        dao.actualizarSuperior(subastaId);
+    }
 }

@@ -14,7 +14,7 @@ public record CerrarSubastaResponse(
 
     public static CerrarSubastaResponse from(Subasta subasta) {
         boolean huboVenta = subasta.getOfertaActual() != null
-                && subasta.getOfertaActual().getEstado() == EstadoOferta.GANADORA;
+                && subasta.getOfertaActual().getEsSuperior();
         return new CerrarSubastaResponse(
                 subasta.getId(),
                 subasta.getEstado().name(),
