@@ -11,6 +11,8 @@ import RankingPage from "./pages/RankingPage";
 import UserPage from "./pages/UserPage";
 import MercadoPage from "./pages/MercadoPage";
 import OfertaPage from "./pages/OfertaPage";
+import ListaSubastasPage from "./pages/ListaSubastaPage";
+import SubastaPage from "./pages/SubastaPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -92,6 +94,26 @@ export default function App() {
             <ProtectedRoute requireAuth>
               <Sidebar>
                 <RankingPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subasta/:id"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <SubastaPage />
+              </Sidebar>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/subasta"
+          element={
+            <ProtectedRoute requireAuth>
+              <Sidebar>
+                <ListaSubastasPage />
               </Sidebar>
             </ProtectedRoute>
           }

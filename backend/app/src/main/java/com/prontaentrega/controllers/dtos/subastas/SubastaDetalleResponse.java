@@ -1,5 +1,7 @@
 package com.prontaentrega.controllers.dtos.subastas;
 
+import com.prontaentrega.controllers.dtos.auth.UsuarioResponse;
+import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
 import com.prontaentrega.models.Subasta;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -8,8 +10,8 @@ import java.util.UUID;
 
 public record SubastaDetalleResponse(
         UUID id,
-        UUID propietarioId,
-        UUID jugadorId,
+        UsuarioResponse propietario,
+        PlayerResponse jugador,
         Integer cantidadOfrecida,
         BigDecimal ofertaActual,
         List<OfertaResponse> ofertasPrevias,
@@ -19,8 +21,8 @@ public record SubastaDetalleResponse(
     public static SubastaDetalleResponse from(Subasta subasta, List<OfertaResponse> ofertas) {
         return new SubastaDetalleResponse(
                 subasta.getId(),
-                subasta.getPropietarioId(),
-                subasta.getJugadorId(),
+                UsuarioResponse.from(subasta.getPropietario()),
+                PlayerResponse.from(subasta.getBolsaDeJugador()),
                 subasta.getCantidadOfrecida(),
                 subasta.getOfertaActual() == null ? null : subasta.getOfertaActual().getPuja(),
                 ofertas,

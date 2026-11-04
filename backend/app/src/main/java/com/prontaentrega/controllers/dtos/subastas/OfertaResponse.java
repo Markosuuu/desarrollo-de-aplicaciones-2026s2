@@ -1,5 +1,6 @@
 package com.prontaentrega.controllers.dtos.subastas;
 
+import com.prontaentrega.controllers.dtos.auth.UsuarioResponse;
 import com.prontaentrega.models.Oferta;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -8,7 +9,7 @@ import java.util.UUID;
 public record OfertaResponse(
         UUID id,
         UUID subastaId,
-        UUID usuarioId,
+        UsuarioResponse usuario,
         BigDecimal puja,
         LocalDateTime timestamp,
         Boolean estado) {
@@ -17,7 +18,7 @@ public record OfertaResponse(
         return new OfertaResponse(
                 oferta.getId(),
                 oferta.getSubastaId(),
-                oferta.getUsuarioId(),
+                UsuarioResponse.from(oferta.getUsuario()),
                 oferta.getPuja(),
                 oferta.getCreadoEn(),
                 oferta.getEsSuperior());
