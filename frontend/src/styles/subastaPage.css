@@ -1,0 +1,78 @@
+
+.subastas-page {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 35px 24px 50px;
+  box-sizing: border-box;
+}
+
+.subastas-header {
+  margin-bottom: 30px;
+}
+
+.subastas-header p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary, #888888);
+}
+
+.subastas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.subastas-message {
+  padding: 25px 10px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary, #888888);
+}
+
+.subastas-end {
+  font-weight: 600;
+}
+
+.subastas-observer {
+  width: 100%;
+  height: 1px;
+}
+
+.subastas-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 25px 10px;
+  text-align: center;
+  color: #dc3545;
+}
+
+.subastas-error p {
+  margin: 0;
+}
+
+.subastas-error button {
+  padding: 9px 18px;
+  border: none;
+  border-radius: 7px;
+  background: var(--accent-color, #2196f3);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.subastas-error button:hover {
+  opacity: 0.85;
+}
+
+@media (max-width: 600px) {
+  .subastas-page {
+    padding: 25px 15px 40px;
+  }
+
+  .subastas-header h1 {
+    font-size: 25px;
+  }
+}

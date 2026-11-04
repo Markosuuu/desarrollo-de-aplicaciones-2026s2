@@ -1,0 +1,130 @@
+
+.subasta-card {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 22px 26px;
+  gap: 20px;
+
+  text-align: left;
+  color: inherit;
+  font: inherit;
+
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e2e2e2);
+  border-radius: 12px;
+
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.subasta-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-color, #61b4f8);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
+}
+
+.subasta-card:focus-visible {
+  outline: 2px solid var(--accent-color, #61b4f8);
+  outline-offset: 3px;
+}
+
+.subasta-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.subasta-card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.subasta-card-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--text-secondary, #888888);
+}
+
+.subasta-card-id {
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.subasta-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.subasta-status.active {
+  color: #16834b;
+  background: #dcfce7;
+}
+
+.subasta-status.inactive {
+  color: #777777;
+  background: #eeeeee;
+}
+
+.subasta-card-info {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.subasta-card-footer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+
+  padding-top: 18px;
+  border-top: 1px solid var(--border-color, #e2e2e2);
+}
+
+.subasta-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+
+.subasta-info-label {
+  font-size: 12px;
+  color: var(--text-secondary, #888888);
+}
+
+.subasta-info-value {
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.subasta-offer {
+  color: var(--accent-color, #2196f3);
+}
+
+@media (max-width: 600px) {
+  .subasta-card {
+    padding: 18px;
+    gap: 16px;
+  }
+
+  .subasta-card-info,
+  .subasta-card-footer {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .subasta-card-header {
+    align-items: flex-start;
+  }
+}
