@@ -1,13 +1,12 @@
 package com.prontaentrega.controllers.dtos.subastas;
 
 import com.prontaentrega.models.Subasta;
-import com.prontaentrega.models.enums.EstadoOferta;
 import java.math.BigDecimal;
 import java.util.UUID;
 
 public record CerrarSubastaResponse(
         UUID id,
-        Boolean estado,
+        Boolean activa,
         UUID ganadorId,
         BigDecimal montoFinal,
         String resultado) {
