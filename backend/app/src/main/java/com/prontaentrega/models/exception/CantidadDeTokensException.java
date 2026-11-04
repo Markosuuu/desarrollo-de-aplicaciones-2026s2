@@ -1,4 +1,4 @@
-package com.prontaentrega.services.exceptions;
+package com.prontaentrega.models.exception;
 
 public class CantidadDeTokensException extends RuntimeException {
     public CantidadDeTokensException(String message) {
