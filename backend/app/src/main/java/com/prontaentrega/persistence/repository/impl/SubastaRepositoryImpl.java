@@ -18,6 +18,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -45,11 +46,18 @@ public class SubastaRepositoryImpl implements SubastaRepository {
         OfertaDTOSQL ofertaActual = subasta.getOfertaActual() == null
                 ? null
                 : ofertaDao.getReferenceById(subasta.getOfertaActual().getId());
+        SubastaDTOSQL dto = generarDTOSubasta(subasta, propietario, bolsa, ofertaActual);
+        SubastaDTOSQL saved = dao.save(dto);
+        subasta.setId(saved.getId());
+        return subasta;
+    }
+
+    @NonNull
+    private SubastaDTOSQL generarDTOSubasta(Subasta subasta, UsuarioDTOSQL propietario, BolsaDeJugadorDTOSQL bolsa, OfertaDTOSQL ofertaActual) {
         SubastaDTOSQL dto;
         if (subasta.getId() == null) {
             dto = SubastaDTOSQL.desdeModelo(subasta, propietario, bolsa, ofertaActual);
         } else {
-            // TODO: CHECK THA SHI
             dto = dao.findById(subasta.getId()).orElseGet(SubastaDTOSQL::new);
             dto.setId(subasta.getId());
             dto.setPropietario(propietario);
@@ -63,9 +71,7 @@ public class SubastaRepositoryImpl implements SubastaRepository {
             dto.setActualizadoEn(subasta.getActualizadoEn());
             dto.setMotivoCierre(subasta.getMotivoCierre());
         }
-        SubastaDTOSQL saved = dao.save(dto);
-        subasta.setId(saved.getId());
-        return subasta;
+        return dto;
     }
 
     @Override

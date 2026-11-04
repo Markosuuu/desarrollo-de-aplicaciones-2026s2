@@ -17,21 +17,29 @@ public class Oferta {
     private final BigDecimal puja;
     private final LocalDateTime creadoEn;
     private Boolean esSuperior;
+    private final String idempotencyKey;
 
-    public Oferta(Subasta subasta, Usuario usuario, BigDecimal puja) {
+    public Oferta(Subasta subasta, Usuario usuario, BigDecimal puja, String idempotencyKey) {
         this.subasta = subasta;
         this.usuario = usuario;
         this.puja = puja;
         this.esSuperior = true;
         this.creadoEn = LocalDateTime.now(ZoneId.systemDefault());
+        this.idempotencyKey = idempotencyKey;
     }
 
-    public Oferta(Subasta subasta, Usuario usuario, BigDecimal puja, LocalDateTime creadoEn) {
+    public Oferta(
+            Subasta subasta,
+            Usuario usuario,
+            BigDecimal puja,
+            LocalDateTime creadoEn,
+            String idempotencyKey) {
         this.subasta = subasta;
         this.usuario = usuario;
         this.puja = puja;
         this.esSuperior = true;
         this.creadoEn = creadoEn;
+        this.idempotencyKey = idempotencyKey;
     }
 
     public UUID getSubastaId() {
@@ -42,7 +50,4 @@ public class Oferta {
         return usuario.getId();
     }
 
-    public boolean esLaMasAltaDeSubasta() {
-        return subasta.getOfertaActual().getUsuarioId() == usuario.getId();
-    }
 }

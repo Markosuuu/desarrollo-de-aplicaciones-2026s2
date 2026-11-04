@@ -124,6 +124,24 @@ class SubastaControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.estado").value(true));
 
+        mockMvc.perform(post("/api/subastas/ofertar")
+                        .header("Authorization", bearer(buyer))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "subastaId", auctionId,
+                                "puja", 80,
+                                "idempotencyKey", "buyer-auction-1"))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/subastas/ofertar")
+                        .header("Authorization", bearer(buyer))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(Map.of(
+                                "subastaId", auctionId,
+                                "puja", 90,
+                                "idempotencyKey", "buyer-auction-1"))))
+                .andExpect(status().isConflict());
+
         mockMvc.perform(get("/api/subastas/{id}", auctionId)
                         .header("Authorization", bearer(buyer)))
                 .andExpect(status().isOk())

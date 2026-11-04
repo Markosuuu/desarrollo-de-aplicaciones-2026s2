@@ -42,8 +42,8 @@ public class OfertaRepositoryImpl implements OfertaRepository {
     }
 
     @Override
-    public Optional<Oferta> findByUsuarioIdAndSubastaId(UUID usuarioId, UUID subastaId) {
-        return dao.findByUsuario_IdAndSubasta_Id(usuarioId, subastaId).map(OfertaDTOSQL::aModelo);
+    public Optional<Oferta> findByUsuarioIdAndIdempotencyKey(UUID usuarioId, String idempotencyKey) {
+        return dao.findByUsuario_IdAndIdempotencyKey(usuarioId, idempotencyKey).map(OfertaDTOSQL::aModelo);
     }
 
     @Override
