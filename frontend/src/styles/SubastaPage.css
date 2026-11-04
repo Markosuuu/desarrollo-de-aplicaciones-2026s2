@@ -19,7 +19,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 1.5px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #595959);
 }
 
 .subasta-detail-header h1 {
@@ -29,7 +29,7 @@
 
 .subasta-detail-header p {
   margin: 0;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #595959);
 }
 
 .subasta-detail-status {
@@ -73,7 +73,7 @@
 
 .subasta-overview-item span {
   font-size: 12px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #595959);
 }
 
 .subasta-overview-item strong {
@@ -127,7 +127,7 @@
 
 .subasta-stat span {
   font-size: 12px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #595959);
 }
 
 .subasta-stat strong {
@@ -156,7 +156,7 @@
 
 .subasta-player-details span {
   font-size: 12px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #595959);
 }
 
 .subasta-player-details strong {
@@ -188,7 +188,7 @@
 
 .subasta-offers-table th {
   font-size: 12px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #595959);
   font-weight: 700;
 }
 
@@ -230,7 +230,7 @@
 .subasta-empty {
   padding: 30px;
   text-align: center;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #595959);
   background: var(--card-bg, #fff);
   border: 1px dashed var(--border-color, #ddd);
   border-radius: 12px;
@@ -342,7 +342,7 @@
 .subasta-offer-form p {
   margin: 0;
   font-size: 14px;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #595959);
 }
 
 .subasta-offer-form label {
@@ -425,7 +425,7 @@
 .subasta-page-error {
   padding: 40px 20px;
   text-align: center;
-  color: var(--text-secondary, #888);
+  color: var(--text-secondary, #595959);
 }
 
 .subasta-page-error {
