@@ -1,12 +1,6 @@
 package com.prontaentrega.controllers;
 
-import com.prontaentrega.controllers.dtos.subastas.CerrarSubastaRequest;
-import com.prontaentrega.controllers.dtos.subastas.CerrarSubastaResponse;
-import com.prontaentrega.controllers.dtos.subastas.CrearSubastaRequest;
-import com.prontaentrega.controllers.dtos.subastas.SubastaDetalleResponse;
-import com.prontaentrega.controllers.dtos.subastas.OfertaResponse;
-import com.prontaentrega.controllers.dtos.subastas.OfertarSubastaRequest;
-import com.prontaentrega.controllers.dtos.subastas.SubastaResponse;
+import com.prontaentrega.controllers.dtos.subastas.*;
 import com.prontaentrega.models.Oferta;
 import com.prontaentrega.models.Subasta;
 import com.prontaentrega.services.SubastaService;
@@ -50,7 +44,7 @@ public class SubastaController {
     }
 
     @GetMapping
-    public ResponseEntity<Map<String, Object>> listarSubastas(
+    public ResponseEntity<SubastaPagedResponse> listarSubastas(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<Subasta> subastas = subastaService.listarSubastas(page, size);
@@ -58,11 +52,9 @@ public class SubastaController {
                 .map(SubastaResponse::from)
                 .toList();
 
-        // TODO: Cambiar response
-        return ResponseEntity.ok(Map.of(
-                "items", items,
-                "page", page,
-                "size", size));
+        SubastaPagedResponse pages = new SubastaPagedResponse(items, page, size);
+
+        return ResponseEntity.ok(pages);
     }
 
     @GetMapping("/{id}")
@@ -82,13 +74,12 @@ public class SubastaController {
     }
 
     @PatchMapping("/{id}/cerrar")
-    public ResponseEntity<CerrarSubastaResponse> cerrarSubasta(@PathVariable UUID id, @RequestBody(required = false) CerrarSubastaRequest request) {
+    public ResponseEntity<CerrarSubastaResponse> cerrarSubasta(
+            @PathVariable UUID id,
+            @RequestBody(required = false) CerrarSubastaRequest request
+    ) {
         UUID usuarioId = currentUserId();
-
-        // TODO: Mu' feo esto de acá
-        String motivo = request == null || request.motivo() == null ? "POR_PROPIETARIO" : request.motivo();
-
-        Subasta subasta = subastaService.cerrarSubasta(usuarioId, id, motivo);
+        Subasta subasta = subastaService.cerrarSubasta(usuarioId, id, request.motivo());
         return ResponseEntity.ok(CerrarSubastaResponse.from(subasta));
     }
 
