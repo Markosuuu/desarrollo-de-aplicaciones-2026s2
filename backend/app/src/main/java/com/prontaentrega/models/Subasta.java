@@ -19,7 +19,6 @@ public class Subasta {
     private Integer cantidadOfrecida;
     private BigDecimal precioInicial;
     private Oferta ofertaActual;
-
     private EstadoSubasta estado;
     private LocalDateTime vencimiento;
     private LocalDateTime creadoEn;

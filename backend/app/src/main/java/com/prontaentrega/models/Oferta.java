@@ -37,6 +37,6 @@ public class Oferta {
     }
 
     public boolean esLaMasAltaDeSubasta() {
-        return subasta.getOfertanteActual().getId() == usuario.getId();
+        return subasta.getOfertaActual().getUsuarioId() == usuario.getId();
     }
 }
