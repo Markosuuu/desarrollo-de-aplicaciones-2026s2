@@ -26,12 +26,12 @@ public interface SubastaDAOSQL extends JpaRepository<SubastaDTOSQL, UUID> {
     @Query("""
     SELECT s.id
     FROM Subasta s
-    WHERE s.estado = :estado
+    WHERE s.activa
       AND s.vencimiento <= :fecha
     ORDER BY s.vencimiento ASC
     """)
     List<UUID> findIdsVencidas(
-            @Param("estado") EstadoSubasta estado,
+            @Param("estado") Boolean activo,
             @Param("fecha") LocalDateTime fecha,
             Pageable pageable
     );
