@@ -25,8 +25,6 @@ public interface EstrategiaCotizacion {
      */
     Class<? extends ConfiguracionEstrategiaCotizacion> tipoConfiguracion();
 
-    /** Calcula una cotización propuesta desde una proyección y su configuración tipada. */
-
     /**
      * Calcula la cotización con unos datos de valoracion y una configuración de estrategia
      * @param datos Proyección de datos de valoración del jugador.
