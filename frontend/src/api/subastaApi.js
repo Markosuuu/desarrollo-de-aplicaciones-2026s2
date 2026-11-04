@@ -27,3 +27,60 @@ export async function fetchSubastas({ page = 1, size = 10, token } = {}) {
 
   return payload;
 }
+
+async function handleResponse(response, defaultMessage) {
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message ||
+      payload?.message ||
+      defaultMessage;
+
+    throw new Error(message);
+  }
+
+  return payload;
+}
+
+export async function fetchSubasta(id, token) {
+  const response = await fetch(`${API_BASE_URL}/subastas/${id}`, {
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return handleResponse(response, 'No se pudo cargar la subasta.');
+}
+
+export async function cerrarSubasta(id, token) {
+  const response = await fetch(`${API_BASE_URL}/subastas/${id}/cerrar`, {
+    method: 'PATCH',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  return handleResponse(response, 'No se pudo cerrar la subasta.');
+}
+
+export async function ofertarSubasta({ subastaId, puja, token }) {
+  const response = await fetch(`${API_BASE_URL}/subastas/ofertar`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      subastaId,
+      puja,
+      idempotencyKey: crypto.randomUUID(),
+    }),
+  });
+
+  return handleResponse(response, 'No se pudo realizar la oferta.');
+}
+

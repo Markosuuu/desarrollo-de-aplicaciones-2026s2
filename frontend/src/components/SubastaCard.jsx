@@ -1,9 +1,9 @@
 
+import { useNavigate } from 'react-router-dom';
 import '../styles/subastaCard.css';
 
 function formatDate(date) {
   if (!date) return 'Sin fecha';
-
   const parsedDate = new Date(date);
 
   if (Number.isNaN(parsedDate.getTime())) {
@@ -15,7 +15,6 @@ function formatDate(date) {
     month: '2-digit',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit',
   }).format(parsedDate);
 }
 
@@ -30,8 +29,11 @@ function formatOffer(offer) {
 }
 
 export default function SubastaCard({ subasta }) {
+    const navigate = useNavigate()
+
   const handleClick = () => {
-    console.log('Subasta seleccionada:', subasta);
+    console.log(`/subasta/${subasta.id}`)
+    navigate(`/subasta/${subasta.id}`)
   };
 
   return (
@@ -41,13 +43,34 @@ export default function SubastaCard({ subasta }) {
       onClick={handleClick}
     >
       <div className="subasta-card-header">
-        <div className="subasta-info-item">
-          <span className="subasta-info-label">Jugador</span>
-          <span className="subasta-info-value">
-            {subasta.jugadorId}
+        <div className="subasta-card-title">
+          <span className="subasta-player-name">
+            {subasta.jugador?.nombre || 'Jugador desconocido'}
+          </span>
+          <span className="subasta-player-team">
+            {subasta.jugador?.equipo || 'Equipo desconocido'}
+            {subasta.jugador?.liga && ` · ${subasta.jugador.liga}`}
           </span>
         </div>
-
+        <div className="subasta-info-item">
+          <span className="subasta-info-label">Cotización actual</span>
+          <span className="subasta-info-value subasta-offer">
+            {subasta.jugador?.cotizacion != null
+              ? subasta.jugador.cotizacion.toLocaleString('es-AR', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })
+              : 'No disponible'}
+          </span>
+        </div>
+        <div className="subasta-card-info">
+        <div className="subasta-info-item">
+          <span className="subasta-info-label">Propietario</span>
+          <span className="subasta-info-value">
+            {subasta.propietario?.nombre || 'Desconocido'}
+          </span>
+        </div>
+      </div>
         <span
           className={`subasta-status ${
             subasta.activa ? 'active' : 'inactive'
@@ -55,22 +78,6 @@ export default function SubastaCard({ subasta }) {
         >
           {subasta.activa ? 'Activa' : 'Finalizada'}
         </span>
-      </div>
-
-      <div className="subasta-card-info">
-        <div className="subasta-info-item">
-          <span className="subasta-info-label">Jugador</span>
-          <span className="subasta-info-value">
-            {subasta.jugadorId}
-          </span>
-        </div>
-
-        <div className="subasta-info-item">
-          <span className="subasta-info-label">Propietario</span>
-          <span className="subasta-info-value">
-            {subasta.propietarioId}
-          </span>
-        </div>
       </div>
 
       <div className="subasta-card-footer">
@@ -83,7 +90,7 @@ export default function SubastaCard({ subasta }) {
 
         <div className="subasta-info-item">
           <span className="subasta-info-label">Oferta actual</span>
-          <span className="subasta-info-value subasta-offer">
+          <span className="subasta-info-value">
             {formatOffer(subasta.ofertaActual)}
           </span>
         </div>
