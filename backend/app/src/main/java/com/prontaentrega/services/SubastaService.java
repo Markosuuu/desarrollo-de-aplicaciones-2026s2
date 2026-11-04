@@ -198,7 +198,6 @@ public class SubastaService {
 
     @Transactional
     public void resolverSubastasVencidas() {
-        // TODO: Ver que onda esto
         LocalDateTime ahora = LocalDateTime.now(ZoneId.systemDefault());
 
         List<UUID> idsVencidas = subastaRepository.findIdsVencidas(ahora);
