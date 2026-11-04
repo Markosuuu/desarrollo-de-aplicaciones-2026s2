@@ -4,5 +4,4 @@ public enum EstadoOferta {
     VIGENTE,
     SUPERADA,
     GANADORA,
-    RECHAZADA
 }

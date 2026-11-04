@@ -314,6 +314,5 @@ public class SubastaService {
 
         operacionRepository.save(operacionCompra);
         operacionRepository.save(operacionVenta);
-        // Lo hace aca no dije nadaaaaa
     }
 }
