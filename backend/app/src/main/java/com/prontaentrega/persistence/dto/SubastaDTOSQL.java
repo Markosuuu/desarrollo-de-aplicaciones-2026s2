@@ -1,11 +1,8 @@
 package com.prontaentrega.persistence.dto;
 
 import com.prontaentrega.models.Subasta;
-import com.prontaentrega.models.enums.EstadoSubasta;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -49,9 +46,8 @@ public class SubastaDTOSQL {
     @JoinColumn(name = "oferta_actual_id")
     private OfertaDTOSQL ofertaActual;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private EstadoSubasta estado;
+    private Boolean activa;
 
     @Column(nullable = false)
     private LocalDateTime vencimiento;
@@ -80,7 +76,7 @@ public class SubastaDTOSQL {
         dto.cantidadOfrecida = subasta.getCantidadOfrecida();
         dto.precioInicial = subasta.getPrecioInicial();
         dto.ofertaActual = ofertaActual;
-        dto.estado = subasta.getEstado();
+        dto.activa = subasta.getActiva();
         dto.vencimiento = subasta.getVencimiento();
         dto.creadoEn = subasta.getCreadoEn();
         dto.actualizadoEn = subasta.getActualizadoEn();
@@ -94,13 +90,13 @@ public class SubastaDTOSQL {
                 bolsaDeJugador.aModelo(),
                 cantidadOfrecida,
                 precioInicial,
-                vencimiento);
+                vencimiento,
+                creadoEn);
         subasta.setId(id);
         if (ofertaActual != null) {
             subasta.setOfertaActual(ofertaActual.aModelo(subasta));
         }
-        subasta.setEstado(estado);
-        subasta.setCreadoEn(creadoEn);
+        subasta.setActiva(activa);
         subasta.setActualizadoEn(actualizadoEn);
         subasta.setMotivoCierre(motivoCierre);
         return subasta;

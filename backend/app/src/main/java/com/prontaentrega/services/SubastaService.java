@@ -6,9 +6,7 @@ import com.prontaentrega.models.Oferta;
 import com.prontaentrega.models.Operacion;
 import com.prontaentrega.models.Subasta;
 import com.prontaentrega.models.Usuario;
-import com.prontaentrega.models.enums.EstadoOferta;
 import com.prontaentrega.models.enums.EstadoOperacion;
-import com.prontaentrega.models.enums.EstadoSubasta;
 import com.prontaentrega.models.enums.TipoOperacion;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
@@ -67,7 +65,7 @@ public class SubastaService {
         int normalizedPage = Math.max(page, 1) - 1;
         int normalizedSize = Math.max(size, 1);
         Pageable pageable = PageRequest.of(normalizedPage, normalizedSize);
-        return subastaRepository.findByEstado(EstadoSubasta.ACTIVA, pageable);
+        return subastaRepository.findByActiva(true, pageable);
     }
 
     /**
@@ -214,7 +212,7 @@ public class SubastaService {
 
             for (UUID id : idsVencidas) {
                 subastaRepository.findByIdForUpdate(id).ifPresent(subasta -> {
-                    if (subasta.getEstado() == EstadoSubasta.ACTIVA
+                    if (subasta.getActiva()
                             && !subasta.getVencimiento().isAfter(ahora)) {
                         resolverCierre(subasta, "POR_TIEMPO");
                     }
@@ -248,7 +246,7 @@ public class SubastaService {
         }
 
         subasta.setMotivoCierre(motivo);
-        subasta.setEstado(EstadoSubasta.CERRADA);
+        subasta.setActiva(false);
         subasta.setActualizadoEn(LocalDateTime.now());
         subastaRepository.save(subasta);
         return subasta;
@@ -331,7 +329,7 @@ public class SubastaService {
     }
 
     private static void validarOferta(UUID usuarioId, BigDecimal puja, Subasta subasta) {
-        if (subasta.getEstado() != EstadoSubasta.ACTIVA) {
+        if (!subasta.getActiva()) {
             throw new SubastaNoActivaException("La subasta ya no está activa");
         }
 
@@ -379,7 +377,7 @@ public class SubastaService {
             throw new SinAutorizacionExpcetion("No puedes cerrar una subasta ajena");
         }
 
-        if (subasta.getEstado() != EstadoSubasta.ACTIVA) {
+        if (!subasta.getActiva()) {
             throw new SubastaNoActivaException("La subasta ya está cerrada");
         }
     }

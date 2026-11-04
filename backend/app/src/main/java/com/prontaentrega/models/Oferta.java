@@ -4,20 +4,19 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+
+import lombok.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@AllArgsConstructor
 public class Oferta {
     private UUID id;
-    private Subasta subasta;
-    private Usuario usuario;
-    private BigDecimal puja;
+    private final Subasta subasta;
+    private final Usuario usuario;
+    private final BigDecimal puja;
+    private final LocalDateTime creadoEn;
     private Boolean esSuperior;
-    private LocalDateTime creadoEn;
 
     public Oferta(Subasta subasta, Usuario usuario, BigDecimal puja) {
         this.subasta = subasta;
@@ -25,6 +24,14 @@ public class Oferta {
         this.puja = puja;
         this.esSuperior = true;
         this.creadoEn = LocalDateTime.now(ZoneId.systemDefault());
+    }
+
+    public Oferta(Subasta subasta, Usuario usuario, BigDecimal puja, LocalDateTime creadoEn) {
+        this.subasta = subasta;
+        this.usuario = usuario;
+        this.puja = puja;
+        this.esSuperior = true;
+        this.creadoEn = creadoEn;
     }
 
     public UUID getSubastaId() {

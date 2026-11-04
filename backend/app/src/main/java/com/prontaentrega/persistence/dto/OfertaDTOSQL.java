@@ -65,10 +65,9 @@ public class OfertaDTOSQL {
     }
 
     public Oferta aModelo(Subasta subastaModelo) {
-        Oferta oferta = new Oferta(subastaModelo, UsuarioDTOSQL.aUsuario(usuario), puja);
+        Oferta oferta = new Oferta(subastaModelo, UsuarioDTOSQL.aUsuario(usuario), puja, creadoEn);
         oferta.setId(id);
         oferta.setEsSuperior(esSuperior);
-        oferta.setCreadoEn(creadoEn);
         return oferta;
     }
 }

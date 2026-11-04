@@ -1,27 +1,27 @@
 package com.prontaentrega.models;
 
-import com.prontaentrega.models.enums.EstadoSubasta;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
+
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@AllArgsConstructor
 public class Subasta {
     private UUID id;
-    private Usuario propietario;
-    private BolsaDeJugador bolsaDeJugador;
-    private Integer cantidadOfrecida;
-    private BigDecimal precioInicial;
+    private final Usuario propietario;
+    private final BolsaDeJugador bolsaDeJugador;
+    private final Integer cantidadOfrecida;
+    private final BigDecimal precioInicial;
+    private final LocalDateTime vencimiento;
+    private final LocalDateTime creadoEn;
     private Oferta ofertaActual;
-    private EstadoSubasta estado;
-    private LocalDateTime vencimiento;
-    private LocalDateTime creadoEn;
+    private Boolean activa;
     private LocalDateTime actualizadoEn;
     private String motivoCierre;
 
@@ -36,9 +36,27 @@ public class Subasta {
         this.cantidadOfrecida = cantidadOfrecida;
         this.precioInicial = precioInicial;
         this.ofertaActual = null;
-        this.estado = EstadoSubasta.ACTIVA;
+        this.activa = true;
         this.vencimiento = vencimiento;
         this.creadoEn = LocalDateTime.now(ZoneId.systemDefault());
+        this.actualizadoEn = this.creadoEn;
+    }
+
+    public Subasta(
+            Usuario propietario,
+            BolsaDeJugador bolsaDeJugador,
+            Integer cantidadOfrecida,
+            BigDecimal precioInicial,
+            LocalDateTime vencimiento,
+            LocalDateTime creadoEn) {
+        this.propietario = propietario;
+        this.bolsaDeJugador = bolsaDeJugador;
+        this.cantidadOfrecida = cantidadOfrecida;
+        this.precioInicial = precioInicial;
+        this.ofertaActual = null;
+        this.activa = true;
+        this.vencimiento = vencimiento;
+        this.creadoEn = creadoEn;
         this.actualizadoEn = this.creadoEn;
     }
 
@@ -56,6 +74,12 @@ public class Subasta {
 
     public void actualizarPostorMasGrande(Oferta oferta) {
         setOfertaActual(oferta);
+        setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+    }
+
+    public void cerrarPorVencimiento() {
+        setActiva(false);
+        setMotivoCierre("POR_TIEMPO");
         setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 }

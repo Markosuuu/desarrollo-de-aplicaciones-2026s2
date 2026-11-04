@@ -11,7 +11,7 @@ public record SubastaResponse(
         UUID jugadorId,
         Integer cantidadOfrecida,
         BigDecimal ofertaActual,
-        String estado,
+        Boolean activa,
         LocalDateTime vencimiento) {
 
     public static SubastaResponse from(Subasta subasta) {
@@ -21,7 +21,7 @@ public record SubastaResponse(
                 subasta.getJugadorId(),
                 subasta.getCantidadOfrecida(),
                 subasta.getOfertaActual() == null ? null : subasta.getOfertaActual().getPuja(),
-                subasta.getEstado().name(),
+                subasta.getActiva(),
                 subasta.getVencimiento());
     }
 }

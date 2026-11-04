@@ -109,7 +109,7 @@ class SubastaControllerTest extends AbstractIntegrationTest {
                                 "precioInicial", 50,
                                 "vencimiento", deadline.toString()))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.estado").value("ACTIVA"))
+                .andExpect(jsonPath("$.activa").value(true))
                 .andReturn().getResponse().getContentAsString();
         JsonNode created = objectMapper.readTree(createResponse);
         UUID auctionId = UUID.fromString(created.get("id").asText());

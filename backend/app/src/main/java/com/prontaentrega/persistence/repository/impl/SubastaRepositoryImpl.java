@@ -1,7 +1,6 @@
 package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.Subasta;
-import com.prontaentrega.models.enums.EstadoSubasta;
 import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
 import com.prontaentrega.persistence.dto.OfertaDTOSQL;
 import com.prontaentrega.persistence.dto.SubastaDTOSQL;
@@ -58,7 +57,7 @@ public class SubastaRepositoryImpl implements SubastaRepository {
             dto.setCantidadOfrecida(subasta.getCantidadOfrecida());
             dto.setPrecioInicial(subasta.getPrecioInicial());
             dto.setOfertaActual(ofertaActual);
-            dto.setEstado(subasta.getEstado());
+            dto.setActiva(subasta.getActiva());
             dto.setVencimiento(subasta.getVencimiento());
             dto.setCreadoEn(subasta.getCreadoEn());
             dto.setActualizadoEn(subasta.getActualizadoEn());
@@ -80,14 +79,14 @@ public class SubastaRepositoryImpl implements SubastaRepository {
     }
 
     @Override
-    public Page<Subasta> findByEstado(EstadoSubasta estado, Pageable pageable) {
-        return dao.findByEstado(estado, pageable).map(SubastaDTOSQL::aModelo);
+    public Page<Subasta> findByActiva(Boolean activa, Pageable pageable) {
+        return dao.findByActiva(activa, pageable).map(SubastaDTOSQL::aModelo);
     }
 
     @Override
     public List<UUID> findIdsVencidas(LocalDateTime fecha, Pageable page) {
         return dao.findIdsVencidas(
-                EstadoSubasta.ACTIVA,
+                true,
                 fecha,
                 PageRequest.of(0, 100)
         );

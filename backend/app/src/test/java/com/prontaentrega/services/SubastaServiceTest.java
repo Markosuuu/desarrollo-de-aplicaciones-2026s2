@@ -82,7 +82,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
                 BigDecimal.valueOf(150),
                 futureDeadline());
 
-        assertEquals("ACTIVA", subasta.getEstado().name());
+        assertTrue(subasta.getActiva());
         assertEquals(3, subasta.getCantidadOfrecida());
         assertNull(subasta.getOfertaActual());
     }
@@ -148,8 +148,8 @@ class SubastaServiceTest extends AbstractIntegrationTest {
             + operacionRepository.findByUsuarioId(buyer.getId()).size());
         }
 
-        @Test
-        void shouldFallBackToNextBidderWhenHighestBidderCannotPay() {
+    @Test
+    void shouldFallBackToNextBidderWhenHighestBidderCannotPay() {
         Usuario seller = saveUser("Vendedor fallback", "seller-fallback@test.com");
         Usuario highestBidder = saveUser("Mayor postor", "highest-fallback@test.com");
         Usuario nextBidder = saveUser("Siguiente postor", "next-fallback@test.com");
@@ -170,10 +170,10 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         assertEquals(nextBidder.getId(), cerrada.getOfertaActual().getUsuarioId());
         assertEquals(0, usuarioRepository.findById(seller.getId()).orElseThrow()
             .getCreditosDisponibles().compareTo(BigDecimal.valueOf(1070)));
-        }
+    }
 
-        @Test
-        void shouldReturnReservedTokensWhenAuctionHasNoBids() {
+    @Test
+    void shouldReturnReservedTokensWhenAuctionHasNoBids() throws InterruptedException {
         Usuario seller = saveUser("Vendedor retorno", "seller-return@test.com");
         BolsaDeJugador bolsa = saveJugador("Jugador retorno");
         UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
@@ -181,7 +181,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
 
         Subasta subasta = subastaService.crearSubasta(
             seller.getId(), jugadorId, 3, BigDecimal.valueOf(10), futureDeadline());
-        subasta.setVencimiento(LocalDateTime.now().minusMinutes(1));
+        subasta.cerrarPorVencimiento();
         subastaRepository.save(subasta);
         subastaService.resolverSubastasVencidas();
 
@@ -190,7 +190,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         assertEquals(4, inventory.getTokensDisponibles());
         assertEquals(0, inventory.getTokensEnVenta());
         assertTrue(operacionRepository.findByUsuarioId(seller.getId()).isEmpty());
-        }
+    }
 
     private Usuario saveUser(String nombre, String correo) {
         Usuario usuario = new Usuario(nombre, correo, "hash");

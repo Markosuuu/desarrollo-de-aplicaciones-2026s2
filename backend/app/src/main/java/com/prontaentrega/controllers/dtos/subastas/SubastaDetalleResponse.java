@@ -13,7 +13,7 @@ public record SubastaDetalleResponse(
         Integer cantidadOfrecida,
         BigDecimal ofertaActual,
         List<OfertaResponse> ofertasPrevias,
-        String estado,
+        Boolean estado,
         LocalDateTime vencimiento) {
 
     public static SubastaDetalleResponse from(Subasta subasta, List<OfertaResponse> ofertas) {
@@ -24,7 +24,7 @@ public record SubastaDetalleResponse(
                 subasta.getCantidadOfrecida(),
                 subasta.getOfertaActual() == null ? null : subasta.getOfertaActual().getPuja(),
                 ofertas,
-                subasta.getEstado().name(),
+                subasta.getActiva(),
                 subasta.getVencimiento());
     }
 }

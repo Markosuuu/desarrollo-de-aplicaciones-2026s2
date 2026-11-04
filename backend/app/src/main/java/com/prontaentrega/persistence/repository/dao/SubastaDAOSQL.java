@@ -1,6 +1,5 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.models.enums.EstadoSubasta;
 import com.prontaentrega.persistence.dto.SubastaDTOSQL;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
@@ -16,9 +15,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface SubastaDAOSQL extends JpaRepository<SubastaDTOSQL, UUID> {
-    Page<SubastaDTOSQL> findByEstado(EstadoSubasta estado, Pageable pageable);
+    Page<SubastaDTOSQL> findByActiva(Boolean activa, Pageable pageable);
 
-    List<SubastaDTOSQL> findByEstadoAndVencimientoLessThanEqual(EstadoSubasta estado, LocalDateTime fecha);
+    List<SubastaDTOSQL> findByActivaAndVencimientoLessThanEqual(Boolean activa, LocalDateTime fecha);
 
     @Lock(LockModeType.OPTIMISTIC)
     @Query("select s from Subasta s where s.id = :id")

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record CerrarSubastaResponse(
         UUID id,
-        String estado,
+        Boolean estado,
         UUID ganadorId,
         BigDecimal montoFinal,
         String resultado) {
@@ -17,7 +17,7 @@ public record CerrarSubastaResponse(
                 && subasta.getOfertaActual().getEsSuperior();
         return new CerrarSubastaResponse(
                 subasta.getId(),
-                subasta.getEstado().name(),
+                subasta.getActiva(),
                 huboVenta ? subasta.getOfertaActual().getUsuarioId() : null,
                 huboVenta ? subasta.getOfertaActual().getPuja() : null,
                 huboVenta ? "VENTA" : "RETORNO_TOKENS");
