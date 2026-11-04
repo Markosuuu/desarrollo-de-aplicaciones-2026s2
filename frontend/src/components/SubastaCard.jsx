@@ -33,7 +33,7 @@ export default function SubastaCard({ subasta }) {
 
   const handleClick = () => {
     console.log(`/subasta/${subasta.id}`)
-    navigate(`/subasta/${subasta.id}`)
+    void navigate(`/subasta/${subasta.id}`)
   };
 
   return (

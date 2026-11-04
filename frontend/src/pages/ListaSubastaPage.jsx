@@ -55,7 +55,7 @@ export default function ListaSubastasPage() {
 
   // Carga inicial.
   useEffect(() => {
-    loadPage(1);
+    void loadPage(1);
   }, [loadPage]);
 
   // Configuración del scroll infinito.
@@ -67,7 +67,7 @@ export default function ListaSubastasPage() {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
-          loadPage(nextPageRef.current);
+          void loadPage(nextPageRef.current);
         }
       },
       {
@@ -82,7 +82,7 @@ export default function ListaSubastasPage() {
   }, [loading, error, hasMore, loadPage]);
 
   const handleRetry = () => {
-    loadPage(nextPageRef.current);
+    void loadPage(nextPageRef.current);
   };
 
   return (

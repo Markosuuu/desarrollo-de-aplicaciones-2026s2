@@ -80,7 +80,7 @@ export default function SubastaPage() {
   }, [id, token]);
 
   useEffect(() => {
-    loadSubasta();
+    void loadSubasta();
   }, [loadSubasta]);
 
   // Los errores y mensajes desaparecen automáticamente.
@@ -103,7 +103,7 @@ export default function SubastaPage() {
 
     try {
       await cerrarSubasta(id, token);
-      navigate('/profile');
+      void navigate('/profile');
     } catch (err) {
       setActionError(err.message || 'No se pudo cerrar la subasta.');
       setShowCloseConfirmation(false);
@@ -360,7 +360,7 @@ export default function SubastaPage() {
       )}
 
       {successMessage && (
-        <div className="subasta-action-feedback success" role="status">
+        <div className="subasta-action-feedback success">
           {successMessage}
         </div>
       )}

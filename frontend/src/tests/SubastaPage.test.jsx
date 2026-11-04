@@ -296,8 +296,8 @@ describe("SubastaPage", () => {
     });
 
     expect(
-      await screen.findByRole("status"),
-    ).toHaveTextContent("¡Tu oferta se realizó correctamente!");
+      await screen.findByText("¡Tu oferta se realizó correctamente!"),
+    ).toBeInTheDocument();
   });
 
   test("muestra un error si falla la realización de una oferta", async () => {
