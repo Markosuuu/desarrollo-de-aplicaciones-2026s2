@@ -115,9 +115,7 @@ public class SubastaService {
         BolsaDeJugador bolsa = Optional.ofNullable(jugadorRepository.findById(jugadorId))
                 .orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado con el id: " + jugadorId));
 
-        // TODO: Falta validacion de que el jugador sea del usuario
-
-        validarCreacionSubasta(cantidad, precioInicial, vencimiento);
+        validarCreacionSubasta(cantidad, precioInicial, vencimiento, usuarioId, jugadorId);
 
         InventarioUsuario inventario = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(usuarioId, jugadorId)
                 .orElse(new InventarioUsuario(vendedor, bolsa, 0, 0));
@@ -152,8 +150,7 @@ public class SubastaService {
         validarOferta(usuarioId, puja, subasta);
 
         Optional<Oferta> ofertaExistente = ofertaRepository.findByUsuarioIdAndSubastaId(usuarioId, subastaId);
-        if (ofertaExistente.isPresent()) {
-            // TODO: Actualice la oferta
+        if (ofertaExistente.isPresent() && ofertaExistente.get().esLaMasAltaDeSubasta()) {
             return ofertaExistente.get();
         }
 
@@ -203,7 +200,7 @@ public class SubastaService {
 
     @Transactional
     public void resolverSubastasVencidas() {
-        // TODO: Ver que onda esto
+        // TODO: Ver que onda esto. Resolver en base de datos de alguna manera si se puede para no hacer un for en memoria
         for (Subasta vencida : subastaRepository.findVencidas(LocalDateTime.now(ZoneId.systemDefault()))) {
             subastaRepository.findByIdForUpdate(vencida.getId()).ifPresent(subasta -> {
                 if (subasta.getEstado() == EstadoSubasta.ACTIVA
@@ -348,7 +345,11 @@ public class SubastaService {
         }
     }
 
-    private static void validarCreacionSubasta(Integer cantidad, BigDecimal precioInicial, LocalDateTime vencimiento) {
+    private void validarCreacionSubasta(Integer cantidad,
+                                               BigDecimal precioInicial,
+                                               LocalDateTime vencimiento,
+                                               UUID userId, UUID jugadorID
+    ) {
         if (cantidad == null || cantidad < 1) {
             throw new CantidadDeTokensException("La cantidad de tokens debe ser mayor o igual a 1");
         }
@@ -362,6 +363,11 @@ public class SubastaService {
         }
         if (vencimiento.getSecond() != 0 || vencimiento.getNano() != 0) {
             throw new OfertaInvalidaException("La fecha de cierre solo admite precisión de minutos");
+        }
+
+        Optional<InventarioUsuario> inventory = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(userId, jugadorID);
+        if (inventory.isEmpty()) {
+            throw new InventarioNoEncontradoException("No puedes crear una subasta, no eres propietario de tokens del jugador.");
         }
     }
 

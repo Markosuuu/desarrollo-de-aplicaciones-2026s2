@@ -35,4 +35,8 @@ public class Oferta {
     public UUID getUsuarioId() {
         return usuario.getId();
     }
+
+    public boolean esLaMasAltaDeSubasta() {
+        return subasta.getOfertanteActual().getId() == usuario.getId();
+    }
 }
