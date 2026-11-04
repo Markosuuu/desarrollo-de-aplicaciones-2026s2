@@ -74,13 +74,12 @@ public class SubastaController {
     }
 
     @PatchMapping("/{id}/cerrar")
-    public ResponseEntity<CerrarSubastaResponse> cerrarSubasta(@PathVariable UUID id, @RequestBody(required = false) CerrarSubastaRequest request) {
+    public ResponseEntity<CerrarSubastaResponse> cerrarSubasta(
+            @PathVariable UUID id,
+            @RequestBody(required = false) CerrarSubastaRequest request
+    ) {
         UUID usuarioId = currentUserId();
-
-        // TODO: Mu' feo esto de acá
-        String motivo = request == null || request.motivo() == null ? "POR_PROPIETARIO" : request.motivo();
-
-        Subasta subasta = subastaService.cerrarSubasta(usuarioId, id, motivo);
+        Subasta subasta = subastaService.cerrarSubasta(usuarioId, id, request.motivo());
         return ResponseEntity.ok(CerrarSubastaResponse.from(subasta));
     }
 
