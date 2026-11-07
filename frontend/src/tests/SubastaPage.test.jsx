@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import SubastaPage from "../pages/SubastaPage";
+import SubastaPage, { formatNumber } from "../pages/SubastaPage";
 
 const mocks = vi.hoisted(() => ({
   fetchSubasta: vi.fn(),
@@ -99,6 +99,11 @@ beforeEach(() => {
 });
 
 describe("SubastaPage", () => {
+  test("formatea números y representa los valores no disponibles", () => {
+    expect(formatNumber(1234.5)).toBe("1.234,50");
+    expect(formatNumber(null)).toBe("No disponible");
+  });
+
   test("muestra la información de la subasta y del jugador", async () => {
     renderAuction();
 

@@ -57,7 +57,7 @@
   padding: 9px 18px;
   border: none;
   border-radius: 7px;
-  background: var(--accent-color, #2196f3);
+  background: var(--accent-color, #1565c0);
   color: white;
   font-weight: 600;
   cursor: pointer;

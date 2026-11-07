@@ -578,6 +578,14 @@ body[data-theme="dark"] .auth-form input {
     opacity 0.15s ease;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .auth-form button,
+  .theme-toggle,
+  .logout-button {
+    transition: opacity 0.15s ease;
+  }
+}
+
 .auth-form button,
 .logout-button {
   background: #111827;
