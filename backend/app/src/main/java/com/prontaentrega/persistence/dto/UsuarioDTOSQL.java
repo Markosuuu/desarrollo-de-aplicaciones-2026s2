@@ -62,14 +62,14 @@ public class UsuarioDTOSQL {
     }
 
     public static Usuario aUsuario(UsuarioDTOSQL usuarioDTOSQL) {
-        Usuario usuario = new Usuario();
-        usuario.setId(usuarioDTOSQL.getId());
-        usuario.setNombre(usuarioDTOSQL.getNombre());
-        usuario.setCorreo(usuarioDTOSQL.getCorreo());
-        usuario.setPasswordHash(usuarioDTOSQL.getPasswordHash());
-        usuario.setCreditosDisponibles(usuarioDTOSQL.getCreditosDisponibles());
-        usuario.setCreadoEn(usuarioDTOSQL.getCreadoEn());
-        usuario.setActualizadoEn(usuarioDTOSQL.getActualizadoEn());
-        return usuario;
+        return Usuario.builder()
+                .id(usuarioDTOSQL.getId())
+                .nombre(usuarioDTOSQL.getNombre())
+                .correo(usuarioDTOSQL.getCorreo())
+                .passwordHash(usuarioDTOSQL.getPasswordHash())
+                .creditosDisponibles(usuarioDTOSQL.getCreditosDisponibles())
+                .creadoEn(usuarioDTOSQL.getCreadoEn())
+                .actualizadoEn(usuarioDTOSQL.getActualizadoEn())
+                .build();
     }
 }
