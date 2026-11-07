@@ -13,7 +13,7 @@ import HistorialOfertas from "../components/subasta/HistorialOfertas";
 import CerrarSubasta from "../components/subasta/CerrarSubasta";
 import RealizarOferta from "../components/subasta/RealizarOferta";
 
-function formatNumber(value, decimals = 2) {
+export function formatNumber(value, decimals = 2) {
   if (value == null) return "No disponible";
 
   return Number(value).toLocaleString("es-AR", {
