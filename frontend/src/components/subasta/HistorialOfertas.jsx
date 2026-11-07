@@ -26,12 +26,14 @@ function formatDate(date, includeTime = true) {
   }).format(parsedDate);
 }
 
-const HistorialOfertas = (ofertas) => {
+const HistorialOfertas = ({ ofertasPrevias = [], ofertas = ofertasPrevias }) => {
+  const listaOfertas = Array.isArray(ofertas) ? ofertas : [];
+
   return (
     <section className="subasta-section">
       <h2>Historial de ofertas</h2>
 
-      {ofertas.length === 0 ? (
+      {listaOfertas.length === 0 ? (
         <p className="subasta-empty">
           Todavía no hubo ofertas para esta subasta.
         </p>
@@ -48,7 +50,7 @@ const HistorialOfertas = (ofertas) => {
             </thead>
 
             <tbody>
-              {ofertas.map((oferta) => (
+              {listaOfertas.map((oferta) => (
                 <tr key={oferta.id}>
                   <td>{oferta.usuario?.nombre || "Desconocido"}</td>
                   <td className="subasta-table-bid">

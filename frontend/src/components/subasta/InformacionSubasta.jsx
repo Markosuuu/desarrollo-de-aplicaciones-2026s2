@@ -26,7 +26,7 @@ function formatDate(date, includeTime = true) {
   }).format(parsedDate);
 }
 
-const InformacionSubasta = ({ propietario, jugador, subasta }) => {
+const InformacionSubasta = ({ propietario, jugador, subasta = {} }) => {
   return (
     <section className="subasta-overview">
       <div className="subasta-overview-item">
@@ -50,7 +50,7 @@ const InformacionSubasta = ({ propietario, jugador, subasta }) => {
 
       <div className="subasta-overview-item">
         <span>Cantidad ofrecida</span>
-        <strong>{subasta.cantidadOfrecida}</strong>
+        <strong>{subasta.cantidadOfrecida ?? "-"}</strong>
       </div>
 
       <div className="subasta-overview-item">

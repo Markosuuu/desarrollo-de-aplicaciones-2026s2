@@ -6,14 +6,12 @@ import { fetchSubasta, cerrarSubasta, ofertarSubasta } from "../api/subastaApi";
 
 import "../styles/SubastaPage.css";
 
-import {
-  InformacionSubasta,
-  EstadisticasJugador,
-  DatosJugador,
-  HistorialOfertas,
-  CerrarSubasta,
-  RealizarOferta,
-} from "../components/subasta/*";
+import InformacionSubasta from "../components/subasta/InformacionSubasta";
+import EstadisticasJugador from "../components/subasta/EstadisticasJugador";
+import DatosJugador from "../components/subasta/DatosJugador";
+import HistorialOfertas from "../components/subasta/HistorialOfertas";
+import CerrarSubasta from "../components/subasta/CerrarSubasta";
+import RealizarOferta from "../components/subasta/RealizarOferta";
 
 function formatNumber(value, decimals = 2) {
   if (value == null) return "No disponible";
@@ -184,7 +182,11 @@ export default function SubastaPage() {
       </header>
 
       {/* Información principal */}
-      <InformacionSubasta jugador={jugador} propietario={propietario} />
+      <InformacionSubasta
+        jugador={jugador}
+        propietario={propietario}
+        subasta={subasta}
+      />
 
       {/* Estadísticas del jugador */}
       <EstadisticasJugador jugador={jugador} />
