@@ -41,12 +41,12 @@
 }
 
 .subasta-detail-status.active {
-  color: #16834b;
+  color: #166534;
   background: #dcfce7;
 }
 
 .subasta-detail-status.inactive {
-  color: #777;
+  color: #666;
   background: #eee;
 }
 
@@ -117,7 +117,9 @@
   background: var(--card-bg, #fff);
   border: 1px solid var(--border-color, #e2e2e2);
   border-radius: 12px;
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .subasta-stat:hover {
@@ -218,12 +220,12 @@
 }
 
 .offer-status.active {
-  color: #16834b;
+  color: #166534;
   background: #dcfce7;
 }
 
 .offer-status.inactive {
-  color: #777;
+  color: #666;
   background: #eee;
 }
 
@@ -260,7 +262,9 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .subasta-close-button {
@@ -382,8 +386,8 @@
 }
 
 .subasta-offer-form-actions button:first-child {
-  color: white;
-  background: var(--accent-color, #2196f3);
+  color: #fff;
+  background: var(--accent-color, #1565c0);
 }
 
 .subasta-offer-form-actions button:last-child {
@@ -417,7 +421,7 @@
 }
 
 .subasta-action-feedback.success {
-  color: #16834b;
+  color: #166534;
   background: #dcfce7;
 }
 
@@ -437,8 +441,8 @@
   padding: 10px 18px;
   border: none;
   border-radius: 7px;
-  background: var(--accent-color, #2196f3);
-  color: white;
+  background: #1565c0;
+  color: #fff;
   cursor: pointer;
 }
 
@@ -586,5 +590,16 @@ body[data-theme="dark"] .subasta-page-error {
 
   .subasta-offer-form-actions {
     flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subasta-stat {
+    transition: border-color 0.2s ease;
+  }
+
+  .subasta-close-button,
+  .subasta-offer-button {
+    transition: opacity 0.2s ease;
   }
 }

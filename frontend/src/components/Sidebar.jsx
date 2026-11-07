@@ -18,9 +18,9 @@ export default function Sidebar({ children }) {
   const { user, logout } = useAuth();
   const { isDark, toggleTheme } = useTheme();
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout();
-    void navigate("/login");
+    await navigate("/login");
   };
 
   return (
@@ -65,7 +65,7 @@ export default function Sidebar({ children }) {
           </span>
           <span className="sidebar__username">Mercado</span>
         </Link>
-        
+
         {/* Enlace al ranking de jugadores */}
         <Link to="/ranking" className="sidebar__user" title="Mercado">
           <span className="sidebar__avatar" aria-hidden="true">

@@ -21,6 +21,15 @@
     background 0.2s ease;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .subasta-card {
+    transition:
+      box-shadow 0.2s ease,
+      border-color 0.2s ease,
+      background 0.2s ease;
+  }
+}
+
 .subasta-card:hover {
   transform: translateY(-2px);
   border-color: var(--accent-color, #61b4f8);
@@ -68,12 +77,12 @@
 }
 
 .subasta-status.active {
-  color: #16834b;
+  color: #166534;
   background: #dcfce7;
 }
 
 .subasta-status.inactive {
-  color: #777777;
+  color: #666;
   background: #eeeeee;
 }
 
