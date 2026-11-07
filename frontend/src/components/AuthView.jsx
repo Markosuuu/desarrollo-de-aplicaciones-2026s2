@@ -36,7 +36,6 @@ export default function AuthView({
       await schema.validate(values, { abortEarly: false });
       await onSubmit(values);
       toast.success(successMessage);
-      void navigate("/");
     } catch (error) {
       const message =
         error?.inner?.[0]?.message || error?.message || errorMessage;
@@ -44,6 +43,8 @@ export default function AuthView({
     } finally {
       setSubmitting(false);
     }
+
+    await navigate("/");
   };
 
   return (
@@ -55,7 +56,10 @@ export default function AuthView({
         <h1>{title}</h1>
         <p className="auth-subtitle">{subtitle}</p>
 
-        <form onSubmit={handleSubmit} className="auth-form">
+        <form
+          onSubmit={(event) => void handleSubmit(event)}
+          className="auth-form"
+        >
           {fields.map(({ name, label, type, placeholder }) => (
             <label key={name}>
               <span>{label}</span>
