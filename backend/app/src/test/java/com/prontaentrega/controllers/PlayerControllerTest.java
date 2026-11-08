@@ -461,6 +461,49 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.jugadores[0].nombre").value("Riquelme"));
     }
 
+    @Test
+    void getRankingShouldReturnPaginatedRankingWhenNameIsEmpty() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(post("/api/players/ranking")
+                        .param("page", "1")
+                        .param("perPage", "20")
+                        .header("Authorization", "Bearer " + result.token())
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                                "nombre": ""
+                            }
+                            """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.paginacion").exists())
+                .andExpect(jsonPath("$.paginacion.pagina").value(1))
+                .andExpect(jsonPath("$.paginacion.porPagina").value(20))
+                .andExpect(jsonPath("$.paginacion.total").isNumber())
+                .andExpect(jsonPath("$.paginacion.totalPaginas").isNumber());
+    }
+
+    @Test
+    void getRankingShouldReturnFilteredRankingWhenNameIsProvided() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(post("/api/players/ranking")
+                        .param("page", "1")
+                        .param("perPage", "10")
+                        .header("Authorization", "Bearer " + result.token())
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nombre": ""
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.paginacion.pagina").value(1))
+                .andExpect(jsonPath("$.paginacion.porPagina").value(10));
+    }
+
     private static @NotNull EstadisticasDeportivas getEstadisticas() {
         Jugador jugador = new Jugador(
                 101,

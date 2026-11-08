@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -374,5 +375,66 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
                 () -> playerCatalogService.searchById(new UUID(1,2))
         );
         assertEquals("No se encontro un jugador con el id dado.", e.getMessage());
+    }
+
+
+
+    @Test
+    void rankingByNameShouldReturnPlayersOrderedByQuoteDescending() {
+        BolsaDeJugador player1 = saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
+        BolsaDeJugador player2 = saveJugador(2, "Lionel Messi Jr", "Equipo 2", Liga.BUNDESLIGA);
+        BolsaDeJugador player3 = saveJugador(3, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
+
+        player1.setCotizacionActual(BigDecimal.valueOf(100));
+        player2.setCotizacionActual(BigDecimal.valueOf(300));
+        player3.setCotizacionActual(BigDecimal.valueOf(500));
+
+        jugadorRepository.save(player1);
+        jugadorRepository.save(player2);
+        jugadorRepository.save(player3);
+
+        Page<BolsaDeJugador> response = playerCatalogService.getRankingByNombre(
+                1, 10, "Messi"
+        );
+
+        assertEquals(2, response.getTotalElements());
+
+        List<BolsaDeJugador> players = response.getContent();
+
+        assertEquals("Lionel Messi Jr",
+                players.get(0).getEstadisticasDeportivas().getJugador().getNombre());
+
+        assertEquals("Lionel Messi",
+                players.get(1).getEstadisticasDeportivas().getJugador().getNombre());
+
+        assertTrue(players.get(0).getCotizacionActual()
+                .compareTo(players.get(1).getCotizacionActual()) > 0);
+    }
+
+    @Test
+    void rankingByNameShouldNormalizeInvalidPageAndSize() {
+        saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
+
+        Page<BolsaDeJugador> response = playerCatalogService.getRankingByNombre(
+                0, 0, "Messi"
+        );
+
+        assertEquals(1, response.getTotalElements());
+        assertEquals(0, response.getNumber());
+        assertEquals(1, response.getSize());
+    }
+
+    @Test
+    void rankingByNameShouldLimitPageSizeTo50() {
+        saveManyJugadores(55);
+
+        Page<BolsaDeJugador> response = playerCatalogService.getRankingByNombre(
+                1, 100, "Jugador"
+        );
+
+        assertEquals(50, response.getSize());
+        assertEquals(55, response.getTotalElements());
+        assertEquals(50, response.getNumberOfElements());
+        assertEquals(2, response.getTotalPages());
     }
 }

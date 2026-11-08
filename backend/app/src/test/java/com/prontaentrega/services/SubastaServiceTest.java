@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -202,6 +203,101 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         assertEquals(4, inventory.getTokensDisponibles());
         assertEquals(0, inventory.getTokensEnVenta());
         assertTrue(operacionRepository.findByUsuarioId(seller.getId()).isEmpty());
+    }
+
+    @Test
+    void shouldListActiveAuctionsWithPagination() {
+        Usuario seller = saveUser("Vendedor", "seller@test.com");
+        BolsaDeJugador bolsa = saveJugador("Jugador 1");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 10, 0));
+
+        subastaService.crearSubasta(
+                seller.getId(),
+                jugadorId,
+                3,
+                BigDecimal.valueOf(150),
+                futureDeadline()
+        );
+
+        Page<Subasta> result = subastaService.listarSubastas(1, 10);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+        assertTrue(result.getContent().get(0).getActiva());
+    }
+
+    @Test
+    void shouldNormalizePageAndSizeWhenListingAuctions() {
+        Usuario seller = saveUser("Vendedor", "seller@test.com");
+        BolsaDeJugador bolsa = saveJugador("Jugador 1");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 10, 0));
+
+        subastaService.crearSubasta(
+                seller.getId(),
+                jugadorId,
+                3,
+                BigDecimal.valueOf(150),
+                futureDeadline()
+        );
+
+        Page<Subasta> result = subastaService.listarSubastas(0, 0);
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getSize());
+        assertEquals(0, result.getNumber());
+    }
+
+    @Test
+    void shouldListAuctionsFilteredByUserAndPlayerName() {
+        Usuario seller = saveUser("Vendedor", "seller@test.com");
+        BolsaDeJugador bolsa = saveJugador("Jugador 1");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 10, 0));
+
+        subastaService.crearSubasta(
+                seller.getId(),
+                jugadorId,
+                3,
+                BigDecimal.valueOf(150),
+                futureDeadline()
+        );
+
+        Page<Subasta> result = subastaService.listarSubastasPorNombre(
+                1, 10, "Vendedor", "Jugador 1"
+        );
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getContent().size());
+    }
+
+    @Test
+    void shouldNormalizePageAndSizeWhenListingAuctionsByName() {
+        Usuario seller = saveUser("Vendedor", "seller@test.com");
+        BolsaDeJugador bolsa = saveJugador("Jugador 1");
+        UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
+
+        inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 10, 0));
+
+        subastaService.crearSubasta(
+                seller.getId(),
+                jugadorId,
+                3,
+                BigDecimal.valueOf(150),
+                futureDeadline()
+        );
+
+        Page<Subasta> result = subastaService.listarSubastasPorNombre(
+                0, 0, "Vendedor", "Jugador 1"
+        );
+
+        assertEquals(1, result.getTotalElements());
+        assertEquals(1, result.getSize());
+        assertEquals(0, result.getNumber());
     }
 
     private Usuario saveUser(String nombre, String correo) {
