@@ -390,4 +390,12 @@ public class SubastaService {
         }
         return null;
     }
+
+    public Page<Subasta> listarSubastasPorNombre(int page, int size, String user, String jugador) {
+        int normalizedPage = Math.max(page, 1) - 1;
+        int normalizedSize = Math.max(size, 1);
+        Pageable pageable = PageRequest.of(normalizedPage, normalizedSize);
+//        return subastaRepository.findByActiva(true, pageable);
+        return subastaRepository.findByNombre(user, jugador, pageable);
+    }
 }

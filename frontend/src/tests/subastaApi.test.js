@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
 import {
+    buscarSubastasPorNombre,
     fetchSubastas,
     fetchSubasta,
     cerrarSubasta,
@@ -116,6 +117,57 @@ describe("subastaApi", () => {
             await expect(
                 fetchSubastas({ token: "token-test" })
             ).rejects.toThrow("No se pudieron cargar las subastas.");
+        });
+    });
+
+    describe("buscarSubastasPorNombre", () => {
+        test("envía el nombre del jugador y los parámetros de paginación", async () => {
+            const payload = { subastas: [{ id: "subasta-1" }] };
+
+            fetch.mockResolvedValue({
+                ok: true,
+                json: vi.fn().mockResolvedValue(payload),
+            });
+
+            const result = await buscarSubastasPorNombre({
+                page: 2,
+                size: 10,
+                user: null,
+                jugador: "Lionel Messi",
+                token: "token-test",
+            });
+
+            expect(fetch).toHaveBeenCalledWith(
+                expect.stringContaining(
+                    "/subastas/buscarPorNombre?page=2&size=10"
+                ),
+                {
+                    method: "POST",
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                        Authorization: expect.any(String),
+                    },
+                    body: JSON.stringify({ user: null, jugador: "Lionel Messi" }),
+                }
+            );
+            expect(result).toEqual(payload);
+        });
+
+        test("propaga los errores de la búsqueda", async () => {
+            fetch.mockResolvedValue({
+                ok: false,
+                json: vi.fn().mockResolvedValue({
+                    message: "No se pudieron buscar las subastas.",
+                }),
+            });
+
+            await expect(
+                buscarSubastasPorNombre({
+                    jugador: "Lionel Messi",
+                    token: "token-test",
+                })
+            ).rejects.toThrow("No se pudieron buscar las subastas.");
         });
     });
 

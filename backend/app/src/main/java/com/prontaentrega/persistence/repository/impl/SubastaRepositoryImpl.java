@@ -103,4 +103,9 @@ public class SubastaRepositoryImpl implements SubastaRepository {
     public Long count() {
         return dao.count();
     }
+
+    @Override
+    public Page<Subasta> findByNombre(String user, String jugador, Pageable pageable) {
+        return dao.findAllByUsuarioOJugador(user, jugador, pageable).map(SubastaDTOSQL::aModelo);
+    }
 }

@@ -3,11 +3,13 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 
 const mocks = vi.hoisted(() => ({
     fetchSubastas: vi.fn(),
+    buscarSubastasPorNombre: vi.fn(),
     useAuth: vi.fn(),
 }));
 
 vi.mock("../api/subastaApi", () => ({
     fetchSubastas: mocks.fetchSubastas,
+    buscarSubastasPorNombre: mocks.buscarSubastasPorNombre,
 }));
 
 vi.mock("../context/AuthContext", () => ({
@@ -109,6 +111,59 @@ describe("ListaSubastasPage", () => {
         expect(
             screen.getByText("Llegaste al final de las subastas.")
         ).toBeInTheDocument();
+    });
+
+    test("busca subastas por el nombre del jugador", async () => {
+        mocks.fetchSubastas.mockResolvedValue({
+            subastas: crearSubastas(1),
+        });
+        mocks.buscarSubastasPorNombre.mockResolvedValue({
+            subastas: [{ id: "messi", nombre: "Lionel Messi" }],
+        });
+
+        renderListaSubastas();
+        await screen.findByText("Subasta 1");
+
+        fireEvent.change(screen.getByPlaceholderText("Nombre del jugador"), {
+            target: { value: "Lionel Messi" },
+        });
+
+        expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
+        expect(mocks.buscarSubastasPorNombre).toHaveBeenCalledWith({
+            page: 1,
+            size: 10,
+            user: null,
+            jugador: "Lionel Messi",
+            token: "token-test",
+        });
+        expect(screen.queryByText("Subasta 1")).not.toBeInTheDocument();
+    });
+
+    test("ignora resultados de una búsqueda anterior que termina más tarde", async () => {
+        let resolveInitialRequest;
+        mocks.fetchSubastas.mockReturnValue(
+            new Promise((resolve) => {
+                resolveInitialRequest = resolve;
+            }),
+        );
+        mocks.buscarSubastasPorNombre.mockResolvedValue({
+            subastas: [{ id: "messi", nombre: "Lionel Messi" }],
+        });
+
+        renderListaSubastas();
+
+        fireEvent.change(screen.getByPlaceholderText("Nombre del jugador"), {
+            target: { value: "Messi" },
+        });
+
+        expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
+
+        await act(async () => {
+            resolveInitialRequest({ subastas: crearSubastas(1) });
+        });
+
+        expect(screen.getByText("Lionel Messi")).toBeInTheDocument();
+        expect(screen.queryByText("Subasta 1")).not.toBeInTheDocument();
     });
 
     test("muestra un mensaje cuando no hay subastas disponibles", async () => {

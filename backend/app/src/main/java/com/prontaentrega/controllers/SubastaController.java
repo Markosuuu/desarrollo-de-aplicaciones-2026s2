@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,6 +57,30 @@ public class SubastaController {
 
         return ResponseEntity.ok(pages);
     }
+
+    @PostMapping("/buscarPorNombre")
+    public ResponseEntity<SubastaPagedResponse> listarSubastasPorNombre(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestBody SubastaRequest request
+    ) {
+        Page<Subasta> subastas;
+        if (!StringUtils.hasText(request.jugador()) && !StringUtils.hasText(request.user())) {
+            subastas = subastaService.listarSubastas(page, size);
+        } else {
+            subastas = subastaService.listarSubastasPorNombre(page, size, request.user(), request.jugador());
+        }
+
+        List<SubastaResponse> items = subastas.getContent().stream()
+                .map(SubastaResponse::from)
+                .toList();
+
+        SubastaPagedResponse pages = new SubastaPagedResponse(items, page, size);
+
+        return ResponseEntity.ok(pages);
+    }
+
+    public record SubastaRequest(String user, String jugador) {}
 
     @GetMapping("/{id}")
     public ResponseEntity<SubastaDetalleResponse> obtenerSubasta(@PathVariable UUID id) {

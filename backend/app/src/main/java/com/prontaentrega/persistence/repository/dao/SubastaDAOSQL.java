@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -31,4 +30,16 @@ public interface SubastaDAOSQL extends JpaRepository<SubastaDTOSQL, UUID> {
     List<UUID> findIdsVencidas(
             @Param("fecha") LocalDateTime fecha
     );
+
+    @Query("""
+        SELECT s
+        FROM Subasta s
+        WHERE s.activa
+          AND (
+              LOWER(s.propietario.nombre) LIKE LOWER(CONCAT('%', :user, '%'))
+              OR LOWER(s.bolsaDeJugador.estadisticasDeportivas.jugador.nombre) LIKE LOWER(CONCAT('%', :jugador, '%'))
+          )
+        ORDER BY s.vencimiento ASC
+    """)
+    Page<SubastaDTOSQL> findAllByUsuarioOJugador(@Param("user") String user, @Param("jugador") String jugador, Pageable pageable);
 }

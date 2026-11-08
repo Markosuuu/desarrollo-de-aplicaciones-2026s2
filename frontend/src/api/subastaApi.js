@@ -28,6 +28,34 @@ export async function fetchSubastas({ page = 1, size = 10, token } = {}) {
   return payload;
 }
 
+export async function buscarSubastasPorNombre({
+  page = 1,
+  size = 10,
+  user = null,
+  jugador,
+  token,
+} = {}) {
+  const params = new URLSearchParams();
+
+  params.set('page', String(page));
+  params.set('size', String(size));
+
+  const response = await fetch(
+    `${API_BASE_URL}/subastas/buscarPorNombre?${params.toString()}`,
+    {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ user, jugador }),
+    },
+  );
+
+  return handleResponse(response, 'No se pudieron buscar las subastas.');
+}
+
 async function handleResponse(response, defaultMessage) {
   const payload = await response.json().catch(() => ({}));
 
@@ -83,4 +111,3 @@ export async function ofertarSubasta({ subastaId, puja, token }) {
 
   return handleResponse(response, 'No se pudo realizar la oferta.');
 }
-

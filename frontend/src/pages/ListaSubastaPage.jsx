@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from "react";
 
-import { useAuth } from '../context/AuthContext';
-import { fetchSubastas } from '../api/subastaApi';
-import SubastaCard from '../components/SubastaCard';
-import '../styles/listaSubastaPage.css';
+import { useAuth } from "../context/AuthContext";
+import { buscarSubastasPorNombre, fetchSubastas } from "../api/subastaApi";
+import SubastaCard from "../components/SubastaCard";
+import "../styles/listaSubastaPage.css";
 
 const PAGE_SIZE = 10;
 
@@ -15,43 +15,78 @@ export default function ListaSubastasPage() {
   const [error, setError] = useState(null);
   const [hasMore, setHasMore] = useState(true);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
   const loadingRef = useRef(false);
   const hasMoreRef = useRef(true);
   const nextPageRef = useRef(1);
+  const requestGenerationRef = useRef(0);
 
   const sentinelRef = useRef(null);
 
-  const loadPage = useCallback(async (page) => {
-    if (loadingRef.current || !hasMoreRef.current) return;
+  const loadPage = useCallback(
+    async (page) => {
+      if (page !== 1 && (loadingRef.current || !hasMoreRef.current)) return;
 
-    loadingRef.current = true;
-    setLoading(true);
-    setError(null);
+      const requestGeneration =
+        page === 1
+          ? ++requestGenerationRef.current
+          : requestGenerationRef.current;
 
-    try {
-      const response = await fetchSubastas({
-        page,
-        size: PAGE_SIZE,
-        token,
-      });
+      if (page === 1) {
+        hasMoreRef.current = true;
+        nextPageRef.current = 1;
+        setHasMore(true);
+        setSubastas([]);
+      }
 
-      const nuevasSubastas = response.subastas ?? [];
+      loadingRef.current = true;
+      setLoading(true);
+      setError(null);
 
-      setSubastas((prev) => [...prev, ...nuevasSubastas]);
+      try {
+        const jugador = searchTerm.trim();
+        const response = jugador
+          ? await buscarSubastasPorNombre({
+              page,
+              size: PAGE_SIZE,
+              user: jugador,
+              jugador,
+              token,
+            })
+          : await fetchSubastas({
+              page,
+              size: PAGE_SIZE,
+              token,
+            });
 
-      const hayMas = nuevasSubastas.length === PAGE_SIZE;
+        if (requestGeneration !== requestGenerationRef.current) return;
 
-      hasMoreRef.current = hayMas;
-      setHasMore(hayMas);
+        const nuevasSubastas = response.subastas ?? [];
 
-      nextPageRef.current = page + 1;
-    } catch (err) {
-      setError(err.message || 'Ocurrió un error al cargar las subastas.');
-    } finally {
-      loadingRef.current = false;
-      setLoading(false);
-    }
-  }, [token]);
+        setSubastas((prev) =>
+          page === 1 ? nuevasSubastas : [...prev, ...nuevasSubastas],
+        );
+
+        const hayMas = nuevasSubastas.length === PAGE_SIZE;
+
+        hasMoreRef.current = hayMas;
+        setHasMore(hayMas);
+
+        nextPageRef.current = page + 1;
+      } catch (err) {
+        if (requestGeneration === requestGenerationRef.current) {
+          setError(err.message || "Ocurrió un error al cargar las subastas.");
+        }
+      } finally {
+        if (requestGeneration === requestGenerationRef.current) {
+          loadingRef.current = false;
+          setLoading(false);
+        }
+      }
+    },
+    [searchTerm, token],
+  );
 
   // Carga inicial.
   useEffect(() => {
@@ -71,9 +106,9 @@ export default function ListaSubastasPage() {
         }
       },
       {
-        rootMargin: '200px',
+        rootMargin: "200px",
         threshold: 0,
-      }
+      },
     );
 
     observer.observe(sentinelRef.current);
@@ -85,27 +120,37 @@ export default function ListaSubastasPage() {
     void loadPage(nextPageRef.current);
   };
 
+  const handleSearch = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
   return (
     <main className="subastas-page">
       <header className="subastas-header">
-        <h1>Subastas</h1>
-        <p>Explorá las subastas disponibles en el mercado.</p>
+        <div>
+          <h1>Subastas</h1>
+          <p>Explorá las subastas disponibles en el mercado.</p>
+        </div>
+        <div>
+          <label className="search-field" aria-label="Buscar jugadores">
+            <span className="search-label">Buscar</span>
+            <input
+              type="search"
+              value={searchTerm}
+              onChange={handleSearch}
+              placeholder="Nombre del jugador"
+            />
+          </label>
+        </div>
       </header>
 
       <section className="subastas-list">
         {subastas.map((subasta) => (
-          <SubastaCard
-            key={subasta.id}
-            subasta={subasta}
-          />
+          <SubastaCard key={subasta.id} subasta={subasta} />
         ))}
       </section>
 
-      {loading && (
-        <p className="subastas-message">
-          Cargando subastas...
-        </p>
-      )}
+      {loading && <p className="subastas-message">Cargando subastas...</p>}
 
       {error && (
         <div className="subastas-error">
@@ -117,10 +162,7 @@ export default function ListaSubastasPage() {
       )}
 
       {!loading && !error && hasMore && (
-        <div
-          ref={sentinelRef}
-          className="subastas-observer"
-        />
+        <div ref={sentinelRef} className="subastas-observer" />
       )}
 
       {!loading && !error && !hasMore && subastas.length > 0 && (
@@ -130,9 +172,7 @@ export default function ListaSubastasPage() {
       )}
 
       {!loading && !error && subastas.length === 0 && (
-        <p className="subastas-message">
-          No hay subastas disponibles.
-        </p>
+        <p className="subastas-message">No hay subastas disponibles.</p>
       )}
     </main>
   );
