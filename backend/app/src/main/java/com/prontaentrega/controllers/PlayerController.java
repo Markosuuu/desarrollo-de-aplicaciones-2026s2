@@ -3,6 +3,7 @@ package com.prontaentrega.controllers;
 import com.prontaentrega.controllers.dtos.jugadores.CatalogResponse;
 import com.prontaentrega.controllers.dtos.jugadores.HistorialCotizacionResponse;
 import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
+import com.prontaentrega.controllers.dtos.transacciones.ComprarTokensSuperRequest;
 import com.prontaentrega.models.BolsaDeJugador;
 import com.prontaentrega.models.enums.Liga;
 import com.prontaentrega.services.HistorialCotizacionService;
@@ -18,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -130,4 +132,33 @@ public class PlayerController {
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
+
+    @PostMapping("/players/ranking")
+    public ResponseEntity<CatalogResponse> getRankingByNombre(@RequestParam(defaultValue = "1") int page,
+                                                            @RequestParam(defaultValue = "20") int perPage,
+                                                            @RequestBody JugadorRequest request) {
+
+        Page<BolsaDeJugador> jugadores;
+
+        if (!StringUtils.hasText(request.nombre())) {
+            jugadores = playerCatalogService.getRanking(page, perPage);
+        } else {
+            jugadores = playerCatalogService.getRankingByNombre(page, perPage, request.nombre());
+        }
+
+        List<PlayerResponse> jugadoresResponse = jugadores.getContent().stream()
+                .map(PlayerResponse::from)
+                .toList();
+
+        var response = new CatalogResponse(jugadoresResponse, new CatalogResponse.Paginacion(
+                page,
+                perPage,
+                jugadores.getTotalElements(),
+                jugadores.getTotalPages()
+        ));
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    public record JugadorRequest(String nombre) {}
 }

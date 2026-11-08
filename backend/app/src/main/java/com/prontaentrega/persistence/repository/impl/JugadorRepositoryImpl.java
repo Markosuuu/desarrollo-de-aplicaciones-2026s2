@@ -84,4 +84,11 @@ public class JugadorRepositoryImpl implements JugadorRepository {
         Page<BolsaDeJugadorDTOSQL> pageDTO = daosql.getRanking(page);
         return pageDTO.map(BolsaDeJugadorDTOSQL::aModelo);
     }
+
+    @Override
+    public Page<BolsaDeJugador> getRankingByNombre(Pageable pageable, String nombre) {
+        Page<BolsaDeJugadorDTOSQL> pageDTO = daosql.findJugadorByNombre(nombre, pageable);
+
+        return pageDTO.map(BolsaDeJugadorDTOSQL::aModelo);
+    }
 }
