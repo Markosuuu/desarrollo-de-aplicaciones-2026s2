@@ -7,6 +7,12 @@ import "../styles/listaSubastaPage.css";
 
 const PAGE_SIZE = 10;
 
+const extraerContenido = (response) => {
+  if (Array.isArray(response.subastas)) return response.subastas;
+  if (Array.isArray(response.content)) return response.content;
+  return [];
+};
+
 function normalizeSubastaResponse(response) {
   if (Array.isArray(response)) {
     return {
@@ -20,11 +26,7 @@ function normalizeSubastaResponse(response) {
     };
   }
 
-  const subastas = Array.isArray(response?.subastas)
-    ? response.subastas
-    : Array.isArray(response?.content)
-      ? response.content
-      : [];
+  const subastas = extraerContenido(response);
 
   return {
     subastas,
@@ -95,7 +97,9 @@ export default function ListaSubastasPage() {
         const payload = normalizeSubastaResponse(response);
         const nuevasSubastas = payload.subastas ?? [];
 
-        setSubastas((prev) => (page === 1 ? nuevasSubastas : [...prev, ...nuevasSubastas]));
+        setSubastas((prev) =>
+          page === 1 ? nuevasSubastas : [...prev, ...nuevasSubastas],
+        );
 
         const hayMas = payload.hasNext ?? nuevasSubastas.length === PAGE_SIZE;
 
@@ -188,14 +192,20 @@ export default function ListaSubastasPage() {
         </div>
       )}
 
-      {!loading && !error && hasMore && <div ref={sentinelRef} className="subastas-observer" />}
+      {!loading && !error && hasMore && (
+        <div ref={sentinelRef} className="subastas-observer" />
+      )}
 
       {!loading && !error && !hasMore && subastas.length > 0 && (
-        <p className="subastas-message subastas-end">Fin de las subastas activas</p>
+        <p className="subastas-message subastas-end">
+          Fin de las subastas activas
+        </p>
       )}
 
       {!loading && !error && subastas.length === 0 && (
-        <p className="subastas-message">No existen subastas activas actualmente</p>
+        <p className="subastas-message">
+          No existen subastas activas actualmente
+        </p>
       )}
     </main>
   );

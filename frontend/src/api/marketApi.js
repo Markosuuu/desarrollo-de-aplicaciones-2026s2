@@ -30,18 +30,16 @@ export async function fetchListings(token, { page = 1, size = 20 } = {}) {
   params.set("page", String(page));
   params.set("size", String(size));
 
-  const payload = await request(`/marketplace/listings?${params.toString()}`, { token });
+  const payload = await request(`/marketplace/listings?${params.toString()}`, {
+    token,
+  });
 
   if (Array.isArray(payload)) {
     return payload;
   }
 
   if (payload && typeof payload === "object") {
-    const content = Array.isArray(payload.content)
-      ? payload.content
-      : Array.isArray(payload.listings)
-        ? payload.listings
-        : [];
+    const content = extraerContenido(payload);
 
     return {
       ...payload,
@@ -51,6 +49,12 @@ export async function fetchListings(token, { page = 1, size = 20 } = {}) {
   }
 
   throw new TypeError("La API devolvió un listado de anuncios inválido.");
+}
+
+function extraerContenido(payload) {
+  if (Array.isArray(payload.content)) return payload.content;
+  if (Array.isArray(payload.listings)) return payload.listings;
+  return [];
 }
 
 export async function createSellOrder({ jugadorId, cantidad }, token) {

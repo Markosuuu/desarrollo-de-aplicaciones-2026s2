@@ -18,6 +18,12 @@ function formatNumber(value) {
   return Number.isFinite(number) ? numberFormatter.format(number) : "—";
 }
 
+const extraerContenido = (response) => {
+  if (Array.isArray(response.content)) return response.content;
+  if (Array.isArray(response.listings)) return response.subastas;
+  return [];
+};
+
 function normalizeListingsResponse(response) {
   if (Array.isArray(response)) {
     return {
@@ -31,11 +37,7 @@ function normalizeListingsResponse(response) {
     };
   }
 
-  const content = Array.isArray(response?.content)
-    ? response.content
-    : Array.isArray(response?.listings)
-      ? response.listings
-      : [];
+  const content = extraerContenido(response);
 
   return {
     content,
@@ -158,11 +160,14 @@ const MercadoPage = () => {
             </div>
           )}
 
-          {!loading && !error && search.trim() && otherUsersListings.length === 0 && (
-            <div className="catalog-state">
-              No se encontraron anuncios para esta búsqueda.
-            </div>
-          )}
+          {!loading &&
+            !error &&
+            search.trim() &&
+            otherUsersListings.length === 0 && (
+              <div className="catalog-state">
+                No se encontraron anuncios para esta búsqueda.
+              </div>
+            )}
 
           {!loading && !error && !search.trim() && pageItems.length === 0 && (
             <div className="catalog-state">
@@ -174,7 +179,8 @@ const MercadoPage = () => {
             <>
               <div className="catalog-summary">
                 <span>
-                  {otherUsersListings.length} {otherUsersListings.length === 1 ? "anuncio" : "anuncios"}
+                  {otherUsersListings.length}{" "}
+                  {otherUsersListings.length === 1 ? "anuncio" : "anuncios"}
                 </span>
               </div>
 
@@ -239,7 +245,9 @@ const MercadoPage = () => {
                     type="button"
                     className="pager-button"
                     disabled={!pageData.hasPrevious || page <= 1}
-                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                    onClick={() =>
+                      setPage((current) => Math.max(1, current - 1))
+                    }
                   >
                     Anterior
                   </button>
@@ -250,7 +258,11 @@ const MercadoPage = () => {
                     type="button"
                     className="pager-button"
                     disabled={!pageData.hasNext || page >= pageData.totalPages}
-                    onClick={() => setPage((current) => Math.min(pageData.totalPages, current + 1))}
+                    onClick={() =>
+                      setPage((current) =>
+                        Math.min(pageData.totalPages, current + 1),
+                      )
+                    }
                   >
                     Siguiente
                   </button>
