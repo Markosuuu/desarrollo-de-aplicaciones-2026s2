@@ -193,6 +193,21 @@ describe("ListaSubastasPage", () => {
     ).toBeInTheDocument();
   });
 
+  test("normaliza respuestas en arreglo y en propiedad content", async () => {
+    mocks.fetchSubastas.mockResolvedValueOnce(crearSubastas(1)).mockResolvedValueOnce({
+      content: [{ id: "content-item", nombre: "Desde content" }],
+      hasNext: false,
+    });
+
+    const { unmount } = renderListaSubastas();
+    expect(await screen.findByText("Subasta 1")).toBeInTheDocument();
+    unmount();
+
+    renderListaSubastas();
+    expect(await screen.findByText("Desde content")).toBeInTheDocument();
+    expect(mocks.fetchSubastas).toHaveBeenCalledTimes(2);
+  });
+
   test("muestra un error cuando falla la carga de subastas", async () => {
     mocks.fetchSubastas.mockRejectedValue(
       new Error("Error al conectar con el servidor"),
@@ -302,6 +317,37 @@ describe("ListaSubastasPage", () => {
     expect(
       screen.getByText("Fin de las subastas activas"),
     ).toBeInTheDocument();
+  });
+
+  test("no solicita otra página mientras una solicitud está en curso", async () => {
+    let resolveNextPage;
+    mocks.fetchSubastas
+      .mockResolvedValueOnce({
+        subastas: crearSubastas(10),
+        hasNext: true,
+      })
+      .mockReturnValueOnce(
+        new Promise((resolve) => {
+          resolveNextPage = resolve;
+        }),
+      );
+
+    renderListaSubastas();
+
+    await screen.findAllByTestId("subasta-card");
+    await waitFor(() => expect(observers).toHaveLength(1));
+
+    act(() => {
+      observers[0].trigger(true);
+      observers[0].trigger(true);
+    });
+
+    expect(mocks.fetchSubastas).toHaveBeenCalledTimes(2);
+
+    await act(async () => {
+      resolveNextPage({ subastas: crearSubastas(1, 11), hasNext: false });
+    });
+    expect(await screen.findByText("Subasta 11")).toBeInTheDocument();
   });
 
   test("no carga otra página cuando el sentinel no es visible", async () => {

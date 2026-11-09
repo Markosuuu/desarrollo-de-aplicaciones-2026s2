@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import MercadoPage from "../pages/MercadoPage";
 
@@ -90,11 +90,17 @@ describe("MercadoPage", () => {
     renderMarket();
 
     await screen.findByText("Lionel Messi");
+    const search = screen.getByRole("searchbox", { name: "Buscar anuncios" });
+    fireEvent.change(search, { target: { value: "  vendedor UNO " } });
+
+    await waitFor(() => {
+      expect(screen.getByText("Vendedor Uno")).toBeInTheDocument();
+      expect(screen.queryByText("Jude Bellingham")).not.toBeInTheDocument();
+    });
+
     fireEvent.change(
-      screen.getByRole("searchbox", { name: "Buscar anuncios" }),
-      {
-        target: { value: "inexistente" },
-      },
+      search,
+      { target: { value: "inexistente" } },
     );
 
     await waitFor(() => {
@@ -115,5 +121,136 @@ describe("MercadoPage", () => {
     fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
 
     expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
+  });
+
+  test("muestra el estado vacío cuando no hay anuncios", async () => {
+    mocks.fetchListings.mockResolvedValue([]);
+
+    renderMarket();
+
+    expect(
+      await screen.findByText("No existen anuncios publicados actualmente."),
+    ).toBeInTheDocument();
+  });
+
+  test("muestra valores de reemplazo para datos incompletos o inválidos", async () => {
+    mocks.fetchListings.mockResolvedValue([
+      {
+        id: "listing-incomplete",
+        cantidadTokens: "",
+        precioPorToken: "no-numérico",
+        precioTotal: null,
+      },
+    ]);
+
+    renderMarket();
+
+    expect(await screen.findByText("Jugador")).toBeInTheDocument();
+    expect(screen.getByText("—")).toBeInTheDocument();
+    expect(screen.getByText("— tokens")).toBeInTheDocument();
+    expect(screen.getAllByText("— créditos")).toHaveLength(2);
+  });
+
+  test("normaliza el formato paginado y permite avanzar y retroceder", async () => {
+    const firstPage = { ...listings[0], id: "page-1" };
+    const secondPage = { ...listings[1], id: "page-2" };
+    mocks.fetchListings
+      .mockResolvedValueOnce({
+        content: [firstPage],
+        page: 1,
+        totalPages: 2,
+        hasNext: true,
+        hasPrevious: false,
+      })
+      .mockResolvedValueOnce({
+        listings: [secondPage],
+        page: 2,
+        totalPages: 2,
+        hasNext: false,
+        hasPrevious: true,
+      })
+      .mockResolvedValueOnce({
+        content: [firstPage],
+        page: 1,
+        totalPages: 2,
+        hasNext: true,
+        hasPrevious: false,
+      });
+
+    renderMarket();
+
+    expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Anterior" })).toBeDisabled();
+    fireEvent.click(screen.getByRole("button", { name: "Siguiente" }));
+
+    expect(await screen.findByText("Jude Bellingham")).toBeInTheDocument();
+    expect(screen.getByText("Página 2 de 2")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Siguiente" })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole("button", { name: "Anterior" }));
+    expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
+    expect(mocks.fetchListings).toHaveBeenLastCalledWith("token-test", {
+      page: 1,
+      size: 20,
+    });
+  });
+
+  test("usa el mensaje de error predeterminado si el rechazo no tiene mensaje", async () => {
+    mocks.fetchListings.mockRejectedValue({});
+
+    renderMarket();
+
+    expect(
+      await screen.findByText("No se pudieron cargar los anuncios."),
+    ).toBeInTheDocument();
+  });
+
+  test("normaliza respuestas sin listados ni metadatos de paginación", async () => {
+    mocks.fetchListings
+      .mockResolvedValueOnce({ content: null, listings: null })
+      .mockResolvedValueOnce({ content: [listings[0]] });
+
+    const { unmount } = renderMarket();
+    expect(
+      await screen.findByText("No existen anuncios publicados actualmente."),
+    ).toBeInTheDocument();
+    unmount();
+
+    renderMarket();
+    expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
+    expect(screen.queryByText(/Página \d+ de \d+/)).not.toBeInTheDocument();
+  });
+
+  test("ignora resultados de carga recibidos después de desmontarse", async () => {
+    let resolveListings;
+    mocks.fetchListings.mockReturnValue(
+      new Promise((resolve) => {
+        resolveListings = resolve;
+      }),
+    );
+
+    const { unmount } = renderMarket();
+    unmount();
+
+    await act(async () => {
+      resolveListings(listings);
+    });
+  });
+
+  test("ignora errores recibidos después de desmontarse", async () => {
+    let rejectListings;
+    mocks.fetchListings.mockReturnValue(
+      new Promise((_resolve, reject) => {
+        rejectListings = reject;
+      }),
+    );
+    vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const { unmount } = renderMarket();
+    unmount();
+
+    await act(async () => {
+      rejectListings(new Error("Fallo posterior al desmontaje"));
+    });
   });
 });

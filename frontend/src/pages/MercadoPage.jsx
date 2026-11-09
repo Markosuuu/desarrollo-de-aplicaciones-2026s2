@@ -20,7 +20,7 @@ function formatNumber(value) {
 
 const extraerContenido = (response) => {
   if (Array.isArray(response.content)) return response.content;
-  if (Array.isArray(response.listings)) return response.subastas;
+  if (Array.isArray(response.listings)) return response.listings;
   return [];
 };
 
