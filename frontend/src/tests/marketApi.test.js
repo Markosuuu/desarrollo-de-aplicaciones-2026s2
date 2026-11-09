@@ -26,7 +26,7 @@ describe("marketApi", () => {
     await fetchListings("token-test");
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:8080/api/marketplace/listings",
+      "http://localhost:8080/api/marketplace/listings?page=1&size=20",
       {
         method: "GET",
         headers: {

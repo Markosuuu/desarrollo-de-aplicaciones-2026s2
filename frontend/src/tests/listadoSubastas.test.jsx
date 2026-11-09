@@ -112,7 +112,7 @@ describe("ListaSubastasPage", () => {
     expect(screen.getByText("Subasta 3")).toBeInTheDocument();
 
     expect(
-      screen.getByText("Llegaste al final de las subastas."),
+      screen.getByText("Fin de las subastas activas"),
     ).toBeInTheDocument();
   });
 
@@ -177,7 +177,7 @@ describe("ListaSubastasPage", () => {
     renderListaSubastas();
 
     expect(
-      await screen.findByText("No hay subastas disponibles."),
+      await screen.findByText("No existen subastas activas actualmente"),
     ).toBeInTheDocument();
 
     expect(screen.queryAllByTestId("subasta-card")).toHaveLength(0);
@@ -189,7 +189,7 @@ describe("ListaSubastasPage", () => {
     renderListaSubastas();
 
     expect(
-      await screen.findByText("No hay subastas disponibles."),
+      await screen.findByText("No existen subastas activas actualmente"),
     ).toBeInTheDocument();
   });
 
@@ -246,6 +246,7 @@ describe("ListaSubastasPage", () => {
   test("configura el IntersectionObserver para detectar el scroll", async () => {
     mocks.fetchSubastas.mockResolvedValue({
       subastas: crearSubastas(10),
+      hasNext: true,
     });
 
     renderListaSubastas();
@@ -267,9 +268,11 @@ describe("ListaSubastasPage", () => {
     mocks.fetchSubastas
       .mockResolvedValueOnce({
         subastas: crearSubastas(10),
+        hasNext: true,
       })
       .mockResolvedValueOnce({
         subastas: crearSubastas(5, 11),
+        hasNext: false,
       });
 
     renderListaSubastas();
@@ -297,13 +300,14 @@ describe("ListaSubastasPage", () => {
     expect(await screen.findAllByTestId("subasta-card")).toHaveLength(15);
 
     expect(
-      screen.getByText("Llegaste al final de las subastas."),
+      screen.getByText("Fin de las subastas activas"),
     ).toBeInTheDocument();
   });
 
   test("no carga otra página cuando el sentinel no es visible", async () => {
     mocks.fetchSubastas.mockResolvedValue({
       subastas: crearSubastas(10),
+      hasNext: true,
     });
 
     renderListaSubastas();
@@ -324,6 +328,7 @@ describe("ListaSubastasPage", () => {
   test("desconecta el observer cuando deja de utilizarse", async () => {
     mocks.fetchSubastas.mockResolvedValue({
       subastas: crearSubastas(10),
+      hasNext: true,
     });
 
     const { unmount } = renderListaSubastas();
@@ -351,7 +356,7 @@ describe("ListaSubastasPage", () => {
     await screen.findAllByTestId("subasta-card");
 
     expect(
-      screen.getByText("Llegaste al final de las subastas."),
+      screen.getByText("Fin de las subastas activas"),
     ).toBeInTheDocument();
 
     expect(observers).toHaveLength(0);

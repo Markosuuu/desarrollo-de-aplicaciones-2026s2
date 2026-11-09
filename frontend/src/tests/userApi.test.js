@@ -24,7 +24,7 @@ describe("userApi", () => {
       await fetchResource(`${userId}`, "token-prueba");
 
       expect(fetchMock).toHaveBeenCalledWith(
-        `http://localhost:8080/api/users/${userId}/${resource}`,
+        `http://localhost:8080/api/users/${userId}/${resource}?page=1&size=10`,
         {
           headers: {
             Accept: "application/json",
@@ -48,7 +48,7 @@ describe("userApi", () => {
     ).rejects.toThrow("Usuario no encontrado");
   });
 
-  test("rechaza respuestas que no contienen una lista", async () => {
+  test("normaliza respuestas sin una lista de contenido", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({ data: [] }), {
         status: 200,
@@ -58,6 +58,6 @@ describe("userApi", () => {
 
     await expect(
       fetchUserInventory(`${userId}`, "token-prueba"),
-    ).rejects.toThrow("La API devolvió un formato de datos inválido.");
+    ).resolves.toEqual({ data: [], content: [] });
   });
 });

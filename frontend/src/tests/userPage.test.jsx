@@ -115,10 +115,12 @@ describe("UserPage", () => {
     expect(mocks.fetchUserInventory).toHaveBeenCalledWith(
       "user-1",
       "token-prueba",
+      { page: 1, size: 10 },
     );
     expect(mocks.fetchUserTransactions).toHaveBeenCalledWith(
       "user-1",
       "token-prueba",
+      { page: 1, size: 10 },
     );
   });
 
@@ -163,11 +165,9 @@ describe("UserPage", () => {
 
     renderUserPage();
 
+    expect(await screen.findByText("Inventario vacío")).toBeInTheDocument();
     expect(
-      await screen.findByText("Todavía no tienes jugadores en tu inventario."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("Todavía no tienes operaciones en tu historial."),
+      screen.getByText("No hay operaciones registradas"),
     ).toBeInTheDocument();
     expect(screen.getByText("100")).toBeInTheDocument();
   });
