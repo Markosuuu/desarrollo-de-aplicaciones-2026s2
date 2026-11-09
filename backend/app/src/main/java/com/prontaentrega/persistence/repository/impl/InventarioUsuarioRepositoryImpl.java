@@ -31,24 +31,13 @@ public class InventarioUsuarioRepositoryImpl implements InventarioUsuarioReposit
     @Override
     public Optional<InventarioUsuario> findByUsuarioIdAndJugadorId(UUID usuarioId, UUID jugadorId) {
         return dao.findByUsuarioIdAndJugadorId(usuarioId, jugadorId)
-                .map(this::aModelo);
-    }
-
-    @Override
-    public List<InventarioUsuario> findAllByUsuarioId(UUID usuarioId) {
-        return dao.findAllByUsuarioId(usuarioId).stream()
-                .map(this::aModelo)
-                .toList();
+                .map(InventarioUsuarioDTOSQL::aModelo);
     }
 
     @Override
     public Page<InventarioUsuario> findAllByUsuarioId(UUID usuarioId, Pageable pageable) {
         return dao.findAllByUsuarioId(usuarioId, pageable)
                 .map(InventarioUsuarioDTOSQL::aModelo);
-    }
-
-    private InventarioUsuario aModelo(InventarioUsuarioDTOSQL dto) {
-        return dto.aModelo();
     }
 
     @Override

@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 public interface InventarioUsuarioRepository {
     InventarioUsuario save(InventarioUsuario token);
     Optional<InventarioUsuario> findByUsuarioIdAndJugadorId(UUID usuarioId, UUID jugadorId);
-    List<InventarioUsuario> findAllByUsuarioId(UUID usuarioId);
     Page<InventarioUsuario> findAllByUsuarioId(UUID usuarioId, Pageable pageable);
     Long count();
     void deleteAll();

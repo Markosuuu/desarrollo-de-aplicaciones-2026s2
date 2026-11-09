@@ -7,8 +7,6 @@ import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.persistence.repository.dao.OperacionDAOSQL;
 import com.prontaentrega.persistence.repository.dao.JugadorDTOSQLDAO;
 import com.prontaentrega.persistence.repository.dao.UsuarioDAOSQL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -41,13 +39,6 @@ public class OperacionRepositoryImpl implements OperacionRepository {
         OperacionDTOSQL saved = dao.save(dto);
         operacion.setId(saved.getId());
         return operacion;
-    }
-
-    @Override
-    public List<Operacion> findByUsuarioId(UUID usuarioId) {
-        return dao.findAllByUsuario_IdOrderByCreadaEnDesc(usuarioId).stream()
-                .map(OperacionDTOSQL::aModelo)
-                .toList();
     }
 
     @Override
