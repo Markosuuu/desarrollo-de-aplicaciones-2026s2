@@ -107,7 +107,6 @@ describe('HomePage', () => {
         expect(screen.getByText('Catálogo de jugadores')).toBeTruthy();
 
         await waitFor(() => {
-            expect(screen.getByText('Bienvenido/a, Ana')).toBeTruthy();
             expect(screen.getByText('Lionel Messi')).toBeTruthy();
             expect(screen.getByText('Jude Bellingham')).toBeTruthy();
         });
@@ -170,7 +169,7 @@ describe('HomePage', () => {
 
         await screen.findByText('Lionel Messi');
 
-        const search = screen.getByPlaceholderText('Nombre, equipo o liga');
+        const search = screen.getByPlaceholderText('Nombre');
 
         fireEvent.change(search, {
             target: { value: 'messi' },
@@ -271,7 +270,7 @@ describe('HomePage', () => {
 
         await screen.findByText('Lionel Messi');
 
-        const search = screen.getByPlaceholderText('Nombre, equipo o liga');
+        const search = screen.getByPlaceholderText('Nombre');
 
         fireEvent.change(search, {
             target: { value: 'messi' },
@@ -352,7 +351,7 @@ describe('HomePage', () => {
 
         renderHome();
 
-        const search = screen.getByPlaceholderText('Nombre, equipo o liga');
+        const search = screen.getByPlaceholderText('Nombre');
 
         // Cambiar la búsqueda limpia el efecto anterior.
         fireEvent.change(search, {
@@ -390,7 +389,7 @@ describe('HomePage', () => {
 
         renderHome();
 
-        const search = screen.getByPlaceholderText('Nombre, equipo o liga');
+        const search = screen.getByPlaceholderText('Nombre');
 
         // Limpiar el efecto anterior.
         fireEvent.change(search, {

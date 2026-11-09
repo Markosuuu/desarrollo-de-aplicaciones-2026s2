@@ -34,7 +34,7 @@ describe('fetchPlayers', () => {
         expect(parsedUrl.searchParams.get('page')).toBe('2');
         expect(parsedUrl.searchParams.get('perPage')).toBe('10');
         expect(parsedUrl.searchParams.get('nombre')).toBe('Messi');
-        expect(parsedUrl.searchParams.get('equipo')).toBe('Inter%20Miami');
+        expect(parsedUrl.searchParams.get('equipo')).toBe('Inter Miami');
         expect(parsedUrl.searchParams.get('liga')).toBe('MLS');
 
         expect(options.headers).toEqual({
