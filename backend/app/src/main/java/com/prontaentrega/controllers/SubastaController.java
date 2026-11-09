@@ -7,7 +7,6 @@ import com.prontaentrega.models.Subasta;
 import com.prontaentrega.services.SubastaService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -49,8 +48,11 @@ public class SubastaController {
     public ResponseEntity<PageResponse<SubastaResponse>> listarSubastas(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<Subasta> subastas = subastaService.listarSubastas(page, size);
-        return ResponseEntity.ok(PageResponse.from(subastas, SubastaResponse::from));
+        Page<SubastaResponse> subastas = subastaService
+                .listarSubastas(page, size)
+                .map(SubastaResponse::from);
+
+        return ResponseEntity.ok(PageResponse.from(subastas));
     }
 
     @PostMapping("/buscarPorNombre")
@@ -59,14 +61,18 @@ public class SubastaController {
             @RequestParam(defaultValue = "10") int size,
             @RequestBody SubastaRequest request
     ) {
-        Page<Subasta> subastas;
+        Page<SubastaResponse> subastas;
         if (!StringUtils.hasText(request.jugador()) && !StringUtils.hasText(request.user())) {
-            subastas = subastaService.listarSubastas(page, size);
+            subastas = subastaService
+                    .listarSubastas(page, size)
+                    .map(SubastaResponse::from);
         } else {
-            subastas = subastaService.listarSubastasPorNombre(page, size, request.user(), request.jugador());
+            subastas = subastaService
+                    .listarSubastasPorNombre(page, size, request.user(), request.jugador())
+                    .map(SubastaResponse::from);
         }
 
-        return ResponseEntity.ok(PageResponse.from(subastas, SubastaResponse::from));
+        return ResponseEntity.ok(PageResponse.from(subastas));
     }
 
     public record SubastaRequest(String user, String jugador) {}

@@ -30,8 +30,11 @@ public class MercadoController {
     public ResponseEntity<PageResponse<AnuncioVentaResponse>> getAnuncios(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
-        Page<AnuncioVenta> anuncios = mercadoService.getAnuncios(page, size);
-        return ResponseEntity.ok(PageResponse.from(anuncios, AnuncioVentaResponse::from));
+        Page<AnuncioVentaResponse> anuncios = mercadoService
+                .getAnuncios(page, size)
+                .map(AnuncioVentaResponse::from);
+
+        return ResponseEntity.ok(PageResponse.from(anuncios));
     }
 
     @PostMapping("/orders/sell")
@@ -68,8 +71,11 @@ public class MercadoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Page<Operacion> operaciones = mercadoService.getTransaccionesById(id, page, size);
-        return ResponseEntity.ok(PageResponse.from(operaciones, OperacionResponse::from));
+        Page<OperacionResponse> operaciones = mercadoService
+                .getTransaccionesById(id, page, size)
+                .map(OperacionResponse::from);
+
+        return ResponseEntity.ok(PageResponse.from(operaciones));
     }
 
     @PostMapping("/orders/super/buy")
@@ -86,8 +92,11 @@ public class MercadoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
-        Page<InventarioUsuario> inventario = mercadoService.getInventarioById(id, page, size);
-        return ResponseEntity.ok(PageResponse.from(inventario, InventarioUsuarioResponse::from));
+        Page<InventarioUsuarioResponse> inventario = mercadoService
+                .getInventarioById(id, page, size)
+                .map(InventarioUsuarioResponse::from);
+
+        return ResponseEntity.ok(PageResponse.from(inventario));
     }
 
     private UUID currentUserId() {
