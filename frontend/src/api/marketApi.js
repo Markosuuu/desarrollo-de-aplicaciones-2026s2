@@ -1,4 +1,4 @@
-const API_BASE_URL =
+﻿const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 async function request(path, { method = "GET", token, body } = {}) {
@@ -25,14 +25,32 @@ async function request(path, { method = "GET", token, body } = {}) {
   return payload;
 }
 
-export async function fetchListings(token) {
-  const payload = await request("/marketplace/listings", { token });
+export async function fetchListings(token, { page = 1, size = 20 } = {}) {
+  const params = new URLSearchParams();
+  params.set("page", String(page));
+  params.set("size", String(size));
 
-  if (!Array.isArray(payload)) {
-    throw new TypeError("La API devolvió un listado de anuncios inválido.");
+  const payload = await request(`/marketplace/listings?${params.toString()}`, { token });
+
+  if (Array.isArray(payload)) {
+    return payload;
   }
 
-  return payload;
+  if (payload && typeof payload === "object") {
+    const content = Array.isArray(payload.content)
+      ? payload.content
+      : Array.isArray(payload.listings)
+        ? payload.listings
+        : [];
+
+    return {
+      ...payload,
+      content,
+      listings: content,
+    };
+  }
+
+  throw new TypeError("La API devolvió un listado de anuncios inválido.");
 }
 
 export async function createSellOrder({ jugadorId, cantidad }, token) {

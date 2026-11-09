@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+﻿import { useCallback, useEffect, useRef, useState } from "react";
 
 import { useAuth } from "../context/AuthContext";
 import { buscarSubastasPorNombre, fetchSubastas } from "../api/subastaApi";
@@ -6,6 +6,36 @@ import SubastaCard from "../components/SubastaCard";
 import "../styles/listaSubastaPage.css";
 
 const PAGE_SIZE = 10;
+
+function normalizeSubastaResponse(response) {
+  if (Array.isArray(response)) {
+    return {
+      subastas: response,
+      page: 1,
+      size: PAGE_SIZE,
+      totalElements: response.length,
+      totalPages: 1,
+      hasNext: false,
+      hasPrevious: false,
+    };
+  }
+
+  const subastas = Array.isArray(response?.subastas)
+    ? response.subastas
+    : Array.isArray(response?.content)
+      ? response.content
+      : [];
+
+  return {
+    subastas,
+    page: Number(response?.page ?? 1),
+    size: Number(response?.size ?? PAGE_SIZE),
+    totalElements: Number(response?.totalElements ?? subastas.length),
+    totalPages: Number(response?.totalPages ?? 1),
+    hasNext: Boolean(response?.hasNext),
+    hasPrevious: Boolean(response?.hasPrevious),
+  };
+}
 
 export default function ListaSubastasPage() {
   const { token } = useAuth();
@@ -62,18 +92,17 @@ export default function ListaSubastasPage() {
 
         if (requestGeneration !== requestGenerationRef.current) return;
 
-        const nuevasSubastas = response.subastas ?? [];
+        const payload = normalizeSubastaResponse(response);
+        const nuevasSubastas = payload.subastas ?? [];
 
-        setSubastas((prev) =>
-          page === 1 ? nuevasSubastas : [...prev, ...nuevasSubastas],
-        );
+        setSubastas((prev) => (page === 1 ? nuevasSubastas : [...prev, ...nuevasSubastas]));
 
-        const hayMas = nuevasSubastas.length === PAGE_SIZE;
+        const hayMas = payload.hasNext ?? nuevasSubastas.length === PAGE_SIZE;
 
         hasMoreRef.current = hayMas;
         setHasMore(hayMas);
 
-        nextPageRef.current = page + 1;
+        nextPageRef.current = hayMas ? page + 1 : page;
       } catch (err) {
         if (requestGeneration === requestGenerationRef.current) {
           setError(err.message || "Ocurrió un error al cargar las subastas.");
@@ -88,12 +117,10 @@ export default function ListaSubastasPage() {
     [searchTerm, token],
   );
 
-  // Carga inicial.
   useEffect(() => {
     void loadPage(1);
   }, [loadPage]);
 
-  // Configuración del scroll infinito.
   useEffect(() => {
     if (loading || error || !hasMore || !sentinelRef.current) {
       return;
@@ -161,18 +188,14 @@ export default function ListaSubastasPage() {
         </div>
       )}
 
-      {!loading && !error && hasMore && (
-        <div ref={sentinelRef} className="subastas-observer" />
-      )}
+      {!loading && !error && hasMore && <div ref={sentinelRef} className="subastas-observer" />}
 
       {!loading && !error && !hasMore && subastas.length > 0 && (
-        <p className="subastas-message subastas-end">
-          Llegaste al final de las subastas.
-        </p>
+        <p className="subastas-message subastas-end">Fin de las subastas activas</p>
       )}
 
       {!loading && !error && subastas.length === 0 && (
-        <p className="subastas-message">No hay subastas disponibles.</p>
+        <p className="subastas-message">No existen subastas activas actualmente</p>
       )}
     </main>
   );

@@ -1,5 +1,6 @@
 package com.prontaentrega.controllers;
 
+import com.prontaentrega.controllers.dtos.PageResponse;
 import com.prontaentrega.controllers.dtos.subastas.*;
 import com.prontaentrega.models.Oferta;
 import com.prontaentrega.models.Subasta;
@@ -45,21 +46,15 @@ public class SubastaController {
     }
 
     @GetMapping
-    public ResponseEntity<SubastaPagedResponse> listarSubastas(
+    public ResponseEntity<PageResponse<SubastaResponse>> listarSubastas(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
         Page<Subasta> subastas = subastaService.listarSubastas(page, size);
-        List<SubastaResponse> items = subastas.getContent().stream()
-                .map(SubastaResponse::from)
-                .toList();
-
-        SubastaPagedResponse pages = new SubastaPagedResponse(items, page, size);
-
-        return ResponseEntity.ok(pages);
+        return ResponseEntity.ok(PageResponse.from(subastas, SubastaResponse::from));
     }
 
     @PostMapping("/buscarPorNombre")
-    public ResponseEntity<SubastaPagedResponse> listarSubastasPorNombre(
+    public ResponseEntity<PageResponse<SubastaResponse>> listarSubastasPorNombre(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestBody SubastaRequest request
@@ -71,13 +66,7 @@ public class SubastaController {
             subastas = subastaService.listarSubastasPorNombre(page, size, request.user(), request.jugador());
         }
 
-        List<SubastaResponse> items = subastas.getContent().stream()
-                .map(SubastaResponse::from)
-                .toList();
-
-        SubastaPagedResponse pages = new SubastaPagedResponse(items, page, size);
-
-        return ResponseEntity.ok(pages);
+        return ResponseEntity.ok(PageResponse.from(subastas, SubastaResponse::from));
     }
 
     public record SubastaRequest(String user, String jugador) {}

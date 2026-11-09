@@ -61,11 +61,14 @@ public class MercadoService {
      * @return Lista de anuncios de venta
      */
     public Page<AnuncioVenta> getAnuncios(int page, int size) {
+        Pageable pageable = toPageable(page, size);
+        return anuncioVentaRepository.findByEstado(EstadoAnuncioVenta.PENDIENTE, pageable);
+    }
+
+    private Pageable toPageable(int page, int size) {
         int normalizedPage = Math.max(page, 1) - 1;
         int normalizedSize = Math.max(size, 1);
-        Pageable pageable = PageRequest.of(normalizedPage, normalizedSize);
-
-        return anuncioVentaRepository.findByEstado(EstadoAnuncioVenta.PENDIENTE, pageable);
+        return PageRequest.of(normalizedPage, normalizedSize);
     }
 
     /**
@@ -279,6 +282,11 @@ public class MercadoService {
         return operacionRepository.findByUsuarioId(usuarioId);
     }
 
+    public Page<Operacion> getTransaccionesById(UUID usuarioId, int page, int size) {
+        Pageable pageable = toPageable(page, size);
+        return operacionRepository.findByUsuarioId(usuarioId, pageable);
+    }
+
     /**
      * Metodo para comprar al super usuario
      * <p>
@@ -349,5 +357,13 @@ public class MercadoService {
         }
 
         return inventarioUsuarioRepository.findAllByUsuarioId(usuarioId);
+    }
+
+    public Page<InventarioUsuario> getInventarioById(UUID usuarioId, int page, int size) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new UsuarioNoEncontradoException("Uusario no encontrado con el id: " + usuarioId.toString());
+        }
+
+        return inventarioUsuarioRepository.findAllByUsuarioId(usuarioId, toPageable(page, size));
     }
 }

@@ -82,6 +82,37 @@
   opacity: 0.75;
 }
 
+.user-page-pager,
+.market-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+.pager-button {
+  border: 1px solid var(--border-color, #dedede);
+  border-radius: 999px;
+  background: var(--card-background, #fff);
+  color: inherit;
+  padding: 0.5rem 0.9rem;
+  font: inherit;
+  cursor: pointer;
+}
+
+.pager-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pager-status {
+  min-width: 7rem;
+  text-align: center;
+  font-weight: 700;
+}
+
 .user-page-amount {
   font-weight: 700;
   font-variant-numeric: tabular-nums;

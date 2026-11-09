@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +10,34 @@ import "../styles/userPage.css";
 const numberFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 2,
 });
+
+const PAGE_SIZE = 10;
+
+function normalizePageResponse(response) {
+  if (Array.isArray(response)) {
+    return {
+      content: response,
+      page: 1,
+      size: PAGE_SIZE,
+      totalElements: response.length,
+      totalPages: 1,
+      hasNext: false,
+      hasPrevious: false,
+    };
+  }
+
+  const content = Array.isArray(response?.content) ? response.content : [];
+
+  return {
+    content,
+    page: Number(response?.page ?? 1),
+    size: Number(response?.size ?? PAGE_SIZE),
+    totalElements: Number(response?.totalElements ?? content.length),
+    totalPages: Number(response?.totalPages ?? 1),
+    hasNext: Boolean(response?.hasNext),
+    hasPrevious: Boolean(response?.hasPrevious),
+  };
+}
 
 function formatNumber(value) {
   if (value === null || value === undefined || value === "") return "—";
@@ -32,8 +60,26 @@ function formatDate(value) {
 function UserPage() {
   const { token, user } = useAuth();
   const navigate = useNavigate();
-  const [inventory, setInventory] = useState([]);
-  const [transactions, setTransactions] = useState([]);
+  const [inventoryPageData, setInventoryPageData] = useState({
+    content: [],
+    page: 1,
+    size: PAGE_SIZE,
+    totalElements: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrevious: false,
+  });
+  const [transactionsPageData, setTransactionsPageData] = useState({
+    content: [],
+    page: 1,
+    size: PAGE_SIZE,
+    totalElements: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrevious: false,
+  });
+  const [inventoryPage, setInventoryPage] = useState(1);
+  const [transactionsPage, setTransactionsPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
@@ -57,14 +103,14 @@ function UserPage() {
 
       try {
         const [inventoryResponse, transactionsResponse] = await Promise.all([
-          fetchUserInventory(user.id, token),
-          fetchUserTransactions(user.id, token),
+          fetchUserInventory(user.id, token, { page: inventoryPage, size: PAGE_SIZE }),
+          fetchUserTransactions(user.id, token, { page: transactionsPage, size: PAGE_SIZE }),
         ]);
 
-        if (active) {
-          setInventory(inventoryResponse);
-          setTransactions(transactionsResponse);
-        }
+        if (!active) return;
+
+        setInventoryPageData(normalizePageResponse(inventoryResponse));
+        setTransactionsPageData(normalizePageResponse(transactionsResponse));
       } catch (loadError) {
         console.error("Error al cargar los datos del usuario:", loadError);
 
@@ -86,7 +132,10 @@ function UserPage() {
     return () => {
       active = false;
     };
-  }, [retry, token, user?.id]);
+  }, [retry, token, user?.id, inventoryPage, transactionsPage]);
+
+  const inventory = inventoryPageData.content;
+  const transactions = transactionsPageData.content;
 
   const currentUser = inventory.find(
     (item) => item.usuario?.id === user?.id,
@@ -214,13 +263,36 @@ function UserPage() {
                 })}
                 {!error && inventory.length === 0 && (
                   <tr>
-                    <td colSpan="8" className="user-page-message">
-                      Todavía no tienes jugadores en tu inventario.
+                    <td colSpan="9" className="user-page-message">
+                      Inventario vacío
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+            {inventoryPageData.totalPages > 1 && (
+              <div className="user-page-pager">
+                <button
+                  type="button"
+                  className="pager-button"
+                  disabled={!inventoryPageData.hasPrevious || inventoryPage <= 1}
+                  onClick={() => setInventoryPage((value) => Math.max(1, value - 1))}
+                >
+                  Anterior
+                </button>
+                <span className="pager-status">
+                  {inventoryPageData.page} / {inventoryPageData.totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="pager-button"
+                  disabled={!inventoryPageData.hasNext || inventoryPage >= inventoryPageData.totalPages}
+                  onClick={() => setInventoryPage((value) => Math.min(inventoryPageData.totalPages, value + 1))}
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
           </div>
         )}
       </article>
@@ -273,12 +345,35 @@ function UserPage() {
                 {!error && transactions.length === 0 && (
                   <tr>
                     <td colSpan="8" className="user-page-message">
-                      Todavía no tienes operaciones en tu historial.
+                      No hay operaciones registradas
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+            {transactionsPageData.totalPages > 1 && (
+              <div className="user-page-pager">
+                <button
+                  type="button"
+                  className="pager-button"
+                  disabled={!transactionsPageData.hasPrevious || transactionsPage <= 1}
+                  onClick={() => setTransactionsPage((value) => Math.max(1, value - 1))}
+                >
+                  Anterior
+                </button>
+                <span className="pager-status">
+                  {transactionsPageData.page} / {transactionsPageData.totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="pager-button"
+                  disabled={!transactionsPageData.hasNext || transactionsPage >= transactionsPageData.totalPages}
+                  onClick={() => setTransactionsPage((value) => Math.min(transactionsPageData.totalPages, value + 1))}
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
           </div>
         )}
       </article>
@@ -293,9 +388,7 @@ function UserPage() {
           >
             <h2 id="user-page-sell-title">Crear oferta</h2>
             <p>
-              {selectedInventoryItem.jugador?.nombre || "Jugador"} ·{" "}
-              {formatNumber(selectedInventoryItem.jugador?.cotizacion)} créditos
-              por token
+              {selectedInventoryItem.jugador?.nombre || "Jugador"} — {formatNumber(selectedInventoryItem.jugador?.cotizacion)} créditos por token
             </p>
             <form onSubmit={handleCreateOffer}>
               <label htmlFor="user-page-sell-quantity">

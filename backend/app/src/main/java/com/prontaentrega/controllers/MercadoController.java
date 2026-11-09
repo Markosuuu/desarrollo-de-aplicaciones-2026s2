@@ -1,5 +1,6 @@
 package com.prontaentrega.controllers;
 
+import com.prontaentrega.controllers.dtos.PageResponse;
 import com.prontaentrega.controllers.dtos.transacciones.*;
 import com.prontaentrega.models.AnuncioVenta;
 import com.prontaentrega.models.InventarioUsuario;
@@ -26,14 +27,11 @@ public class MercadoController {
     }
 
     @GetMapping("/marketplace/listings")
-    public ResponseEntity<List<AnuncioVentaResponse>> getAnuncios(
+    public ResponseEntity<PageResponse<AnuncioVentaResponse>> getAnuncios(
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "32") int size) {
+            @RequestParam(defaultValue = "20") int size) {
         Page<AnuncioVenta> anuncios = mercadoService.getAnuncios(page, size);
-
-        return ResponseEntity.ok(anuncios.getContent().stream()
-                .map(AnuncioVentaResponse::from)
-                .toList());
+        return ResponseEntity.ok(PageResponse.from(anuncios, AnuncioVentaResponse::from));
     }
 
     @PostMapping("/orders/sell")
@@ -65,15 +63,13 @@ public class MercadoController {
     }
 
     @GetMapping("/users/{id}/transactions")
-    public ResponseEntity<List<OperacionResponse>> getTransactions(@PathVariable UUID id) {
+    public ResponseEntity<PageResponse<OperacionResponse>> getTransactions(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<Operacion> operaciones = mercadoService.getTransaccionesById(id);
-
-        List<OperacionResponse> response = operaciones.stream()
-                .map(OperacionResponse::from)
-                .toList();
-
-        return ResponseEntity.ok(response);
+        Page<Operacion> operaciones = mercadoService.getTransaccionesById(id, page, size);
+        return ResponseEntity.ok(PageResponse.from(operaciones, OperacionResponse::from));
     }
 
     @PostMapping("/orders/super/buy")
@@ -85,15 +81,13 @@ public class MercadoController {
     }
 
     @GetMapping("/users/{id}/inventario")
-    public ResponseEntity<List<InventarioUsuarioResponse>> getInventario(@PathVariable UUID id) {
+    public ResponseEntity<PageResponse<InventarioUsuarioResponse>> getInventario(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
 
-        List<InventarioUsuario> inventario = mercadoService.getInventarioById(id);
-
-        List<InventarioUsuarioResponse> response = inventario.stream()
-                .map(InventarioUsuarioResponse::from)
-                .toList();
-
-        return ResponseEntity.ok(response);
+        Page<InventarioUsuario> inventario = mercadoService.getInventarioById(id, page, size);
+        return ResponseEntity.ok(PageResponse.from(inventario, InventarioUsuarioResponse::from));
     }
 
     private UUID currentUserId() {

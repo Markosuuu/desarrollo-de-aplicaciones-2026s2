@@ -7,6 +7,8 @@ import com.prontaentrega.persistence.repository.dao.InventarioUsuarioDAOSQL;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -37,6 +39,12 @@ public class InventarioUsuarioRepositoryImpl implements InventarioUsuarioReposit
         return dao.findAllByUsuarioId(usuarioId).stream()
                 .map(this::aModelo)
                 .toList();
+    }
+
+    @Override
+    public Page<InventarioUsuario> findAllByUsuarioId(UUID usuarioId, Pageable pageable) {
+        return dao.findAllByUsuarioId(usuarioId, pageable)
+                .map(InventarioUsuarioDTOSQL::aModelo);
     }
 
     private InventarioUsuario aModelo(InventarioUsuarioDTOSQL dto) {
