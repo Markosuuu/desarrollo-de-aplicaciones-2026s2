@@ -200,4 +200,13 @@ public class PlayerCatalogService {
     private String normalize(String value) {
         return value == null || value.isBlank() ? null : value.trim();
     }
+
+    public Page<BolsaDeJugador> getRankingByNombre(int page, int perPage, String nombre) {
+        int safePage = Math.max(page, 1);
+        int safePerPage = Math.clamp(perPage, 1, 50);
+
+        Pageable pageable = PageRequest.of(safePage-1, safePerPage);
+
+        return jugadorRepository.getRankingByNombre(pageable, nombre);
+    }
 }

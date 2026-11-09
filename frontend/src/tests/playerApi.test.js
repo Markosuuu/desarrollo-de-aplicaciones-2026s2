@@ -218,15 +218,32 @@ describe('getRanking', () => {
 
         expect(fetch).toHaveBeenCalledWith(
             expect.stringContaining('/players/ranking?page=1&perPage=50'),
-            {
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ nombre: '' }),
                 headers: {
                     Accept: 'application/json',
+                    'Content-Type': 'application/json',
                     Authorization: 'Bearer token-test',
                 },
-            }
+            })
         );
 
         expect(result).toEqual(payload);
+    });
+
+    test('envía el nombre vacío para solicitar el ranking completo', async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue([]),
+        });
+
+        await getRanking({ token: 'token-test' });
+
+        expect(fetch.mock.calls[0][1]).toMatchObject({
+            method: 'POST',
+            body: JSON.stringify({ nombre: '' }),
+        });
     });
 
     test('debe obtener el ranking con parámetros personalizados', async () => {
@@ -240,12 +257,16 @@ describe('getRanking', () => {
         const result = await getRanking({
             page: 3,
             perPage: 20,
+            nombre: 'Lionel Messi',
             token: 'token-test',
         });
 
         expect(fetch).toHaveBeenCalledWith(
             expect.stringContaining('/players/ranking?page=3&perPage=20'),
-            expect.any(Object)
+            expect.objectContaining({
+                method: 'POST',
+                body: JSON.stringify({ nombre: 'Lionel Messi' }),
+            })
         );
 
         expect(result).toEqual(payload);

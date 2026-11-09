@@ -17,4 +17,6 @@ public interface JugadorRepository {
     void deleteAll();
     Long count();
     Page<BolsaDeJugador> getRanking(Pageable page);
+
+    Page<BolsaDeJugador> getRankingByNombre(Pageable pageable, String nombre);
 }

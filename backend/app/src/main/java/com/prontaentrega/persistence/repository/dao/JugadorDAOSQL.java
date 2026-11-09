@@ -38,4 +38,12 @@ public interface JugadorDAOSQL extends JpaRepository<BolsaDeJugadorDTOSQL, UUID>
             ORDER BY b.cotizacionActual DESC
     """)
     Page<BolsaDeJugadorDTOSQL> getRanking(Pageable pageable);
+
+    @Query("""
+        SELECT b
+        FROM BolsaDeJugador b
+        WHERE LOWER(b.estadisticasDeportivas.jugador.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))
+        ORDER BY b.cotizacionActual DESC
+    """)
+    Page<BolsaDeJugadorDTOSQL> findJugadorByNombre(String nombre, Pageable pageable);
 }

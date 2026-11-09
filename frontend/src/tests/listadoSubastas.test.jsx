@@ -1,319 +1,373 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 
 const mocks = vi.hoisted(() => ({
-    fetchSubastas: vi.fn(),
-    useAuth: vi.fn(),
+  fetchSubastas: vi.fn(),
+  buscarSubastasPorNombre: vi.fn(),
+  useAuth: vi.fn(),
 }));
 
 vi.mock("../api/subastaApi", () => ({
-    fetchSubastas: mocks.fetchSubastas,
+  fetchSubastas: mocks.fetchSubastas,
+  buscarSubastasPorNombre: mocks.buscarSubastasPorNombre,
 }));
 
 vi.mock("../context/AuthContext", () => ({
-    useAuth: mocks.useAuth,
+  useAuth: mocks.useAuth,
 }));
 
 vi.mock("../components/SubastaCard", () => ({
-    default: ({ subasta }) => (
-        <article data-testid="subasta-card">
-            {subasta.nombre}
-        </article>
-    ),
+  default: ({ subasta }) => (
+    <article data-testid="subasta-card">{subasta.nombre}</article>
+  ),
 }));
 
-import ListaSubastasPage from "../pages/ListaSubastaPage"
+import ListaSubastasPage from "../pages/ListaSubastaPage";
 
 const crearSubastas = (cantidad, inicio = 1) =>
-    Array.from({ length: cantidad }, (_, index) => ({
-        id: `subasta-${inicio + index}`,
-        nombre: `Subasta ${inicio + index}`,
-    }));
+  Array.from({ length: cantidad }, (_, index) => ({
+    id: `subasta-${inicio + index}`,
+    nombre: `Subasta ${inicio + index}`,
+  }));
 
 let observers = [];
 
 class MockIntersectionObserver {
-    constructor(callback, options) {
-        this.callback = callback;
-        this.options = options;
-        this.observe = vi.fn();
-        this.disconnect = vi.fn();
+  constructor(callback, options) {
+    this.callback = callback;
+    this.options = options;
+    this.observe = vi.fn();
+    this.disconnect = vi.fn();
 
-        observers.push(this);
-    }
+    observers.push(this);
+  }
 
-    trigger(isIntersecting = true) {
-        this.callback([
-            {
-                isIntersecting,
-            },
-        ]);
-    }
+  trigger(isIntersecting = true) {
+    this.callback([
+      {
+        isIntersecting,
+      },
+    ]);
+  }
 }
 
 function renderListaSubastas() {
-    return render(<ListaSubastasPage />);
+  return render(<ListaSubastasPage />);
 }
 
 describe("ListaSubastasPage", () => {
-    beforeEach(() => {
-        vi.clearAllMocks();
-        observers = [];
+  beforeEach(() => {
+    vi.clearAllMocks();
+    observers = [];
 
-        mocks.useAuth.mockReturnValue({
-            token: "token-test",
-        });
-
-        vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+    mocks.useAuth.mockReturnValue({
+      token: "token-test",
     });
 
-    afterEach(() => {
-        cleanup();
-        vi.unstubAllGlobals();
+    vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
+  test("muestra el estado de carga inicial", () => {
+    mocks.fetchSubastas.mockReturnValue(new Promise(() => {}));
+
+    renderListaSubastas();
+
+    expect(screen.getByText("Subastas")).toBeInTheDocument();
+    expect(
+      screen.getByText("Explorá las subastas disponibles en el mercado."),
+    ).toBeInTheDocument();
+
+    expect(screen.getByText("Cargando subastas...")).toBeInTheDocument();
+
+    expect(mocks.fetchSubastas).toHaveBeenCalledWith({
+      page: 1,
+      size: 10,
+      token: "token-test",
+    });
+  });
+
+  test("muestra las subastas obtenidas correctamente", async () => {
+    mocks.fetchSubastas.mockResolvedValue({
+      subastas: crearSubastas(3),
     });
 
-    test("muestra el estado de carga inicial", () => {
-        mocks.fetchSubastas.mockReturnValue(new Promise(() => {}));
+    renderListaSubastas();
 
-        renderListaSubastas();
+    expect(await screen.findAllByTestId("subasta-card")).toHaveLength(3);
 
-        expect(screen.getByText("Subastas")).toBeInTheDocument();
-        expect(
-            screen.getByText("Explorá las subastas disponibles en el mercado.")
-        ).toBeInTheDocument();
+    expect(screen.getByText("Subasta 1")).toBeInTheDocument();
+    expect(screen.getByText("Subasta 2")).toBeInTheDocument();
+    expect(screen.getByText("Subasta 3")).toBeInTheDocument();
 
-        expect(
-            screen.getByText("Cargando subastas...")
-        ).toBeInTheDocument();
+    expect(
+      screen.getByText("Llegaste al final de las subastas."),
+    ).toBeInTheDocument();
+  });
 
-        expect(mocks.fetchSubastas).toHaveBeenCalledWith({
-            page: 1,
-            size: 10,
-            token: "token-test",
-        });
+  test("busca subastas por el nombre del jugador", async () => {
+    mocks.fetchSubastas.mockResolvedValue({
+      subastas: crearSubastas(1),
+    });
+    mocks.buscarSubastasPorNombre.mockResolvedValue({
+      subastas: [{ id: "messi", nombre: "Lionel Messi" }],
     });
 
-    test("muestra las subastas obtenidas correctamente", async () => {
-        mocks.fetchSubastas.mockResolvedValue({
-            subastas: crearSubastas(3),
-        });
+    renderListaSubastas();
+    await screen.findByText("Subasta 1");
 
-        renderListaSubastas();
-
-        expect(await screen.findAllByTestId("subasta-card")).toHaveLength(3);
-
-        expect(screen.getByText("Subasta 1")).toBeInTheDocument();
-        expect(screen.getByText("Subasta 2")).toBeInTheDocument();
-        expect(screen.getByText("Subasta 3")).toBeInTheDocument();
-
-        expect(
-            screen.getByText("Llegaste al final de las subastas.")
-        ).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText("Nombre del jugador"), {
+      target: { value: "Lionel Messi" },
     });
 
-    test("muestra un mensaje cuando no hay subastas disponibles", async () => {
-        mocks.fetchSubastas.mockResolvedValue({
-            subastas: [],
-        });
+    expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
+    expect(mocks.buscarSubastasPorNombre).toHaveBeenCalledWith({
+      page: 1,
+      size: 10,
+      user: "Lionel Messi",
+      jugador: "Lionel Messi",
+      token: "token-test",
+    });
+    expect(screen.queryByText("Subasta 1")).not.toBeInTheDocument();
+  });
 
-        renderListaSubastas();
-
-        expect(
-            await screen.findByText("No hay subastas disponibles.")
-        ).toBeInTheDocument();
-
-        expect(screen.queryAllByTestId("subasta-card")).toHaveLength(0);
+  test("ignora resultados de una búsqueda anterior que termina más tarde", async () => {
+    let resolveInitialRequest;
+    mocks.fetchSubastas.mockReturnValue(
+      new Promise((resolve) => {
+        resolveInitialRequest = resolve;
+      }),
+    );
+    mocks.buscarSubastasPorNombre.mockResolvedValue({
+      subastas: [{ id: "messi", nombre: "Lionel Messi" }],
     });
 
-    test("maneja una respuesta sin la propiedad subastas", async () => {
-        mocks.fetchSubastas.mockResolvedValue({});
+    renderListaSubastas();
 
-        renderListaSubastas();
-
-        expect(
-            await screen.findByText("No hay subastas disponibles.")
-        ).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText("Nombre del jugador"), {
+      target: { value: "Messi" },
     });
 
-    test("muestra un error cuando falla la carga de subastas", async () => {
-        mocks.fetchSubastas.mockRejectedValue(
-            new Error("Error al conectar con el servidor")
-        );
+    expect(await screen.findByText("Lionel Messi")).toBeInTheDocument();
 
-        renderListaSubastas();
-
-        expect(
-            await screen.findByText("Error al conectar con el servidor")
-        ).toBeInTheDocument();
-
-        expect(
-            screen.getByRole("button", { name: "Reintentar" })
-        ).toBeInTheDocument();
-
-        expect(screen.queryByText("Cargando subastas...")).not.toBeInTheDocument();
+    await act(async () => {
+      resolveInitialRequest({ subastas: crearSubastas(1) });
     });
 
-    test("muestra el mensaje predeterminado cuando ocurre un error sin mensaje", async () => {
-        mocks.fetchSubastas.mockRejectedValue({});
+    expect(screen.getByText("Lionel Messi")).toBeInTheDocument();
+    expect(screen.queryByText("Subasta 1")).not.toBeInTheDocument();
+  });
 
-        renderListaSubastas();
-
-        expect(
-            await screen.findByText(
-                "Ocurrió un error al cargar las subastas."
-            )
-        ).toBeInTheDocument();
+  test("muestra un mensaje cuando no hay subastas disponibles", async () => {
+    mocks.fetchSubastas.mockResolvedValue({
+      subastas: [],
     });
 
-    test("permite reintentar la carga después de un error", async () => {
-        mocks.fetchSubastas
-            .mockRejectedValueOnce(new Error("Error temporal"))
-            .mockResolvedValueOnce({
-                subastas: crearSubastas(2),
-            });
+    renderListaSubastas();
 
-        renderListaSubastas();
+    expect(
+      await screen.findByText("No hay subastas disponibles."),
+    ).toBeInTheDocument();
 
-        fireEvent.click(
-            await screen.findByRole("button", { name: "Reintentar" })
-        );
+    expect(screen.queryAllByTestId("subasta-card")).toHaveLength(0);
+  });
 
-        expect(await screen.findAllByTestId("subasta-card")).toHaveLength(2);
+  test("maneja una respuesta sin la propiedad subastas", async () => {
+    mocks.fetchSubastas.mockResolvedValue({});
 
-        expect(mocks.fetchSubastas).toHaveBeenCalledTimes(2);
+    renderListaSubastas();
 
-        expect(mocks.fetchSubastas).toHaveBeenLastCalledWith({
-            page: 1,
-            size: 10,
-            token: "token-test",
-        });
+    expect(
+      await screen.findByText("No hay subastas disponibles."),
+    ).toBeInTheDocument();
+  });
+
+  test("muestra un error cuando falla la carga de subastas", async () => {
+    mocks.fetchSubastas.mockRejectedValue(
+      new Error("Error al conectar con el servidor"),
+    );
+
+    renderListaSubastas();
+
+    expect(
+      await screen.findByText("Error al conectar con el servidor"),
+    ).toBeInTheDocument();
+
+    expect(
+      screen.getByRole("button", { name: "Reintentar" }),
+    ).toBeInTheDocument();
+
+    expect(screen.queryByText("Cargando subastas...")).not.toBeInTheDocument();
+  });
+
+  test("muestra el mensaje predeterminado cuando ocurre un error sin mensaje", async () => {
+    mocks.fetchSubastas.mockRejectedValue({});
+
+    renderListaSubastas();
+
+    expect(
+      await screen.findByText("Ocurrió un error al cargar las subastas."),
+    ).toBeInTheDocument();
+  });
+
+  test("permite reintentar la carga después de un error", async () => {
+    mocks.fetchSubastas
+      .mockRejectedValueOnce(new Error("Error temporal"))
+      .mockResolvedValueOnce({
+        subastas: crearSubastas(2),
+      });
+
+    renderListaSubastas();
+
+    fireEvent.click(await screen.findByRole("button", { name: "Reintentar" }));
+
+    expect(await screen.findAllByTestId("subasta-card")).toHaveLength(2);
+
+    expect(mocks.fetchSubastas).toHaveBeenCalledTimes(2);
+
+    expect(mocks.fetchSubastas).toHaveBeenLastCalledWith({
+      page: 1,
+      size: 10,
+      token: "token-test",
+    });
+  });
+
+  test("configura el IntersectionObserver para detectar el scroll", async () => {
+    mocks.fetchSubastas.mockResolvedValue({
+      subastas: crearSubastas(10),
     });
 
-    test("configura el IntersectionObserver para detectar el scroll", async () => {
-        mocks.fetchSubastas.mockResolvedValue({
-            subastas: crearSubastas(10),
-        });
+    renderListaSubastas();
 
-        renderListaSubastas();
+    await screen.findAllByTestId("subasta-card");
 
-        await screen.findAllByTestId("subasta-card");
-
-        await waitFor(() => {
-            expect(observers).toHaveLength(1);
-        });
-
-        expect(observers[0].observe).toHaveBeenCalledTimes(1);
-        expect(observers[0].options).toEqual({
-            rootMargin: "200px",
-            threshold: 0,
-        });
+    await waitFor(() => {
+      expect(observers).toHaveLength(1);
     });
 
-    test("carga la siguiente página cuando el sentinel es visible", async () => {
-        mocks.fetchSubastas
-            .mockResolvedValueOnce({
-                subastas: crearSubastas(10),
-            })
-            .mockResolvedValueOnce({
-                subastas: crearSubastas(5, 11),
-            });
+    expect(observers[0].observe).toHaveBeenCalledTimes(1);
+    expect(observers[0].options).toEqual({
+      rootMargin: "200px",
+      threshold: 0,
+    });
+  });
 
-        renderListaSubastas();
+  test("carga la siguiente página cuando el sentinel es visible", async () => {
+    mocks.fetchSubastas
+      .mockResolvedValueOnce({
+        subastas: crearSubastas(10),
+      })
+      .mockResolvedValueOnce({
+        subastas: crearSubastas(5, 11),
+      });
 
-        expect(await screen.findAllByTestId("subasta-card")).toHaveLength(10);
+    renderListaSubastas();
 
-        await waitFor(() => {
-            expect(observers.length).toBeGreaterThan(0);
-        });
+    expect(await screen.findAllByTestId("subasta-card")).toHaveLength(10);
 
-        act(() => {
-            observers[0].trigger(true);
-        });
-
-        await waitFor(() => {
-            expect(mocks.fetchSubastas).toHaveBeenCalledTimes(2);
-        });
-
-        expect(mocks.fetchSubastas).toHaveBeenLastCalledWith({
-            page: 2,
-            size: 10,
-            token: "token-test",
-        });
-
-        expect(await screen.findAllByTestId("subasta-card")).toHaveLength(15);
-
-        expect(
-            screen.getByText("Llegaste al final de las subastas.")
-        ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(observers.length).toBeGreaterThan(0);
     });
 
-    test("no carga otra página cuando el sentinel no es visible", async () => {
-        mocks.fetchSubastas.mockResolvedValue({
-            subastas: crearSubastas(10),
-        });
-
-        renderListaSubastas();
-
-        await screen.findAllByTestId("subasta-card");
-
-        await waitFor(() => {
-            expect(observers).toHaveLength(1);
-        });
-
-        act(() => {
-            observers[0].trigger(false);
-        });
-
-        expect(mocks.fetchSubastas).toHaveBeenCalledTimes(1);
+    act(() => {
+      observers[0].trigger(true);
     });
 
-    test("desconecta el observer cuando deja de utilizarse", async () => {
-        mocks.fetchSubastas.mockResolvedValue({
-            subastas: crearSubastas(10),
-        });
-
-        const { unmount } = renderListaSubastas();
-
-        await screen.findAllByTestId("subasta-card");
-
-        await waitFor(() => {
-            expect(observers).toHaveLength(1);
-        });
-
-        const observer = observers[0];
-
-        unmount();
-
-        expect(observer.disconnect).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(mocks.fetchSubastas).toHaveBeenCalledTimes(2);
     });
 
-    test("no crea un observer cuando no hay más subastas", async () => {
-        mocks.fetchSubastas.mockResolvedValue({
-            subastas: crearSubastas(5),
-        });
-
-        renderListaSubastas();
-
-        await screen.findAllByTestId("subasta-card");
-
-        expect(
-            screen.getByText("Llegaste al final de las subastas.")
-        ).toBeInTheDocument();
-
-        expect(observers).toHaveLength(0);
+    expect(mocks.fetchSubastas).toHaveBeenLastCalledWith({
+      page: 2,
+      size: 10,
+      token: "token-test",
     });
 
-    test("no vuelve a solicitar páginas cuando ya se alcanzó el final", async () => {
-        mocks.fetchSubastas.mockResolvedValue({
-            subastas: crearSubastas(5),
-        });
+    expect(await screen.findAllByTestId("subasta-card")).toHaveLength(15);
 
-        renderListaSubastas();
+    expect(
+      screen.getByText("Llegaste al final de las subastas."),
+    ).toBeInTheDocument();
+  });
 
-        await screen.findAllByTestId("subasta-card");
-
-        expect(mocks.fetchSubastas).toHaveBeenCalledTimes(1);
-
-        expect(observers).toHaveLength(0);
+  test("no carga otra página cuando el sentinel no es visible", async () => {
+    mocks.fetchSubastas.mockResolvedValue({
+      subastas: crearSubastas(10),
     });
+
+    renderListaSubastas();
+
+    await screen.findAllByTestId("subasta-card");
+
+    await waitFor(() => {
+      expect(observers).toHaveLength(1);
+    });
+
+    act(() => {
+      observers[0].trigger(false);
+    });
+
+    expect(mocks.fetchSubastas).toHaveBeenCalledTimes(1);
+  });
+
+  test("desconecta el observer cuando deja de utilizarse", async () => {
+    mocks.fetchSubastas.mockResolvedValue({
+      subastas: crearSubastas(10),
+    });
+
+    const { unmount } = renderListaSubastas();
+
+    await screen.findAllByTestId("subasta-card");
+
+    await waitFor(() => {
+      expect(observers).toHaveLength(1);
+    });
+
+    const observer = observers[0];
+
+    unmount();
+
+    expect(observer.disconnect).toHaveBeenCalled();
+  });
+
+  test("no crea un observer cuando no hay más subastas", async () => {
+    mocks.fetchSubastas.mockResolvedValue({
+      subastas: crearSubastas(5),
+    });
+
+    renderListaSubastas();
+
+    await screen.findAllByTestId("subasta-card");
+
+    expect(
+      screen.getByText("Llegaste al final de las subastas."),
+    ).toBeInTheDocument();
+
+    expect(observers).toHaveLength(0);
+  });
+
+  test("no vuelve a solicitar páginas cuando ya se alcanzó el final", async () => {
+    mocks.fetchSubastas.mockResolvedValue({
+      subastas: crearSubastas(5),
+    });
+
+    renderListaSubastas();
+
+    await screen.findAllByTestId("subasta-card");
+
+    expect(mocks.fetchSubastas).toHaveBeenCalledTimes(1);
+
+    expect(observers).toHaveLength(0);
+  });
 });

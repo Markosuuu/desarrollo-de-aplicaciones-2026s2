@@ -63,19 +63,26 @@ export async function fetchPlayer(id, token) {
   return payload;
 }
 
-export async function getRanking({ page = 1, perPage = 50, token } = {}) {
+export async function getRanking({
+  page = 1,
+  perPage = 50,
+  nombre = '',
+  token,
+} = {}) {
   const params = new URLSearchParams();
 
   params.set('page', String(page));
   params.set('perPage', String(perPage));
 
-
   const queryString = params.toString();
   const response = await fetch(`${API_BASE_URL}/players/ranking?${queryString}`, {
+    method: 'POST',
     headers: {
       Accept: 'application/json',
+      'Content-Type': 'application/json',
       Authorization: 'Bearer '+token
     },
+    body: JSON.stringify({ nombre }),
   });
 
   const payload = await response.json().catch(() => ({}));

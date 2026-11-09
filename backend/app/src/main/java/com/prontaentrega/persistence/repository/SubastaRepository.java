@@ -16,4 +16,6 @@ public interface SubastaRepository {
     List<UUID> findIdsVencidas(LocalDateTime fecha);
     void deleteAll();
     Long count();
+
+    Page<Subasta> findByNombre(String user, String jugador, Pageable pageable);
 }
