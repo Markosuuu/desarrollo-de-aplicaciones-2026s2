@@ -149,13 +149,13 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         assertEquals(2, tokensComprador.getTokensDisponibles());
         assertEquals(3, tokensVendedor.getTokensEnVenta());
 
-        List<Operacion> historialComprador = mercadoService.getTransaccionesById(buyer.getId());
-        assertEquals(1, historialComprador.size());
-        assertEquals(2, historialComprador.get(0).getCantidad());
-        assertEquals(0, historialComprador.get(0).getTotal().compareTo(BigDecimal.valueOf(10)));
-        assertEquals(buyer.getId(), historialComprador.get(0).getUsuario().getId());
-        assertEquals(seller.getId(), historialComprador.get(0).getContraparte().getId());
-        assertEquals(jugadorId, historialComprador.get(0).getJugador().getId());
+        Page<Operacion> historialComprador = mercadoService.getTransaccionesById(buyer.getId(), 1, 20);
+        assertEquals(1, historialComprador.getTotalElements());
+        assertEquals(2, historialComprador.getContent().get(0).getCantidad());
+        assertEquals(0, historialComprador.getContent().get(0).getTotal().compareTo(BigDecimal.valueOf(10)));
+        assertEquals(buyer.getId(), historialComprador.getContent().get(0).getUsuario().getId());
+        assertEquals(seller.getId(), historialComprador.getContent().get(0).getContraparte().getId());
+        assertEquals(jugadorId, historialComprador.getContent().get(0).getJugador().getId());
     }
 
     @Test
@@ -186,9 +186,9 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 3).getId();
         mercadoService.comprar(buyer.getId(), anuncioId);
 
-        List<Operacion> history = mercadoService.getTransaccionesById(seller.getId());
-        assertEquals(1, history.size());
-        assertEquals(TipoOperacion.VENTA, history.get(0).getTipo());
+        Page<Operacion> history = mercadoService.getTransaccionesById(seller.getId(), 1, 20);
+        assertEquals(1, history.getTotalElements());
+        assertEquals(TipoOperacion.VENTA, history.getContent().get(0).getTipo());
     }
 
     @Test
@@ -492,12 +492,12 @@ class MercadoServiceTest extends AbstractIntegrationTest {
 
         mercadoService.comprarSuper(buyer.getId(), jugadorId, 3);
 
-        List<Operacion> historial = mercadoService.getTransaccionesById(buyer.getId());
-        assertEquals(1, historial.size());
-        assertEquals(TipoOperacion.COMPRA, historial.get(0).getTipo());
-        assertEquals(3, historial.get(0).getCantidad());
-        assertEquals(0, historial.get(0).getTotal().compareTo(BigDecimal.valueOf(15)));
-        assertEquals(jugadorId, historial.get(0).getJugador().getId());
+        Page<Operacion> historial = mercadoService.getTransaccionesById(buyer.getId(), 1, 20);
+        assertEquals(1, historial.getTotalElements());
+        assertEquals(TipoOperacion.COMPRA, historial.getContent().get(0).getTipo());
+        assertEquals(3, historial.getContent().get(0).getCantidad());
+        assertEquals(0, historial.getContent().get(0).getTotal().compareTo(BigDecimal.valueOf(15)));
+        assertEquals(jugadorId, historial.getContent().get(0).getJugador().getId());
     }
 
     @Test
@@ -565,9 +565,9 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         inventarioUsuarioRepository.save(new InventarioUsuario(usuario, bolsa1, 5, 0));
         inventarioUsuarioRepository.save(new InventarioUsuario(usuario, bolsa2, 2, 1));
 
-        List<InventarioUsuario> inventario = mercadoService.getInventarioById(usuario.getId());
+        Page<InventarioUsuario> inventario = mercadoService.getInventarioById(usuario.getId(), 1, 20);
 
-        assertEquals(2, inventario.size());
+        assertEquals(2, inventario.getTotalElements());
     }
 
     @Test
@@ -578,23 +578,23 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         inventarioUsuarioRepository.save(new InventarioUsuario(usuario, bolsa, 5, 0));
         inventarioUsuarioRepository.save(new InventarioUsuario(otro, bolsa, 9, 0));
 
-        List<InventarioUsuario> inventario = mercadoService.getInventarioById(usuario.getId());
+        Page<InventarioUsuario> inventario = mercadoService.getInventarioById(usuario.getId(), 1, 20);
 
-        assertEquals(1, inventario.size());
-        assertEquals(5, inventario.getFirst().getTokensDisponibles());
+        assertEquals(1, inventario.getTotalElements());
+        assertEquals(5, inventario.getContent().getFirst().getTokensDisponibles());
     }
 
     @Test
     void obtenerElInventarioDeUnUsuarioVacio() {
         Usuario usuario = saveUser("Usuario", uniqueEmail("inventario-empty@test.com"));
 
-        assertTrue(mercadoService.getInventarioById(usuario.getId()).isEmpty());
+        assertTrue(mercadoService.getInventarioById(usuario.getId(), 1, 20).isEmpty());
     }
 
     @Test
     void consultarUnInventarioFallaSiElUsuarioNoExisteTest() {
         assertThrows(UsuarioNoEncontradoException.class,
-                () -> mercadoService.getInventarioById(UUID.randomUUID()));
+                () -> mercadoService.getInventarioById(UUID.randomUUID(), 1, 20));
     }
 
     private String uniqueEmail(String base) {
