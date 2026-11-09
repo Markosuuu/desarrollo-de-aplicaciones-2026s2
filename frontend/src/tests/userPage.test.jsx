@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import UserPage from "../pages/UserPage";
 
@@ -182,7 +188,11 @@ describe("UserPage", () => {
       },
     ]);
     mocks.fetchUserTransactions.mockResolvedValue([
-      { id: "incomplete-transaction", tipo: "COMPRA", creadaEn: "fecha-invalid" },
+      {
+        id: "incomplete-transaction",
+        tipo: "COMPRA",
+        creadaEn: "fecha-invalid",
+      },
       { id: "missing-transaction-fields", creadaEn: "" },
     ]);
 
@@ -194,7 +204,9 @@ describe("UserPage", () => {
     });
     expect(unnamedPlayerButtons[0]).toBeDisabled();
     fireEvent.click(unnamedPlayerButtons[1]);
-    expect(await screen.findByText(/Jugador — — créditos por token/)).toBeInTheDocument();
+    expect(
+      await screen.findByText(/Jugador — — créditos por token/),
+    ).toBeInTheDocument();
   });
 
   test("muestra el error de carga y permite volver a cargar los datos", async () => {
@@ -213,7 +225,9 @@ describe("UserPage", () => {
 
   test("muestra el error de carga genérico y la falta de usuario", async () => {
     mocks.useAuth.mockReturnValue({ token: "token-prueba" });
-    const fetchInventory = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchInventory = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     renderUserPage();
 
@@ -246,8 +260,12 @@ describe("UserPage", () => {
     renderUserPage();
 
     expect(await screen.findByText("Inventario vacío")).toBeInTheDocument();
-    expect(screen.getByText("No hay operaciones registradas")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Siguiente" })).not.toBeInTheDocument();
+    expect(
+      screen.getByText("No hay operaciones registradas"),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Siguiente" }),
+    ).not.toBeInTheDocument();
   });
 
   test("ignora resultados de carga recibidos después de desmontarse", async () => {
@@ -263,6 +281,9 @@ describe("UserPage", () => {
         resolveTransactions = resolve;
       }),
     );
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const { unmount } = renderUserPage();
     unmount();
@@ -271,6 +292,10 @@ describe("UserPage", () => {
       resolveInventory(inventory);
       resolveTransactions(transactions);
     });
+
+    expect(mocks.fetchUserInventory).toHaveBeenCalledTimes(1);
+    expect(mocks.fetchUserTransactions).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
   test("ignora errores de carga recibidos después de desmontarse", async () => {
@@ -286,15 +311,24 @@ describe("UserPage", () => {
         resolveTransactions = resolve;
       }),
     );
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const loadError = new Error("Fallo posterior al desmontaje");
 
     const { unmount } = renderUserPage();
     unmount();
 
     await act(async () => {
-      rejectInventory(new Error("Fallo posterior al desmontaje"));
+      rejectInventory(loadError);
       resolveTransactions(transactions);
     });
+
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error al cargar los datos del usuario:",
+      loadError,
+    );
   });
 
   test("página el inventario y el historial usando sus controles", async () => {
@@ -306,7 +340,13 @@ describe("UserPage", () => {
       hasPrevious: false,
     };
     const inventoryPage2 = {
-      content: [{ ...inventory[0], id: "inventory-2", jugador: { ...inventory[0].jugador, nombre: "Página dos" } }],
+      content: [
+        {
+          ...inventory[0],
+          id: "inventory-2",
+          jugador: { ...inventory[0].jugador, nombre: "Página dos" },
+        },
+      ],
       page: 2,
       totalPages: 2,
       hasNext: false,
@@ -320,7 +360,13 @@ describe("UserPage", () => {
       hasPrevious: false,
     };
     const transactionsPage2 = {
-      content: [{ ...transactions[0], id: "transaction-2", nombreJugador: "Operación dos" }],
+      content: [
+        {
+          ...transactions[0],
+          id: "transaction-2",
+          nombreJugador: "Operación dos",
+        },
+      ],
       page: 2,
       totalPages: 2,
       hasNext: false,
@@ -339,7 +385,9 @@ describe("UserPage", () => {
 
     expect(await screen.findAllByText("Lionel Messi")).toHaveLength(2);
     const nextButtons = screen.getAllByRole("button", { name: "Siguiente" });
-    expect(screen.getAllByRole("button", { name: "Anterior" })[0]).toBeDisabled();
+    expect(
+      screen.getAllByRole("button", { name: "Anterior" })[0],
+    ).toBeDisabled();
     fireEvent.click(nextButtons[0]);
 
     expect(await screen.findByText("Página dos")).toBeInTheDocument();
@@ -347,7 +395,9 @@ describe("UserPage", () => {
 
     expect(await screen.findByText("Operación dos")).toBeInTheDocument();
     expect(screen.getAllByText("2 / 2")).toHaveLength(2);
-    expect(screen.getAllByRole("button", { name: "Siguiente" })[0]).toBeDisabled();
+    expect(
+      screen.getAllByRole("button", { name: "Siguiente" })[0],
+    ).toBeDisabled();
 
     fireEvent.click(screen.getAllByRole("button", { name: "Anterior" })[0]);
     await waitFor(() => {
@@ -419,6 +469,8 @@ describe("UserPage", () => {
     );
     fireEvent.submit(screen.getByRole("dialog").querySelector("form"));
 
-    expect(await screen.findByText("No se pudo crear la oferta.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("No se pudo crear la oferta."),
+    ).toBeInTheDocument();
   });
 });

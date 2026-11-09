@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import MercadoPage from "../pages/MercadoPage";
 
@@ -98,10 +104,7 @@ describe("MercadoPage", () => {
       expect(screen.queryByText("Jude Bellingham")).not.toBeInTheDocument();
     });
 
-    fireEvent.change(
-      search,
-      { target: { value: "inexistente" } },
-    );
+    fireEvent.change(search, { target: { value: "inexistente" } });
 
     await waitFor(() => {
       expect(
@@ -228,6 +231,9 @@ describe("MercadoPage", () => {
         resolveListings = resolve;
       }),
     );
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
 
     const { unmount } = renderMarket();
     unmount();
@@ -235,6 +241,9 @@ describe("MercadoPage", () => {
     await act(async () => {
       resolveListings(listings);
     });
+
+    expect(mocks.fetchListings).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
   test("ignora errores recibidos después de desmontarse", async () => {
@@ -244,13 +253,22 @@ describe("MercadoPage", () => {
         rejectListings = reject;
       }),
     );
-    vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+    const loadError = new Error("Fallo posterior al desmontaje");
 
     const { unmount } = renderMarket();
     unmount();
 
     await act(async () => {
-      rejectListings(new Error("Fallo posterior al desmontaje"));
+      rejectListings(loadError);
     });
+
+    expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "Error al cargar los anuncios:",
+      loadError,
+    );
   });
 });
