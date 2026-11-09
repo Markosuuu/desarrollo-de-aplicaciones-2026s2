@@ -13,10 +13,21 @@ import { useNavigate, Link } from "react-router-dom";
 const PAGE_SIZE = 20;
 
 export default function HomePage() {
-  const { user, token } = useAuth();
+  const { token } = useAuth();
   const [players, setPlayers] = useState([]);
   const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchName, setSearchName] = useState("");
+  const [searchEquipo, setSearchEquipo] = useState("");
+  const [searchLiga, setSearchLiga] = useState("");
+
+  const LIGAS = [
+    "LaLiga",
+    "Bundesliga",
+    "Serie A",
+    "Premier League",
+    "Ligue 1",
+  ];
+
   const [pagination, setPagination] = useState({
     pagina: 1,
     porPagina: PAGE_SIZE,
@@ -36,7 +47,9 @@ export default function HomePage() {
     fetchPlayers({
       page,
       perPage: PAGE_SIZE,
-      nombre: searchTerm.trim() || undefined,
+      nombre: searchName.trim() || undefined,
+      equipo: searchEquipo.trim() || undefined,
+      liga: searchLiga || undefined,
       token: token,
     })
       .then((response) => {
@@ -74,35 +87,35 @@ export default function HomePage() {
     return () => {
       active = false;
     };
-  }, [page, searchTerm, token]);
+  }, [page, searchName, searchEquipo, searchLiga, token]);
 
   const filteredPlayers = useMemo(() => {
-    const normalized = searchTerm.trim().toLowerCase();
-
-    if (!normalized) {
-      return players;
-    }
+    const normalizedName = searchName.trim().toLowerCase();
+    const normalizedEquipo = searchEquipo.trim().toLowerCase();
 
     return players.filter((player) => {
-      const searchableText = [
-        player.nombre,
-        player.equipo,
-        player.liga,
-        player.posicion,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
+      const matchesName =
+        !normalizedName ||
+        player.nombre?.toLowerCase().includes(normalizedName);
 
-      return searchableText.includes(normalized);
+      const matchesEquipo =
+        !normalizedEquipo ||
+        player.equipo?.toLowerCase().includes(normalizedEquipo);
+
+      return matchesName && matchesEquipo;
     });
-  }, [players, searchTerm]);
+  }, [players, searchName, searchEquipo]);
 
   const totalPages = Math.max(pagination.totalPaginas || 1, 1);
 
-  const handleSearch = (event) => {
+  const handleSearchName = (event) => {
     setPage(1);
-    setSearchTerm(event.target.value);
+    setSearchName(event.target.value);
+  };
+
+  const handleSearchEquipo = (event) => {
+    setPage(1);
+    setSearchEquipo(event.target.value);
   };
 
   const handlePageChange = (nextPage) => {
@@ -137,22 +150,48 @@ export default function HomePage() {
         </header>
 
         <section className="home-card catalog-card">
+          <div>
+            <h2>Catálogo de jugadores</h2>
+          </div>
           <div className="catalog-header">
-            <div>
-              <p className="welcome">
-                Bienvenido/a{user?.nombre ? `, ${user.nombre}` : ""}
-              </p>
-              <h2>Catálogo de jugadores</h2>
-            </div>
+            
 
             <label className="search-field" aria-label="Buscar jugadores">
-              <span className="search-label">Buscar</span>
+              <span className="search-label">Buscar por nombre</span>
               <input
                 type="search"
-                value={searchTerm}
-                onChange={handleSearch}
-                placeholder="Nombre, equipo o liga"
+                value={searchName}
+                onChange={handleSearchName}
+                placeholder="Nombre"
               />
+            </label>
+            <label className="search-field" aria-label="Buscar jugadores">
+              <span className="search-label">Buscar por equipo</span>
+              <input
+                type="search"
+                value={searchEquipo}
+                onChange={handleSearchEquipo}
+                placeholder="Equipo"
+              />
+            </label>
+            <label className="search-field">
+              <span className="search-label">Filtrar por Liga</span>
+
+              <select
+                value={searchLiga}
+                onChange={(event) => {
+                  setPage(1);
+                  setSearchLiga(event.target.value);
+                }}
+              >
+                <option value="">Todas las ligas</option>
+
+                {LIGAS.map((liga) => (
+                  <option key={liga} value={liga}>
+                    {liga}
+                  </option>
+                ))}
+              </select>
             </label>
           </div>
 

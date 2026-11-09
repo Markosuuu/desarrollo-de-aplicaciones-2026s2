@@ -17,8 +17,8 @@ export async function fetchPlayers({ page = 1, perPage = 20, nombre, equipo, lig
   const safeNombre = toSafeTerm(nombre);
   const safeEquipo = toSafeTerm(equipo);
   
-  if (safeNombre) params.set('nombre', encodeURIComponent(safeNombre));
-  if (safeEquipo) params.set('equipo', encodeURIComponent(safeEquipo));
+  if (safeNombre) params.set('nombre', safeNombre);
+  if (safeEquipo) params.set('equipo', safeEquipo);
   if (liga) params.set('liga', liga);
 
   const queryString = params.toString();

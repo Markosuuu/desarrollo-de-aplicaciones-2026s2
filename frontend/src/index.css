@@ -293,7 +293,7 @@ body[data-theme="dark"] .home-card {
 .catalog-header {
   display: flex;
   justify-content: space-between;
-  align-items: end;
+  align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -316,6 +316,8 @@ body[data-theme="dark"] .home-card {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   opacity: 0.7;
+  align-self: flex-start;
+  margin-left: 10px;
 }
 
 .search-field input {
@@ -327,6 +329,21 @@ body[data-theme="dark"] .home-card {
 }
 
 body[data-theme="dark"] .search-field input {
+  background: rgba(15, 23, 42, 0.8);
+  color: #f8fafc;
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+select {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0.8rem 0.9rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: #111827;
+  font-size: large;
+}
+
+body[data-theme="dark"] select {
   background: rgba(15, 23, 42, 0.8);
   color: #f8fafc;
   border-color: rgba(148, 163, 184, 0.5);
