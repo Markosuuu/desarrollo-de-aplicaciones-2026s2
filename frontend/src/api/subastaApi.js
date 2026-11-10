@@ -1,18 +1,21 @@
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api";
 
 export async function fetchSubastas({ page = 1, size = 10, token } = {}) {
   const params = new URLSearchParams();
 
-  params.set('page', String(page));
-  params.set('size', String(size));
+  params.set("page", String(page));
+  params.set("size", String(size));
 
-  const response = await fetch(`${API_BASE_URL}/subastas?${params.toString()}`, {
-    headers: {
-      Accept: 'application/json',
-      Authorization: `Bearer ${token}`,
+  const response = await fetch(
+    `${API_BASE_URL}/subastas?${params.toString()}`,
+    {
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${token}`,
+      },
     },
-  });
+  );
 
   const payload = await response.json().catch(() => ({}));
 
@@ -20,7 +23,7 @@ export async function fetchSubastas({ page = 1, size = 10, token } = {}) {
     const message =
       payload?.error?.message ||
       payload?.message ||
-      'No se pudieron cargar las subastas.';
+      "No se pudieron cargar las subastas.";
 
     throw new Error(message);
   }
@@ -37,23 +40,23 @@ export async function buscarSubastasPorNombre({
 } = {}) {
   const params = new URLSearchParams();
 
-  params.set('page', String(page));
-  params.set('size', String(size));
+  params.set("page", String(page));
+  params.set("size", String(size));
 
   const response = await fetch(
     `${API_BASE_URL}/subastas/buscarPorNombre?${params.toString()}`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
+        Accept: "application/json",
+        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ user, jugador }),
     },
   );
 
-  return handleResponse(response, 'No se pudieron buscar las subastas.');
+  return handleResponse(response, "No se pudieron buscar las subastas.");
 }
 
 async function handleResponse(response, defaultMessage) {
@@ -61,9 +64,7 @@ async function handleResponse(response, defaultMessage) {
 
   if (!response.ok) {
     const message =
-      payload?.error?.message ||
-      payload?.message ||
-      defaultMessage;
+      payload?.error?.message || payload?.message || defaultMessage;
 
     throw new Error(message);
   }
@@ -74,32 +75,32 @@ async function handleResponse(response, defaultMessage) {
 export async function fetchSubasta(id, token) {
   const response = await fetch(`${API_BASE_URL}/subastas/${id}`, {
     headers: {
-      Accept: 'application/json',
+      Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return handleResponse(response, 'No se pudo cargar la subasta.');
+  return handleResponse(response, "No se pudo cargar la subasta.");
 }
 
 export async function cerrarSubasta(id, token) {
   const response = await fetch(`${API_BASE_URL}/subastas/${id}/cerrar`, {
-    method: 'PATCH',
+    method: "PATCH",
     headers: {
-      Accept: 'application/json',
+      Accept: "application/json",
       Authorization: `Bearer ${token}`,
     },
   });
 
-  return handleResponse(response, 'No se pudo cerrar la subasta.');
+  return handleResponse(response, "No se pudo cerrar la subasta.");
 }
 
 export async function ofertarSubasta({ subastaId, puja, token }) {
   const response = await fetch(`${API_BASE_URL}/subastas/ofertar`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
+      Accept: "application/json",
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
@@ -109,5 +110,5 @@ export async function ofertarSubasta({ subastaId, puja, token }) {
     }),
   });
 
-  return handleResponse(response, 'No se pudo realizar la oferta.');
+  return handleResponse(response, "No se pudo realizar la oferta.");
 }

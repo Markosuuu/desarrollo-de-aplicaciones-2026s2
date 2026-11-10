@@ -126,13 +126,11 @@ export default function OfertaPage() {
       quantityToBuy <= 0 ||
       quantityToBuy > availableTokens
     ) {
-      // setActionError(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
       toast.error(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
       return;
     }
 
     if (credits !== null && purchaseTotal > Number(credits)) {
-      // setActionError("No tienes créditos suficientes para esa cantidad.");
       toast.error("No tienes créditos suficientes para esa cantidad");
       return;
     }
@@ -144,8 +142,7 @@ export default function OfertaPage() {
       toast.success("Compra exitosa!");
     } catch (buyError) {
       console.error("Error al comprar el anuncio:", buyError);
-      toast.error(buyError.message);
-      // setActionError(buyError.message || "No se pudo completar la compra.");
+      toast.error(buyError.message || "No se pudo completar la compra");
     } finally {
       setSubmitting(false);
     }

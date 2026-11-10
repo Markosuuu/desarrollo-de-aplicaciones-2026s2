@@ -107,7 +107,7 @@ export default function SubastaPage() {
 
       await loadSubasta();
     } catch (err) {
-      toast.error(err.message || "No se pudo cerrar la subasta");
+      toast.error(err.message || "No se pudo realizar la oferta");
     } finally {
       setOffering(false);
     }
