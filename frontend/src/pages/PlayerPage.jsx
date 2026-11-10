@@ -1,173 +1,168 @@
 import { useParams } from "react-router-dom";
-import { fetchPlayer, fetchPlayerQuotesHistory} from "../api/playerApi";
+import { fetchPlayer, fetchPlayerQuotesHistory } from "../api/playerApi";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import PlayerRadar from "../components/PlayerRadarStats";
-import "../styles/playerPage.css"
+import "../styles/playerPage.css";
 
-import QuoteHistoryChart from '../components/QuoteHistoryChart';
+import QuoteHistoryChart from "../components/QuoteHistoryChart";
 
 export default function PlayerPage() {
-    const [player, setPlayer] = useState(null);
-    const [error, setError] = useState("");
-    const [loading, setLoading] = useState(true);
-    const { token } = useAuth();
-    const { id } = useParams();
-    const [retry, setRetry] = useState(0);
-    const [quoteHistory, setQuoteHistory] = useState([]);
+  const [player, setPlayer] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
+  const { token } = useAuth();
+  const { id } = useParams();
+  const [retry, setRetry] = useState(0);
+  const [quoteHistory, setQuoteHistory] = useState([]);
 
-    useEffect(() => {
-        let active = true;
+  useEffect(() => {
+    let active = true;
 
-        const loadPlayer = async () => {
-            setLoading(true);
-            setError("");
+    const loadPlayer = async () => {
+      setLoading(true);
+      setError("");
 
-            try {
-                const response = await fetchPlayer(id, token);
-                const history = await fetchPlayerQuotesHistory(id, token)
-                if (active) {
-                    setPlayer(response);
-                    setQuoteHistory(history)
+      try {
+        const response = await fetchPlayer(id, token);
+        const history = await fetchPlayerQuotesHistory(id, token);
+        if (active) {
+          setPlayer(response);
+          setQuoteHistory(history);
+        }
+      } catch (error) {
+        if (active) {
+          setError(
+            error.message || "No se pudo cargar la información del jugador.",
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    };
 
-                }
-            } catch (error) {
-                if (active) {
-                    setError(
-                        error.message || "No se pudo cargar la información del jugador."
-                    );
-                }
-            } finally {
-                if (active) {
-                    setLoading(false);
-                }
-            }
-        };
+    void loadPlayer();
 
-        void loadPlayer();
+    return () => {
+      active = false;
+    };
+  }, [id, token, retry]);
 
-        return () => {
-            active = false;
-        };
-    }, [id, token, retry]);
+  if (loading) {
+    return <div>Cargando jugador...</div>;
+  }
 
-    if (loading) {
-        return <div>Cargando jugador...</div>;
-    }
-
-    if (error) {
-        return (
-            <div className="playerPage-error">
-                <h2>No se pudo cargar el jugador</h2>
-                <button onClick={() => setRetry(prev => prev + 1)}>
-                    Reintentar
-                </button>
-            </div>
-        );
-    }
-
-    if (!player) {
-        return <div>No se encontró el jugador.</div>;
-    }
-    
+  if (error) {
     return (
-        <div className="playerPage-container">
-            <h1 className="eyebrow texto-locura playerPage-titulo">
-                {player.nombre}
-            </h1>
-
-            <div className="playerPage-stats">
-                <section className="playerPage-card playerPage-info">
-                    <h2 className="playerPage-equipo">Equipo: {player.equipo}</h2>
-
-                    <div className="playerPage-details">
-                        <p>
-                            <span>Posición</span>
-                            <strong>{player.posicion}</strong>
-                        </p>
-                        <p>
-                            <span>Edad</span>
-                            <strong>{player.edad} años</strong>
-                        </p>
-                        <p>
-                            <span>Altura</span>
-                            <strong>{player.altura} cm</strong>
-                        </p>
-                        <p>
-                            <span>Peso</span>
-                            <strong>{player.peso} kg</strong>
-                        </p>
-                        <p>
-                            <span>Minutos jugados</span>
-                            <strong>{player.minutosJugados}</strong>
-                        </p>
-                    </div>
-                </section>
-
-                <section className="playerPage-card playerPage-chart">
-                    <h2 className="playerPage-equipo">
-                        Estadísticas por partido
-                    </h2>
-                    <PlayerRadar
-                        disparos={player.disparosPorPartido}
-                        pases={player.keyPassesPorPartido}
-                        regates={player.dribblesGanadosPorPartido}
-                        faltas={player.faltasCometidasPorPartido}
-                        goles={player.goles}
-                        asist={player.asistencias}
-                        max={Math.max(
-                            player.disparosPorPartido,
-                            player.keyPassesPorPartido,
-                            player.dribblesGanadosPorPartido,
-                            player.faltasCometidasPorPartido,
-                            player.goles,
-                            player.asistencias,
-                            1
-                        )}
-                    />
-                </section>
-            </div>
-            <section className="playerPage-card playerPage-info">
-                <h2 className="playerPage-quote-section-title">
-                    Datos de cotización
-                </h2>
-
-                <div className="playerPage-quote-content">
-                    <div className="playerPage-quote-content">
-                        <div className="playerPage-quote-details">
-                            <p>
-                                <span>Cotización actual:</span>
-                                <strong>{player.cotizacion}</strong>
-                            </p>
-
-                            <p>
-                                <span>Tokens restantes:</span>
-                                <strong>{player.tokensRestantes}</strong>
-                            </p>
-
-                            <p>
-                                <span>Ultima actualizacion:</span>
-                                <strong>
-                                    {player.fechaActualizacion
-                                        ? new Date(player.fechaActualizacion).toLocaleDateString("es-AR", {
-                                            day: "2-digit",
-                                            month: "2-digit",
-                                            year: "numeric",
-                                        })
-                                        : "Sin datos"}
-                                </strong>
-                            </p>
-                        </div>
-
-                        <div className="playerPage-quote-chart">
-                            <div className="playerPage-quote-chart">
-                                <QuoteHistoryChart data={quoteHistory} />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
+      <div className="playerPage-error">
+        <h2>No se pudo cargar el jugador</h2>
+        <button onClick={() => setRetry((prev) => prev + 1)}>Reintentar</button>
+      </div>
     );
+  }
 
+  if (!player) {
+    return <div>No se encontró el jugador.</div>;
+  }
+
+  return (
+    <div className="playerPage-container">
+      <h1 className="eyebrow texto-locura playerPage-titulo">
+        {player.nombre}
+      </h1>
+
+      <div className="playerPage-stats">
+        <section className="playerPage-card playerPage-info">
+          <h2 className="playerPage-equipo">Equipo: {player.equipo}</h2>
+
+          <div className="playerPage-details">
+            <p>
+              <span>Posición</span>
+              <strong>{player.posicion}</strong>
+            </p>
+            <p>
+              <span>Edad</span>
+              <strong>{player.edad} años</strong>
+            </p>
+            <p>
+              <span>Altura</span>
+              <strong>{player.altura} cm</strong>
+            </p>
+            <p>
+              <span>Peso</span>
+              <strong>{player.peso} kg</strong>
+            </p>
+            <p>
+              <span>Minutos jugados</span>
+              <strong>{player.minutosJugados}</strong>
+            </p>
+          </div>
+        </section>
+
+        <section className="playerPage-card playerPage-chart">
+          <h2 className="playerPage-equipo">Estadísticas por partido</h2>
+          <PlayerRadar
+            disparos={player.disparosPorPartido}
+            pases={player.keyPassesPorPartido}
+            regates={player.dribblesGanadosPorPartido}
+            faltas={player.faltasCometidasPorPartido}
+            goles={player.goles}
+            asist={player.asistencias}
+            max={Math.max(
+              player.disparosPorPartido,
+              player.keyPassesPorPartido,
+              player.dribblesGanadosPorPartido,
+              player.faltasCometidasPorPartido,
+              player.goles,
+              player.asistencias,
+              1,
+            )}
+          />
+        </section>
+      </div>
+      <section className="playerPage-card playerPage-info">
+        <h2 className="playerPage-quote-section-title">Datos de cotización</h2>
+
+        <div className="playerPage-quote-content">
+          <div className="playerPage-quote-content">
+            <div className="playerPage-quote-details">
+              <p>
+                <span>Cotización actual:</span>
+                <strong>{player.cotizacion}</strong>
+              </p>
+
+              <p>
+                <span>Tokens restantes:</span>
+                <strong>{player.tokensRestantes}</strong>
+              </p>
+
+              <p>
+                <span>Ultima actualizacion:</span>
+                <strong>
+                  {player.fechaActualizacion
+                    ? new Date(player.fechaActualizacion).toLocaleDateString(
+                        "es-AR",
+                        {
+                          day: "2-digit",
+                          month: "2-digit",
+                          year: "numeric",
+                        },
+                      )
+                    : "Sin datos"}
+                </strong>
+              </p>
+            </div>
+
+            <div className="playerPage-quote-chart">
+              <div className="playerPage-quote-chart">
+                <QuoteHistoryChart data={quoteHistory} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
 }
