@@ -4,6 +4,7 @@ import { buyListing, cancelListing, fetchListings } from "../api/marketApi";
 import { fetchUserInventory } from "../api/userApi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/mercadoPage.css";
+import { toast } from "react-toastify";
 
 const numberFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 2,
@@ -27,7 +28,6 @@ export default function OfertaPage() {
   const [creditsError, setCreditsError] = useState("");
   const [loading, setLoading] = useState(!initialListing);
   const [error, setError] = useState("");
-  const [actionError, setActionError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [buyDialogOpen, setBuyDialogOpen] = useState(false);
   const [buyQuantity, setBuyQuantity] = useState("1");
@@ -115,7 +115,6 @@ export default function OfertaPage() {
   const openBuyDialog = () => {
     if (!listing || isOwner || !isPending || submitting) return;
     setBuyQuantity("1");
-    setActionError("");
     setBuyDialogOpen(true);
   };
 
@@ -128,23 +127,23 @@ export default function OfertaPage() {
       quantityToBuy <= 0 ||
       quantityToBuy > availableTokens
     ) {
-      setActionError(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
+      toast.error(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
       return;
     }
 
     if (credits !== null && purchaseTotal > Number(credits)) {
-      setActionError("No tienes créditos suficientes para esa cantidad.");
+      toast.error("No tienes créditos suficientes para esa cantidad");
       return;
     }
 
     setSubmitting(true);
-    setActionError("");
     try {
       await buyListing(listing.id, quantityToBuy, token);
       void navigate("/profile", { replace: true });
+      toast.success("Compra exitosa!");
     } catch (buyError) {
       console.error("Error al comprar el anuncio:", buyError);
-      setActionError(buyError.message || "No se pudo completar la compra.");
+      toast.error(buyError.message || "No se pudo completar la compra");
     } finally {
       setSubmitting(false);
     }
@@ -159,13 +158,13 @@ export default function OfertaPage() {
     if (!confirmed) return;
 
     setSubmitting(true);
-    setActionError("");
     try {
       await cancelListing(listing.id, token);
+      toast.success("Anuncio cancelado exitosamente");
       setListing((current) => ({ ...current, estado: "CANCELADA" }));
     } catch (cancelError) {
       console.error("Error al cancelar el anuncio:", cancelError);
-      setActionError(cancelError.message || "No se pudo cancelar la oferta.");
+      toast.error(cancelError.message || "No se pudo cancelar la oferta");
     } finally {
       setSubmitting(false);
     }
@@ -286,11 +285,6 @@ export default function OfertaPage() {
                   </button>
                 </div>
               )}
-              {actionError && (
-                <p className="offer-inline-error" role="alert">
-                  {actionError}
-                </p>
-              )}
               {offerAction}
             </>
           )}
@@ -324,7 +318,6 @@ export default function OfertaPage() {
                 value={buyQuantity}
                 onChange={(event) => {
                   setBuyQuantity(event.target.value);
-                  setActionError("");
                 }}
                 required
               />
@@ -334,11 +327,6 @@ export default function OfertaPage() {
               <p className="offer-buy-balance">
                 Créditos disponibles: {formatNumber(credits)}
               </p>
-              {actionError && (
-                <p className="offer-inline-error" role="alert">
-                  {actionError}
-                </p>
-              )}
               <div className="offer-buy-actions">
                 <button
                   type="button"

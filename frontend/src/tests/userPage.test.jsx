@@ -14,6 +14,8 @@ const mocks = vi.hoisted(() => ({
   fetchUserInventory: vi.fn(),
   fetchUserTransactions: vi.fn(),
   useAuth: vi.fn(),
+  toastError: vi.fn(),
+  toastSuccess: vi.fn(),
 }));
 
 vi.mock("../api/marketApi", () => ({
@@ -31,6 +33,10 @@ vi.mock("../context/AuthContext", () => ({
 
 vi.mock("@blobatar/react", () => ({
   Blobatar: () => <div data-testid="blobatar" />,
+}));
+
+vi.mock("react-toastify", () => ({
+  toast: { error: mocks.toastError, success: mocks.toastSuccess },
 }));
 
 const inventory = [
@@ -433,9 +439,12 @@ describe("UserPage", () => {
     for (const invalidQuantity of ["1.5", "0", "8"]) {
       fireEvent.change(quantity, { target: { value: invalidQuantity } });
       fireEvent.submit(form);
-      expect(
-        await screen.findByText("Ingresa una cantidad entre 1 y 7."),
-      ).toBeInTheDocument();
+
+      await waitFor(() =>
+        expect(mocks.toastError).toHaveBeenCalledWith(
+          "Ingresa una cantidad entre 1 y 7",
+        ),
+      );
     }
 
     expect(mocks.createSellOrder).not.toHaveBeenCalled();
@@ -454,7 +463,9 @@ describe("UserPage", () => {
     );
     fireEvent.submit(screen.getByRole("dialog").querySelector("form"));
 
-    expect(await screen.findByText("Oferta rechazada")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(mocks.toastError).toHaveBeenCalledWith("Oferta rechazada"),
+    );
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
@@ -469,8 +480,10 @@ describe("UserPage", () => {
     );
     fireEvent.submit(screen.getByRole("dialog").querySelector("form"));
 
-    expect(
-      await screen.findByText("No se pudo crear la oferta."),
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(mocks.toastError).toHaveBeenCalledWith(
+        "Error al crear el anuncio de venta",
+      ),
+    );
   });
 });

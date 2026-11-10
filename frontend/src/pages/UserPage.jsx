@@ -6,6 +6,7 @@ import { createSellOrder } from "../api/marketApi";
 import { fetchUserInventory, fetchUserTransactions } from "../api/userApi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/userPage.css";
+import { toast } from "react-toastify";
 
 const numberFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 2,
@@ -85,7 +86,6 @@ function UserPage() {
   const [retry, setRetry] = useState(0);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
   const [sellQuantity, setSellQuantity] = useState("");
-  const [sellError, setSellError] = useState("");
   const [creatingOffer, setCreatingOffer] = useState(false);
 
   useEffect(() => {
@@ -103,8 +103,14 @@ function UserPage() {
 
       try {
         const [inventoryResponse, transactionsResponse] = await Promise.all([
-          fetchUserInventory(user.id, token, { page: inventoryPage, size: PAGE_SIZE }),
-          fetchUserTransactions(user.id, token, { page: transactionsPage, size: PAGE_SIZE }),
+          fetchUserInventory(user.id, token, {
+            page: inventoryPage,
+            size: PAGE_SIZE,
+          }),
+          fetchUserTransactions(user.id, token, {
+            page: transactionsPage,
+            size: PAGE_SIZE,
+          }),
         ]);
 
         if (!active) return;
@@ -146,13 +152,11 @@ function UserPage() {
   const openSellDialog = (item) => {
     setSelectedInventoryItem(item);
     setSellQuantity(String(item.tokensDisponibles));
-    setSellError("");
   };
 
   const closeSellDialog = () => {
     if (creatingOffer) return;
     setSelectedInventoryItem(null);
-    setSellError("");
   };
 
   const handleCreateOffer = async (event) => {
@@ -164,12 +168,11 @@ function UserPage() {
       quantity <= 0 ||
       quantity > availableTokens
     ) {
-      setSellError(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
+      toast.error(`Ingresa una cantidad entre 1 y ${availableTokens}`);
       return;
     }
 
     setCreatingOffer(true);
-    setSellError("");
     try {
       const listing = await createSellOrder(
         {
@@ -178,12 +181,13 @@ function UserPage() {
         },
         token,
       );
+      toast.success("Anuncio creado correctamente");
       void navigate(`/mercado/${listing.id}`, {
         state: { listing },
       });
     } catch (createError) {
       console.error("Error al crear el anuncio de venta:", createError);
-      setSellError(createError.message || "No se pudo crear la oferta.");
+      toast.error(createError.message || "Error al crear el anuncio de venta");
     } finally {
       setCreatingOffer(false);
     }
@@ -275,8 +279,12 @@ function UserPage() {
                 <button
                   type="button"
                   className="pager-button"
-                  disabled={!inventoryPageData.hasPrevious || inventoryPage <= 1}
-                  onClick={() => setInventoryPage((value) => Math.max(1, value - 1))}
+                  disabled={
+                    !inventoryPageData.hasPrevious || inventoryPage <= 1
+                  }
+                  onClick={() =>
+                    setInventoryPage((value) => Math.max(1, value - 1))
+                  }
                 >
                   Anterior
                 </button>
@@ -286,8 +294,15 @@ function UserPage() {
                 <button
                   type="button"
                   className="pager-button"
-                  disabled={!inventoryPageData.hasNext || inventoryPage >= inventoryPageData.totalPages}
-                  onClick={() => setInventoryPage((value) => Math.min(inventoryPageData.totalPages, value + 1))}
+                  disabled={
+                    !inventoryPageData.hasNext ||
+                    inventoryPage >= inventoryPageData.totalPages
+                  }
+                  onClick={() =>
+                    setInventoryPage((value) =>
+                      Math.min(inventoryPageData.totalPages, value + 1),
+                    )
+                  }
                 >
                   Siguiente
                 </button>
@@ -356,19 +371,31 @@ function UserPage() {
                 <button
                   type="button"
                   className="pager-button"
-                  disabled={!transactionsPageData.hasPrevious || transactionsPage <= 1}
-                  onClick={() => setTransactionsPage((value) => Math.max(1, value - 1))}
+                  disabled={
+                    !transactionsPageData.hasPrevious || transactionsPage <= 1
+                  }
+                  onClick={() =>
+                    setTransactionsPage((value) => Math.max(1, value - 1))
+                  }
                 >
                   Anterior
                 </button>
                 <span className="pager-status">
-                  {transactionsPageData.page} / {transactionsPageData.totalPages}
+                  {transactionsPageData.page} /{" "}
+                  {transactionsPageData.totalPages}
                 </span>
                 <button
                   type="button"
                   className="pager-button"
-                  disabled={!transactionsPageData.hasNext || transactionsPage >= transactionsPageData.totalPages}
-                  onClick={() => setTransactionsPage((value) => Math.min(transactionsPageData.totalPages, value + 1))}
+                  disabled={
+                    !transactionsPageData.hasNext ||
+                    transactionsPage >= transactionsPageData.totalPages
+                  }
+                  onClick={() =>
+                    setTransactionsPage((value) =>
+                      Math.min(transactionsPageData.totalPages, value + 1),
+                    )
+                  }
                 >
                   Siguiente
                 </button>
@@ -388,7 +415,9 @@ function UserPage() {
           >
             <h2 id="user-page-sell-title">Crear oferta</h2>
             <p>
-              {selectedInventoryItem.jugador?.nombre || "Jugador"} — {formatNumber(selectedInventoryItem.jugador?.cotizacion)} créditos por token
+              {selectedInventoryItem.jugador?.nombre || "Jugador"} —{" "}
+              {formatNumber(selectedInventoryItem.jugador?.cotizacion)} créditos
+              por token
             </p>
             <form onSubmit={handleCreateOffer}>
               <label htmlFor="user-page-sell-quantity">
@@ -405,11 +434,6 @@ function UserPage() {
                 onChange={(event) => setSellQuantity(event.target.value)}
                 required
               />
-              {sellError && (
-                <p className="user-page-sell-error" role="alert">
-                  {sellError}
-                </p>
-              )}
               <div className="user-page-dialog-actions">
                 <button
                   type="button"
