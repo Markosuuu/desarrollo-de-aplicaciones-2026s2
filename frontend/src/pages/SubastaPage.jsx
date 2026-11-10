@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { fetchSubasta, cerrarSubasta, ofertarSubasta } from "../api/subastaApi";
 
+import { toast } from "react-toastify";
+
 import "../styles/SubastaPage.css";
 
 import InformacionSubasta from "../components/subasta/InformacionSubasta";
@@ -44,9 +46,6 @@ export default function SubastaPage() {
   const [closing, setClosing] = useState(false);
   const [offering, setOffering] = useState(false);
 
-  const [actionError, setActionError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
-
   // Carga la información de la subasta.
   const loadSubasta = useCallback(async () => {
     setLoading(true);
@@ -66,29 +65,15 @@ export default function SubastaPage() {
     void loadSubasta();
   }, [loadSubasta]);
 
-  // Los errores y mensajes desaparecen automáticamente.
-  useEffect(() => {
-    if (!actionError && !successMessage) return;
-
-    const timeout = setTimeout(() => {
-      setActionError(null);
-      setSuccessMessage(null);
-    }, 5000);
-
-    return () => clearTimeout(timeout);
-  }, [actionError, successMessage]);
-
   // Cerrar la subasta.
   const handleCloseAuction = async () => {
     setClosing(true);
-    setActionError(null);
-    setSuccessMessage(null);
 
     try {
       await cerrarSubasta(id, token);
       void navigate("/profile");
     } catch (err) {
-      setActionError(err.message || "No se pudo cerrar la subasta.");
+      toast.error(err.message || "No se pudo cerrar la subasta");
       setShowCloseConfirmation(false);
     } finally {
       setClosing(false);
@@ -103,13 +88,11 @@ export default function SubastaPage() {
     const minimumBid = getMinimumBid(subasta.ofertaActual);
 
     if (!Number.isFinite(numericBid) || numericBid < minimumBid) {
-      setActionError(`La puja mínima debe ser ${formatNumber(minimumBid)}.`);
+      toast.error(`La puja mínima debe ser ${formatNumber(minimumBid)}`);
       return;
     }
 
     setOffering(true);
-    setActionError(null);
-    setSuccessMessage(null);
 
     try {
       await ofertarSubasta({
@@ -120,11 +103,11 @@ export default function SubastaPage() {
 
       setPuja("");
       setShowOfferForm(false);
-      setSuccessMessage("¡Tu oferta se realizó correctamente!");
+      toast.success("Tu oferta se realizó correctamente!");
 
       await loadSubasta();
     } catch (err) {
-      setActionError(err.message || "No se pudo realizar la oferta.");
+      toast.error(err.message || "No se pudo cerrar la subasta");
     } finally {
       setOffering(false);
     }
@@ -197,17 +180,6 @@ export default function SubastaPage() {
       {/* Historial de ofertas */}
       <HistorialOfertas ofertasPrevias={ofertasPrevias} />
 
-      {/* Mensajes de acciones TO_DO: Cambiar por toasty*/}
-      {actionError && (
-        <div className="subasta-action-feedback error" role="alert">
-          {actionError}
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="subasta-action-feedback success">{successMessage}</div>
-      )}
-
       {/* Acciones del usuario */}
       {isActive && (
         <section className="subasta-actions">
@@ -228,7 +200,6 @@ export default function SubastaPage() {
               puja={puja}
               setPuja={setPuja}
               offering={offering}
-              setActionError={setActionError}
             />
           )}
         </section>

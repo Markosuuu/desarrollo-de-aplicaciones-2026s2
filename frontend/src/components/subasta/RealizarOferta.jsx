@@ -16,7 +16,6 @@ const RealizarOferta = ({
   puja,
   setPuja,
   offering,
-  setActionError,
 }) => {
   return (
     <div className="subasta-offer-container">
@@ -68,7 +67,6 @@ const RealizarOferta = ({
               type="button"
               onClick={() => {
                 setShowOfferForm(false);
-                setActionError(null);
               }}
               disabled={offering}
             >

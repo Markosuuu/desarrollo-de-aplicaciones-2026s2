@@ -6,6 +6,7 @@ import { createSellOrder } from "../api/marketApi";
 import { fetchUserInventory, fetchUserTransactions } from "../api/userApi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/userPage.css";
+import { toast } from "react-toastify";
 
 const numberFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 2,
@@ -39,7 +40,6 @@ function UserPage() {
   const [retry, setRetry] = useState(0);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
   const [sellQuantity, setSellQuantity] = useState("");
-  const [sellError, setSellError] = useState("");
   const [creatingOffer, setCreatingOffer] = useState(false);
 
   useEffect(() => {
@@ -97,13 +97,11 @@ function UserPage() {
   const openSellDialog = (item) => {
     setSelectedInventoryItem(item);
     setSellQuantity(String(item.tokensDisponibles));
-    setSellError("");
   };
 
   const closeSellDialog = () => {
     if (creatingOffer) return;
     setSelectedInventoryItem(null);
-    setSellError("");
   };
 
   const handleCreateOffer = async (event) => {
@@ -115,12 +113,11 @@ function UserPage() {
       quantity <= 0 ||
       quantity > availableTokens
     ) {
-      setSellError(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
+      toast.error(`Ingresa una cantidad entre 1 y ${availableTokens}`);
       return;
     }
 
     setCreatingOffer(true);
-    setSellError("");
     try {
       const listing = await createSellOrder(
         {
@@ -129,12 +126,13 @@ function UserPage() {
         },
         token,
       );
+      toast.success("Anuncio creado correctamente");
       void navigate(`/mercado/${listing.id}`, {
         state: { listing },
       });
     } catch (createError) {
       console.error("Error al crear el anuncio de venta:", createError);
-      setSellError(createError.message || "No se pudo crear la oferta.");
+      toast.error("Error al crear el anuncio de venta");
     } finally {
       setCreatingOffer(false);
     }
@@ -312,11 +310,6 @@ function UserPage() {
                 onChange={(event) => setSellQuantity(event.target.value)}
                 required
               />
-              {sellError && (
-                <p className="user-page-sell-error" role="alert">
-                  {sellError}
-                </p>
-              )}
               <div className="user-page-dialog-actions">
                 <button
                   type="button"
