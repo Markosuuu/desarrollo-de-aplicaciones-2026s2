@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -156,8 +157,9 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         assertEquals(3, sellerInventory.getTokensDisponibles());
         assertEquals(0, sellerInventory.getTokensEnVenta());
         assertEquals(2, buyerInventory.getTokensDisponibles());
-        assertEquals(2, operacionRepository.findByUsuarioId(seller.getId()).size()
-            + operacionRepository.findByUsuarioId(buyer.getId()).size());
+            assertEquals(2,
+                    operacionRepository.findByUsuarioId(seller.getId(), Pageable.unpaged()).getTotalElements()
+                            + operacionRepository.findByUsuarioId(buyer.getId(), Pageable.unpaged()).getTotalElements());
         }
 
     @Test
@@ -202,7 +204,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
             .findByUsuarioIdAndJugadorId(seller.getId(), jugadorId).orElseThrow();
         assertEquals(4, inventory.getTokensDisponibles());
         assertEquals(0, inventory.getTokensEnVenta());
-        assertTrue(operacionRepository.findByUsuarioId(seller.getId()).isEmpty());
+        assertTrue(operacionRepository.findByUsuarioId(seller.getId(), Pageable.unpaged()).isEmpty());
     }
 
     @Test
