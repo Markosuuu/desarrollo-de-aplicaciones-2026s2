@@ -1,12 +1,12 @@
 package com.prontaentrega.controllers;
 
+import com.prontaentrega.controllers.dtos.PageResponse;
 import com.prontaentrega.controllers.dtos.subastas.*;
 import com.prontaentrega.models.Oferta;
 import com.prontaentrega.models.Subasta;
 import com.prontaentrega.services.SubastaService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -45,39 +45,34 @@ public class SubastaController {
     }
 
     @GetMapping
-    public ResponseEntity<SubastaPagedResponse> listarSubastas(
+    public ResponseEntity<PageResponse<SubastaResponse>> listarSubastas(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
-        Page<Subasta> subastas = subastaService.listarSubastas(page, size);
-        List<SubastaResponse> items = subastas.getContent().stream()
-                .map(SubastaResponse::from)
-                .toList();
+        Page<SubastaResponse> subastas = subastaService
+                .listarSubastas(page, size)
+                .map(SubastaResponse::from);
 
-        SubastaPagedResponse pages = new SubastaPagedResponse(items, page, size);
-
-        return ResponseEntity.ok(pages);
+        return ResponseEntity.ok(PageResponse.from(subastas));
     }
 
     @PostMapping("/buscarPorNombre")
-    public ResponseEntity<SubastaPagedResponse> listarSubastasPorNombre(
+    public ResponseEntity<PageResponse<SubastaResponse>> listarSubastasPorNombre(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestBody SubastaRequest request
     ) {
-        Page<Subasta> subastas;
+        Page<SubastaResponse> subastas;
         if (!StringUtils.hasText(request.jugador()) && !StringUtils.hasText(request.user())) {
-            subastas = subastaService.listarSubastas(page, size);
+            subastas = subastaService
+                    .listarSubastas(page, size)
+                    .map(SubastaResponse::from);
         } else {
-            subastas = subastaService.listarSubastasPorNombre(page, size, request.user(), request.jugador());
+            subastas = subastaService
+                    .listarSubastasPorNombre(page, size, request.user(), request.jugador())
+                    .map(SubastaResponse::from);
         }
 
-        List<SubastaResponse> items = subastas.getContent().stream()
-                .map(SubastaResponse::from)
-                .toList();
-
-        SubastaPagedResponse pages = new SubastaPagedResponse(items, page, size);
-
-        return ResponseEntity.ok(pages);
+        return ResponseEntity.ok(PageResponse.from(subastas));
     }
 
     public record SubastaRequest(String user, String jugador) {}

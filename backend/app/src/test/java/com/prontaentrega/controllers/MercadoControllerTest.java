@@ -94,8 +94,10 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/marketplace/listings")
                         .header("Authorization", bearer(vendedor)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.page").value(1));
     }
 
     @Test
@@ -111,13 +113,13 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
                         .param("page", "1").param("size", "2")
                         .header("Authorization", bearer(vendedor)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content.length()").value(2));
 
         mockMvc.perform(get("/api/marketplace/listings")
                         .param("page", "2").param("size", "2")
                         .header("Authorization", bearer(vendedor)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content.length()").value(1));
     }
 
     @Test
@@ -127,7 +129,7 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/marketplace/listings")
                         .header("Authorization", bearer(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content.length()").value(0));
     }
 
     @Test
@@ -404,8 +406,10 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/users/{id}/transactions", vendedor.id())
                         .header("Authorization", bearer(vendedor)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page").value(1));
     }
 
     @Test
@@ -415,7 +419,10 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/users/{id}/transactions", usuario.id())
                         .header("Authorization", bearer(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.page").value(1));
     }
 
     @Test
@@ -499,8 +506,12 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/users/{id}/inventario", usuario.id())
                         .header("Authorization", bearer(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.page").value(1));
+
+
     }
 
     @Test
@@ -510,7 +521,10 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/users/{id}/inventario", usuario.id())
                         .header("Authorization", bearer(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.page").value(1));
     }
 
     @Test

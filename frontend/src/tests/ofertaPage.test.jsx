@@ -43,13 +43,13 @@ const listing = {
   estado: "PENDIENTE",
 };
 
-const userInventory = [
+const userInventory = {content: [
   {
     usuario: { id: "user-1", creditosDisponibles: 75 },
     jugador: { nombre: "Jude Bellingham" },
     tokensDisponibles: 1,
   },
-];
+]};
 
 function renderOffer({ asOwner = false, withNavigationState = true } = {}) {
   const currentListing = asOwner
@@ -227,7 +227,9 @@ test("muestra un error cuando no se puede identificar al usuario", async () => {
 });
 
 test("utiliza los créditos del usuario cuando no aparece en el inventario", async () => {
-  mocks.fetchUserInventory.mockResolvedValue([]);
+    mocks.fetchUserInventory.mockResolvedValue({
+        content: []
+    });
 
   renderOffer();
 
@@ -275,11 +277,13 @@ test("rechaza cantidades que no sean números enteros", async () => {
 });
 
 test("rechaza la compra cuando el usuario no tiene créditos suficientes", async () => {
-  mocks.fetchUserInventory.mockResolvedValue([
-    {
-      usuario: { id: "user-1", creditosDisponibles: 10 },
-    },
-  ]);
+    mocks.fetchUserInventory.mockResolvedValue({
+        content: [
+            {
+                usuario: { id: "user-1", creditosDisponibles: 10 },
+            },
+        ],
+    });
 
   renderOffer();
 

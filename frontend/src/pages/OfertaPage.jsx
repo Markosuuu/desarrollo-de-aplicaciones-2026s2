@@ -70,12 +70,13 @@ export default function OfertaPage() {
       setCreditsLoading(false);
       setCreditsError("No se pudo identificar al usuario.");
     } else {
+      console.log(user)
       setCreditsLoading(true);
       setCreditsError("");
       fetchUserInventory(user.id, token)
         .then((inventory) => {
           if (!active) return;
-          const currentUser = inventory.find(
+          const currentUser = inventory.content.find(
             (item) => item.usuario?.id === user.id,
           )?.usuario;
           setCredits(
