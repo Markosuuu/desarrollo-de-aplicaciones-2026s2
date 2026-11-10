@@ -75,9 +75,11 @@ export default function OfertaPage() {
       fetchUserInventory(user.id, token)
         .then((inventory) => {
           if (!active) return;
-          const currentUser = inventory.find(
+          console.log(inventory)
+          const currentUser = inventory.content.find(
             (item) => item.usuario?.id === user.id,
           )?.usuario;
+          console.log(currentUser)
           setCredits(
             currentUser?.creditosDisponibles ??
               user.creditosDisponibles ??
