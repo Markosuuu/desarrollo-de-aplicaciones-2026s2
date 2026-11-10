@@ -1,9 +1,13 @@
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, navigate } from "react-router-dom";
 import { fetchPlayer, fetchPlayerQuotesHistory } from "../api/playerApi";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 import PlayerRadar from "../components/PlayerRadarStats";
 import "../styles/playerPage.css";
+
+import { buyListing } from "../api/marketApi";
+
+import { toast } from "react-toastify";
 
 import QuoteHistoryChart from "../components/QuoteHistoryChart";
 
@@ -15,6 +19,20 @@ export default function PlayerPage() {
   const { id } = useParams();
   const [retry, setRetry] = useState(0);
   const [quoteHistory, setQuoteHistory] = useState([]);
+
+  const { state } = useLocation();
+  const [submitting, setSubmitting] = useState(false);
+  const [buyDialogOpen, setBuyDialogOpen] = useState(false);
+  const [buyQuantity, setBuyQuantity] = useState("1");
+  const initialListing = state?.listing?.id === id ? state.listing : null;
+  const [listing] = useState(initialListing);
+  const [creditsLoading] = useState(true);
+  const [credits] = useState(null);
+
+  const quantityToBuy = Number(buyQuantity);
+  const availableTokens = Number(listing?.cantidadTokens) || 0;
+  const purchaseTotal =
+    (Number(listing?.precioPorToken) || 0) * (Number(buyQuantity) || 0);
 
   useEffect(() => {
     let active = true;
@@ -67,11 +85,70 @@ export default function PlayerPage() {
     return <div>No se encontró el jugador.</div>;
   }
 
+  const openBuyDialog = () => {
+    if (submitting) return;
+    setBuyQuantity("1");
+    setBuyDialogOpen(true);
+  };
+
+  const handleBuy = async (event) => {
+    event.preventDefault();
+    if (submitting) return;
+
+    if (
+      !Number.isInteger(quantityToBuy) ||
+      quantityToBuy <= 0 ||
+      quantityToBuy > availableTokens
+    ) {
+      toast.error(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
+      return;
+    }
+
+    if (credits !== null && purchaseTotal > Number(credits)) {
+      toast.error("No tienes créditos suficientes para esa cantidad");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      await buyListing(listing.id, quantityToBuy, token);
+      void navigate("/profile", { replace: true });
+      toast.success("Compra exitosa!");
+    } catch (buyError) {
+      console.error("Error al comprar el anuncio:", buyError);
+      toast.error(buyError.message || "No se pudo completar la compra");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const numberFormatter = new Intl.NumberFormat("es-AR", {
+    maximumFractionDigits: 2,
+  });
+
+  function formatNumber(value) {
+    if (value === null || value === undefined || value === "") return "—";
+    const number = Number(value);
+    return Number.isFinite(number) ? numberFormatter.format(number) : "—";
+  }
+
   return (
     <div className="playerPage-container">
-      <h1 className="eyebrow texto-locura playerPage-titulo">
-        {player.nombre}
-      </h1>
+      <header className="">
+        <h1 className="eyebrow texto-locura playerPage-titulo">
+          {player.nombre}
+        </h1>
+        <div>
+          <button
+            type="button"
+            className="market-action-button"
+            onClick={openBuyDialog}
+            disabled={submitting || creditsLoading}
+          >
+            Comprar
+          </button>
+        </div>
+      </header>
 
       <div className="playerPage-stats">
         <section className="playerPage-card playerPage-info">
@@ -163,6 +240,68 @@ export default function PlayerPage() {
           </div>
         </div>
       </section>
+      {buyDialogOpen && listing && (
+        <div className="offer-dialog-backdrop">
+          <dialog
+            open
+            className="offer-buy-dialog"
+            aria-modal="true"
+            aria-labelledby="offer-buy-title"
+          >
+            <h2 id="offer-buy-title">Comprar tokens</h2>
+            <p>
+              Oferta de {listing.vendedorNombre || "vendedor"} para{" "}
+              {listing.nombreJugador}.
+            </p>
+            <form onSubmit={handleBuy}>
+              <label htmlFor="offer-buy-quantity">
+                Cantidad (máximo {availableTokens})
+              </label>
+              <input
+                autoFocus
+                id="offer-buy-quantity"
+                type="number"
+                min="1"
+                max={availableTokens}
+                step="1"
+                value={buyQuantity}
+                onChange={(event) => {
+                  setBuyQuantity(event.target.value);
+                }}
+                required
+              />
+              <p className="offer-buy-total">
+                Total: <strong>{formatNumber(purchaseTotal)} créditos</strong>
+              </p>
+              <p className="offer-buy-balance">
+                Créditos disponibles: {formatNumber(credits)}
+              </p>
+              <div className="offer-buy-actions">
+                <button
+                  type="button"
+                  className="offer-buy-cancel"
+                  onClick={() => setBuyDialogOpen(false)}
+                  disabled={submitting}
+                >
+                  Volver
+                </button>
+                <button
+                  type="submit"
+                  className="market-action-button"
+                  disabled={
+                    submitting ||
+                    !Number.isInteger(quantityToBuy) ||
+                    quantityToBuy <= 0 ||
+                    quantityToBuy > availableTokens
+                  }
+                >
+                  {submitting ? "Procesando compra..." : "Confirmar compra"}
+                </button>
+              </div>
+            </form>
+          </dialog>
+        </div>
+      )}
     </div>
   );
 }
