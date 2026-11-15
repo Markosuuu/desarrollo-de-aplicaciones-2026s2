@@ -6,7 +6,7 @@ import com.prontaentrega.persistence.dto.cotizacion.HistorialCotizacionDTOSQL;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.persistence.repository.dao.HistorialCotizacionDAOSQL;
 import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;
-import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
+import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -45,7 +45,7 @@ public class HistorialCotizacionRepositoryImpl implements HistorialCotizacionRep
                     BolsaDeJugadorDTOSQL bolsa = bolsasPorId.get(registro.getBolsaId());
 
                     if (bolsa == null) {
-                        throw new QuoteOperationConflictException(
+                        throw new NoHayEstrategiaActivaConfiguradaException(
                                 "No existe la bolsa asociada al historial de cotización"
                         );
                     }

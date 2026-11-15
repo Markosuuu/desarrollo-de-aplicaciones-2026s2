@@ -6,12 +6,15 @@ import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
 import com.prontaentrega.services.exceptions.ValidationException;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
-import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
+import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
+import com.prontaentrega.services.exceptions.auth.CampoInvalidoException;
+import com.prontaentrega.services.exceptions.auth.CampoRequeridoException;
+import com.prontaentrega.services.exceptions.auth.ContraseniaEquivocadaException;
+import com.prontaentrega.services.exceptions.auth.CorreoNoExistenteException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -79,8 +82,8 @@ public class GlobalExceptionHandler {
     }
 
     /** Maneja conflictos funcionales de estado/configuración de cotizaciones. */
-    @ExceptionHandler(QuoteOperationConflictException.class)
-    public ResponseEntity<CotizacionErrorResponse> handleQuoteConflict(QuoteOperationConflictException ex) {
+    @ExceptionHandler(NoHayEstrategiaActivaConfiguradaException.class)
+    public ResponseEntity<CotizacionErrorResponse> handleQuoteConflict(NoHayEstrategiaActivaConfiguradaException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new CotizacionErrorResponse("RECOTIZACION_NO_DISPONIBLE", ex.getMessage()));
     }
