@@ -31,7 +31,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 /** Verifica el contrato y la clave maestra del endpoint manual de recotización. */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("e2e")
+@Tag("integracion")
 class CotizacionControllerTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;

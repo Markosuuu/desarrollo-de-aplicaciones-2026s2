@@ -18,7 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("e2e")
+@Tag("integracion")
 class AuthControllerTest extends AbstractIntegrationTest {
 
     @Autowired

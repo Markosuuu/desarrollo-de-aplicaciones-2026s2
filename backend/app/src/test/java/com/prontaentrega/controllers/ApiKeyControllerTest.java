@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("e2e")
+@Tag("integracion")
 class ApiKeyControllerTest extends AbstractIntegrationTest {
 
     @Autowired

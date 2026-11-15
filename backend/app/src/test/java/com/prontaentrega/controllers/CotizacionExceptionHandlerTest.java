@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 /** Verifica códigos quote y que errores de infraestructura no expongan detalles SQL. */
-@Tag("e2e")
+@Tag("integracion")
 class CotizacionExceptionHandlerTest {
     private final CotizacionExceptionHandler handler = new CotizacionExceptionHandler();
 
