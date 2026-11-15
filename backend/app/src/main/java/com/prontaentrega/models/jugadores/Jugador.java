@@ -76,7 +76,7 @@ public class Jugador {
     }
 
     private static void validarNoNegativo(Integer value, String message) {
-        if (value != null && value < 0) {
+        if (value == null || value < 0) {
             throw new ValorNegativoException(message);
         }
     }

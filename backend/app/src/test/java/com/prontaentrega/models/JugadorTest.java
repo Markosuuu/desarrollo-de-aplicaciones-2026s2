@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import com.prontaentrega.models.exception.CampoFaltanteException;
+import com.prontaentrega.models.exception.LigaNoSoportadaException;
+import com.prontaentrega.models.exception.PosicionNoExistenteException;
 import com.prontaentrega.models.exception.ValorNegativoException;
 import com.prontaentrega.models.jugadores.builders.EstadisticasDeportivasDatos;
 import com.prontaentrega.models.jugadores.Liga;
@@ -270,6 +272,33 @@ class JugadorTest {
     }
 
     @Test
+    void noSeCreaUnJugadorSiEl_EsNulo() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new Jugador(1, "Messi", "Barcelona FC", Liga.LALIGA, Posicion.FORWARD,
+                        null, 170, 70));
+
+        assertEquals("La edad no puede ser negativa", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnJugadorSiLaPosicionNoExiste() {
+        LigaNoSoportadaException ex = assertThrows(LigaNoSoportadaException.class,
+                () -> new Jugador(1, "Messi", "Barcelona FC", Liga.fromValue("MLS"), Posicion.FORWARD,
+                        40, 170, 70));
+
+        assertEquals("Liga no soportada: MLS", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnJugadorSiLaLigaNoExiste() {
+        PosicionNoExistenteException ex = assertThrows(PosicionNoExistenteException.class,
+                () -> new Jugador(1, "Messi", "Barcelona FC", Liga.LALIGA, Posicion.fromValue("atajador"),
+                        40, 170, 70));
+
+        assertEquals("Posicion no soportada: atajador", ex.getMessage());
+    }
+
+    @Test
     void actualizarUnJugadorConValoresNulos_NoActualizaSusCampos() {
         jugador.actualizar(null, null, null, null);
 
@@ -369,6 +398,28 @@ class JugadorTest {
                         BigDecimal.ONE, BigDecimal.ONE, -120));
 
         assertEquals("Los minutos jugados no pueden ser negativos", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreanEstadisticasSiLosGolesSonNulos() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, null, 10,
+                        BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
+                        BigDecimal.ONE, BigDecimal.ONE, 120));
+
+        assertEquals("Los goles no pueden ser negativos", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreanEstadisticasSiElRatingEsNulo() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, 10, 10,
+                        BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
+                        BigDecimal.ONE, null, 120));
+
+        assertEquals("El rating no puede ser negativo", ex.getMessage());
     }
 
     // Tests de BolsaDeJugador

@@ -104,13 +104,13 @@ public class EstadisticasDeportivas {
     }
 
     private static void validarNoNegativo(Integer value, String message) {
-        if (value != null && value < 0) {
+        if (value == null || value < 0) {
             throw new ValorNegativoException(message);
         }
     }
 
     private static void validarNoNegativo(BigDecimal value, String message) {
-        if (value != null && value.compareTo(BigDecimal.ZERO) < 0) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) < 0) {
             throw new ValorNegativoException(message);
         }
     }
