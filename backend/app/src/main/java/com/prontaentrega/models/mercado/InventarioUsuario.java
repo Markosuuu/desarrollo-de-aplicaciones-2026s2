@@ -43,7 +43,7 @@ public class InventarioUsuario {
     }
 
     public void quitarTokens(Integer cantidadTokens) {
-        setTokensEnVenta(Math.max(0, (getTokensEnVenta() - cantidadTokens)));
+        this.tokensEnVenta = Math.max(0, this.tokensEnVenta - cantidadTokens);
         setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 

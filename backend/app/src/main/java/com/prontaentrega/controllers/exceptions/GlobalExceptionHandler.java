@@ -36,13 +36,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CampoInvalidoException.class)
     public ResponseEntity<ErrorResponse> handleCampoInvalido(CampoInvalidoException ex) {
-        return error(HttpStatus.BAD_REQUEST, "CREDENCIALES_INVALIDAS",
+        return error(HttpStatus.BAD_REQUEST, "DATOS_INVALIDOS",
                 ex.getMessage());
     }
 
     @ExceptionHandler(CampoRequeridoException.class)
     public ResponseEntity<ErrorResponse> handleCampoInvalido(CampoRequeridoException ex) {
-        return error(HttpStatus.BAD_REQUEST, "CREDENCIALES_INVALIDAS",
+        return error(HttpStatus.BAD_REQUEST, "CAMPO_REQUERIDO",
                 ex.getMessage());
     }
 
@@ -54,7 +54,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(CorreoNoExistenteException.class)
     public ResponseEntity<ErrorResponse> handleCampoInvalido(CorreoNoExistenteException ex) {
-        return error(HttpStatus.UNAUTHORIZED, "CREDENCIALES_INVALIDAS",
+        return error(HttpStatus.UNAUTHORIZED, "CORREO_NO_EXISTENTE",
                 ex.getMessage());
     }
 
