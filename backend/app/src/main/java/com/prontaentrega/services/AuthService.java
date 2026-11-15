@@ -6,7 +6,6 @@ import com.prontaentrega.models.auth.Usuario;
 import com.prontaentrega.persistence.repository.TokenEstadoRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.dto.AuthResult;
-import com.prontaentrega.services.exceptions.*;
 import com.prontaentrega.services.exceptions.auth.*;
 import io.jsonwebtoken.Claims;
 import java.util.UUID;
