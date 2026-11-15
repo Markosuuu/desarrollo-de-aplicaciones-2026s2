@@ -79,9 +79,9 @@ public class Subasta {
         setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 
-    public void cerrarPorVencimiento() {
+    public void cerrarSubasta(String motivo) {
+        setMotivoCierre(motivo);
         setActiva(false);
-        setMotivoCierre("POR_TIEMPO");
         setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 }

@@ -10,6 +10,8 @@ import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;
 import com.prontaentrega.persistence.repository.dao.OfertaDAOSQL;
 import com.prontaentrega.persistence.repository.dao.SubastaDAOSQL;
 import com.prontaentrega.persistence.repository.dao.UsuarioDAOSQL;
+
+import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 import java.time.LocalDateTime;
@@ -88,11 +90,6 @@ public class SubastaRepositoryImpl implements SubastaRepository {
     }
 
     @Override
-    public List<UUID> findIdsVencidas(LocalDateTime fecha) {
-        return dao.findIdsVencidas(fecha);
-    }
-
-    @Override
     public void deleteAll() {
         dao.deleteAll();
     }
@@ -105,5 +102,13 @@ public class SubastaRepositoryImpl implements SubastaRepository {
     @Override
     public Page<Subasta> findByNombre(String user, String jugador, Pageable pageable) {
         return dao.findAllByUsuarioOJugador(user, jugador, pageable).map(SubastaDTOSQL::aModelo);
+    }
+
+    @Override
+    public List<Subasta> getSubastasVencidasActivas() {
+        return dao.findAllByActivaAndVencimientoLessThanEqual(true, LocalDateTime.now(ZoneId.systemDefault()))
+                .stream()
+                .map(SubastaDTOSQL::aModelo)
+                .toList();
     }
 }

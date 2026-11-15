@@ -75,4 +75,9 @@ public class OfertaRepositoryImpl implements OfertaRepository {
     public void actualizarSuperior(UUID subastaId) {
         dao.actualizarSuperior(subastaId);
     }
+
+    @Override
+    public Optional<Oferta> findOfertaGanadora(UUID subastaId) {
+        return dao.findOfertaGanadora(subastaId).map(OfertaDTOSQL::aModelo);
+    }
 }

@@ -19,7 +19,6 @@ import com.prontaentrega.persistence.repository.UsuarioRepository;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,8 +38,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static java.math.RoundingMode.HALF_UP;
 
 @Service
 public class SubastaService {
@@ -193,45 +190,26 @@ public class SubastaService {
 
     @Transactional
     public void resolverSubastasVencidas() {
-        LocalDateTime ahora = LocalDateTime.now(ZoneId.systemDefault());
+        List<Subasta> subastasVencidas = subastaRepository.getSubastasVencidasActivas();
 
-        List<UUID> idsVencidas = subastaRepository.findIdsVencidas(ahora);
-
-        for (UUID id : idsVencidas) {
-            subastaRepository.findByIdForUpdate(id).ifPresent(subasta -> {
-                if (Boolean.TRUE.equals(subasta.getActiva())
-                        && !subasta.getVencimiento().isAfter(ahora)) {
-                    resolverCierre(subasta, "POR_TIEMPO");
-                }
-            });
+        for (Subasta subasta : subastasVencidas) {
+            resolverCierre(subasta, "POR_TIEMPO");
         }
     }
 
-    private Subasta resolverCierre(Subasta subasta, String motivo) {
-        List<Oferta> ofertas = ofertaRepository.findBySubastaIdOrderByPujaDesc(subasta.getId()).stream()
-                .sorted(Comparator.comparing(Oferta::getPuja).reversed())
-                .toList();
+    @Transactional
+    protected Subasta resolverCierre(Subasta subasta, String motivo) {
+        ofertaRepository.findOfertaGanadora(subasta.getId())
+                .ifPresentOrElse(
+                        oferta -> {
+                            oferta.setEsSuperior(true);
+                            ofertaRepository.save(oferta);
+                            liquidarVenta(subasta, oferta);
+                        },
+                        () -> devolverTokensAlPropietario(subasta)
+                );
 
-        Oferta ofertaGanadora = null;
-        for (Oferta oferta : ofertas) {
-            Usuario postor = buscarUsuario(oferta.getUsuarioId());
-            if (postor.getCreditosDisponibles() != null && postor.getCreditosDisponibles().compareTo(oferta.getPuja()) >= 0) {
-                ofertaGanadora = oferta;
-                break;
-            }
-        }
-
-        if (ofertaGanadora == null) {
-            devolverTokensAlPropietario(subasta);
-        } else {
-            ofertaGanadora.setEsSuperior(true);
-            ofertaRepository.save(ofertaGanadora);
-            liquidarVenta(subasta, ofertaGanadora);
-        }
-
-        subasta.setMotivoCierre(motivo);
-        subasta.setActiva(false);
-        subasta.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+        subasta.cerrarSubasta(motivo);
         subastaRepository.save(subasta);
         return subasta;
     }
@@ -251,12 +229,6 @@ public class SubastaService {
         Usuario vendedor = buscarUsuario(subasta.getPropietarioId());
 
         Usuario ganador = buscarUsuario(ofertaGanadora.getUsuarioId());
-
-        BigDecimal totalPuja = ofertaGanadora.getPuja();
-        BigDecimal precioPorToken = totalPuja.divide(
-            BigDecimal.valueOf(subasta.getCantidadOfrecida()),
-            2,
-            HALF_UP);
 
         ganador.restarCreditos(ofertaGanadora.getPuja());
         vendedor.sumarCreditos(ofertaGanadora.getPuja());
@@ -281,8 +253,8 @@ public class SubastaService {
                 vendedor,
                 bolsa.getEstadisticasDeportivas().getJugador(),
                 subasta.getCantidadOfrecida(),
-                precioPorToken,
-                totalPuja,
+                subasta.getBolsaDeJugador().getCotizacionActual(),
+                ofertaGanadora.getPuja(),
                 TipoOperacion.COMPRA,
                 EstadoOperacion.COMPLETADA);
 
@@ -291,8 +263,8 @@ public class SubastaService {
                 ganador,
                 bolsa.getEstadisticasDeportivas().getJugador(),
                 subasta.getCantidadOfrecida(),
-                precioPorToken,
-                totalPuja,
+                subasta.getBolsaDeJugador().getCotizacionActual(),
+                ofertaGanadora.getPuja(),
                 TipoOperacion.VENTA,
                 EstadoOperacion.COMPLETADA);
 

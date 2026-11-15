@@ -42,4 +42,6 @@ public interface SubastaDAOSQL extends JpaRepository<SubastaDTOSQL, UUID> {
         ORDER BY s.vencimiento ASC
     """)
     Page<SubastaDTOSQL> findAllByUsuarioOJugador(@Param("user") String user, @Param("jugador") String jugador, Pageable pageable);
+
+    List<SubastaDTOSQL> findAllByActivaAndVencimientoLessThanEqual(boolean activa, LocalDateTime ahora);
 }

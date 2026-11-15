@@ -14,4 +14,5 @@ public interface OfertaRepository {
     void deleteAll();
     Long count();
     void actualizarSuperior(UUID subastaId);
+    Optional<Oferta> findOfertaGanadora(UUID subastaId);
 }
