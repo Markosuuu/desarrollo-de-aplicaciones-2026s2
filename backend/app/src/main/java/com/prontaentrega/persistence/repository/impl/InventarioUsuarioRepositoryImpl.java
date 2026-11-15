@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.mercado.InventarioUsuario;
-import com.prontaentrega.persistence.dto.InventarioUsuarioDTOSQL;
+import com.prontaentrega.persistence.dto.mercado.InventarioUsuarioDTOSQL;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.dao.InventarioUsuarioDAOSQL;
 

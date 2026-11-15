@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.SubastaDTOSQL;
+import com.prontaentrega.persistence.dto.subastas.SubastaDTOSQL;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import java.time.LocalDateTime;

@@ -2,7 +2,7 @@ package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
 import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.persistence.dto.ConfiguracionEstrategiaPonderadaDTOSQL;
+import com.prontaentrega.persistence.dto.cotizacion.ConfiguracionEstrategiaPonderadaDTOSQL;
 import com.prontaentrega.persistence.repository.ConfiguracionEstrategiaProvider;
 import com.prontaentrega.persistence.repository.dao.ConfiguracionEstrategiaPonderadaDAOSQL;
 import java.util.Optional;

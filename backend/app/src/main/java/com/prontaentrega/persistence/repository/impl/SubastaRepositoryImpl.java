@@ -1,10 +1,10 @@
 package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.subastas.Subasta;
-import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
-import com.prontaentrega.persistence.dto.OfertaDTOSQL;
-import com.prontaentrega.persistence.dto.SubastaDTOSQL;
-import com.prontaentrega.persistence.dto.UsuarioDTOSQL;
+import com.prontaentrega.persistence.dto.jugadores.BolsaDeJugadorDTOSQL;
+import com.prontaentrega.persistence.dto.subastas.OfertaDTOSQL;
+import com.prontaentrega.persistence.dto.subastas.SubastaDTOSQL;
+import com.prontaentrega.persistence.dto.auth.UsuarioDTOSQL;
 import com.prontaentrega.persistence.repository.SubastaRepository;
 import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;
 import com.prontaentrega.persistence.repository.dao.OfertaDAOSQL;

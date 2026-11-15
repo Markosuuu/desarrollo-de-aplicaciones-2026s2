@@ -1,4 +1,4 @@
-package com.prontaentrega.persistence.dto;
+package com.prontaentrega.persistence.dto.auth;
 
 import com.prontaentrega.models.auth.TokenEstado;
 import jakarta.persistence.*;

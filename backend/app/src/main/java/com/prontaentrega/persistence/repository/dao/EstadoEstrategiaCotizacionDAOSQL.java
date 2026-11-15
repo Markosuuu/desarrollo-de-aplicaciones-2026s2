@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.EstadoEstrategiaCotizacionDTOSQL;
+import com.prontaentrega.persistence.dto.cotizacion.EstadoEstrategiaCotizacionDTOSQL;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

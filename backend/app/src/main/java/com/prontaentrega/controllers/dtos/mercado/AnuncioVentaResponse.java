@@ -1,4 +1,4 @@
-package com.prontaentrega.controllers.dtos.transacciones;
+package com.prontaentrega.controllers.dtos.mercado;
 
 import com.prontaentrega.models.mercado.AnuncioVenta;
 import java.math.BigDecimal;

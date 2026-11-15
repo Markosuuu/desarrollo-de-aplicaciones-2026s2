@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.InventarioUsuarioDTOSQL;
+import com.prontaentrega.persistence.dto.mercado.InventarioUsuarioDTOSQL;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;

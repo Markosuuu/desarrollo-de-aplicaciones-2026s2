@@ -1,4 +1,4 @@
-package com.prontaentrega.controllers.dtos.transacciones;
+package com.prontaentrega.controllers.dtos.mercado;
 
 import com.prontaentrega.controllers.dtos.auth.UsuarioResponse;
 import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;

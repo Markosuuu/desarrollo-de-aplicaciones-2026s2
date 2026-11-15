@@ -1,6 +1,6 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.persistence.dto.EstadoEstrategiaCotizacionDTOSQL;
+import com.prontaentrega.persistence.dto.cotizacion.EstadoEstrategiaCotizacionDTOSQL;
 import com.prontaentrega.persistence.repository.dao.EstadoEstrategiaCotizacionDAOSQL;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

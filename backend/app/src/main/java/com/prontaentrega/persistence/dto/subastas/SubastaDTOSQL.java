@@ -1,6 +1,8 @@
-package com.prontaentrega.persistence.dto;
+package com.prontaentrega.persistence.dto.subastas;
 
 import com.prontaentrega.models.subastas.Subasta;
+import com.prontaentrega.persistence.dto.auth.UsuarioDTOSQL;
+import com.prontaentrega.persistence.dto.jugadores.BolsaDeJugadorDTOSQL;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

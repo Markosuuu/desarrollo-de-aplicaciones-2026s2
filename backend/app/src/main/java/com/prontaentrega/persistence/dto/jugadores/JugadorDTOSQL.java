@@ -1,4 +1,4 @@
-package com.prontaentrega.persistence.dto;
+package com.prontaentrega.persistence.dto.jugadores;
 
 import com.prontaentrega.models.jugadores.Jugador;
 import com.prontaentrega.models.jugadores.Liga;
@@ -65,7 +65,7 @@ public class JugadorDTOSQL {
         return dto;
     }
 
-    Jugador aJugador() {
+    public Jugador aJugador() {
         Jugador jugador = new Jugador();
         jugador.setId(id);
         jugador.setWhoscoredId(whoscoredId);

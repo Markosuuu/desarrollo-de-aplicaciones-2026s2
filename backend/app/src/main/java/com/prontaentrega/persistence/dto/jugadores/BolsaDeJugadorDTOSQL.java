@@ -1,4 +1,4 @@
-package com.prontaentrega.persistence.dto;
+package com.prontaentrega.persistence.dto.jugadores;
 
 import com.prontaentrega.models.jugadores.BolsaDeJugador;
 import jakarta.persistence.CascadeType;

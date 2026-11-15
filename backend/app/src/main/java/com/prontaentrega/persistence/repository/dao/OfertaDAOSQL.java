@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.OfertaDTOSQL;
+import com.prontaentrega.persistence.dto.subastas.OfertaDTOSQL;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

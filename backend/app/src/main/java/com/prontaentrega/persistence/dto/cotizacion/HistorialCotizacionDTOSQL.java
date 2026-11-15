@@ -1,6 +1,7 @@
-package com.prontaentrega.persistence.dto;
+package com.prontaentrega.persistence.dto.cotizacion;
 
 import com.prontaentrega.models.cotizacion.HistorialCotizacion;
+import com.prontaentrega.persistence.dto.jugadores.BolsaDeJugadorDTOSQL;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.prontaentrega.controllers.dtos.transacciones;
+package com.prontaentrega.controllers.dtos.mercado;
 
 import java.util.UUID;
 import jakarta.validation.constraints.NotNull;

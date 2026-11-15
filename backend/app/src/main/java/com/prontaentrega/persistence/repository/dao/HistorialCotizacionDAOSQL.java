@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.HistorialCotizacionDTOSQL;
+import com.prontaentrega.persistence.dto.cotizacion.HistorialCotizacionDTOSQL;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

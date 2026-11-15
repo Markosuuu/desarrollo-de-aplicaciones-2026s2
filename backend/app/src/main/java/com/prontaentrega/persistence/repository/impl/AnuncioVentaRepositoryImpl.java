@@ -2,9 +2,9 @@ package com.prontaentrega.persistence.repository.impl;
 
 import com.prontaentrega.models.mercado.AnuncioVenta;
 import com.prontaentrega.models.mercado.EstadoAnuncioVenta;
-import com.prontaentrega.persistence.dto.AnuncioVentaDTOSQL;
-import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
-import com.prontaentrega.persistence.dto.UsuarioDTOSQL;
+import com.prontaentrega.persistence.dto.mercado.AnuncioVentaDTOSQL;
+import com.prontaentrega.persistence.dto.jugadores.BolsaDeJugadorDTOSQL;
+import com.prontaentrega.persistence.dto.auth.UsuarioDTOSQL;
 import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.dao.AnuncioVentaDAOSQL;
 import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;
