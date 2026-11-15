@@ -1,13 +1,13 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.InventarioUsuario;
-import com.prontaentrega.models.Oferta;
-import com.prontaentrega.models.Operacion;
-import com.prontaentrega.models.Subasta;
-import com.prontaentrega.models.Usuario;
-import com.prontaentrega.models.enums.EstadoOperacion;
-import com.prontaentrega.models.enums.TipoOperacion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.mercado.InventarioUsuario;
+import com.prontaentrega.models.subastas.Oferta;
+import com.prontaentrega.models.mercado.Operacion;
+import com.prontaentrega.models.subastas.Subasta;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.mercado.EstadoOperacion;
+import com.prontaentrega.models.mercado.TipoOperacion;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
@@ -27,7 +27,6 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

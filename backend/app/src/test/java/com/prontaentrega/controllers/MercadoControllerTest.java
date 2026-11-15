@@ -9,10 +9,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prontaentrega.models.*;
-import com.prontaentrega.models.enums.EstadoAnuncioVenta;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.mercado.EstadoAnuncioVenta;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.models.jugadores.Posicion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
+import com.prontaentrega.models.jugadores.Jugador;
+import com.prontaentrega.models.mercado.AnuncioVenta;
+import com.prontaentrega.models.mercado.InventarioUsuario;
 import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;

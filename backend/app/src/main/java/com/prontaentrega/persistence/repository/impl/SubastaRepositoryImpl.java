@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.Subasta;
+import com.prontaentrega.models.subastas.Subasta;
 import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
 import com.prontaentrega.persistence.dto.OfertaDTOSQL;
 import com.prontaentrega.persistence.dto.SubastaDTOSQL;
@@ -15,8 +15,6 @@ import java.util.UUID;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;

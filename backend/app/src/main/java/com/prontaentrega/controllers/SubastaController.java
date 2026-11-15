@@ -2,8 +2,8 @@ package com.prontaentrega.controllers;
 
 import com.prontaentrega.controllers.dtos.PageResponse;
 import com.prontaentrega.controllers.dtos.subastas.*;
-import com.prontaentrega.models.Oferta;
-import com.prontaentrega.models.Subasta;
+import com.prontaentrega.models.subastas.Oferta;
+import com.prontaentrega.models.subastas.Subasta;
 import com.prontaentrega.services.SubastaService;
 import jakarta.validation.Valid;
 import java.util.List;

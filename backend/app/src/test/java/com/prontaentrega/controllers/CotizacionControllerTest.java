@@ -13,7 +13,7 @@ import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
 import com.prontaentrega.services.exceptions.QuoteStrategyNotFoundException;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.services.CotizacionService.QuoteStrategyView;
 import java.math.BigDecimal;
 import java.util.List;

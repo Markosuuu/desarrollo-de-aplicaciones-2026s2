@@ -1,4 +1,4 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.cotizacion;
 
 /**
  * Interfaz que marca las configuraciones tipadas que pueden ser consumidas

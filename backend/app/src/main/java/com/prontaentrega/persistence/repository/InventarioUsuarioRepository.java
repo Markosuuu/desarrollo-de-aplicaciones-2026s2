@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository;
 
-import com.prontaentrega.models.InventarioUsuario;
-import java.util.List;
+import com.prontaentrega.models.mercado.InventarioUsuario;
+
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;

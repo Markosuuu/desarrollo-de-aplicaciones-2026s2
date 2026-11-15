@@ -1,7 +1,7 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.HistorialCotizacion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.cotizacion.HistorialCotizacion;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import lombok.RequiredArgsConstructor;

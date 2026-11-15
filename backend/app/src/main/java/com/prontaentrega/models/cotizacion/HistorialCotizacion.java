@@ -1,4 +1,4 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.cotizacion;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

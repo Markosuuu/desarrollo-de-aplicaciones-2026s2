@@ -1,25 +1,23 @@
-package com.prontaentrega.models.estrategias;
+package com.prontaentrega.models.cotizacion.estrategias;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
 
 import java.math.BigDecimal;
 
-/** Coeficientes y escala de la estrategia ponderada sin penalizaciones. */
-public record ConfiguracionEstrategiaPonderada(
+/** Pesos, umbral de regates y escala de la estrategia con penalización. */
+public record ConfiguracionEstrategiaPonderadaPenalizacion(
         BigDecimal pesoGoles,
         BigDecimal pesoAsistencias,
         BigDecimal pesoDisparosPorPartido,
-        BigDecimal pesoPasesClavePorPartido,
-        BigDecimal pesoRegatesGanadosPorPartido,
-        BigDecimal pesoFaltasCometidasPorPartido,
         BigDecimal pesoRating,
+        BigDecimal pesoFaltasCometidasPorPartido,
+        BigDecimal umbralRegatesGanadosPorPartido,
         BigDecimal factorEscala) implements ConfiguracionEstrategiaCotizacion {
 
-    /** Valida coeficientes completos, no negativos y de suma unitaria. */
-    public ConfiguracionEstrategiaPonderada {
+    /** Valida los cinco coeficientes y exige los parámetros independientes. */
+    public ConfiguracionEstrategiaPonderadaPenalizacion {
         BigDecimal[] pesos = {pesoGoles, pesoAsistencias, pesoDisparosPorPartido,
-                pesoPasesClavePorPartido, pesoRegatesGanadosPorPartido,
-                pesoFaltasCometidasPorPartido, pesoRating};
+                pesoRating, pesoFaltasCometidasPorPartido};
         BigDecimal suma = BigDecimal.ZERO;
         for (BigDecimal peso : pesos) {
             if (peso == null || peso.compareTo(BigDecimal.ZERO) < 0) {
@@ -28,13 +26,12 @@ public record ConfiguracionEstrategiaPonderada(
             }
             suma = suma.add(peso);
         }
-
         if (suma.compareTo(BigDecimal.ONE) != 0) {
             throw new IllegalArgumentException("La suma de los pesos debe ser igual a 1");
         }
-
-        if (factorEscala == null) {
-            throw new IllegalArgumentException("El factor de escala es obligatorio");
+        if (umbralRegatesGanadosPorPartido == null || factorEscala == null) {
+            throw new IllegalArgumentException(
+                    "El umbral de regates y el factor de escala son obligatorios");
         }
     }
 }

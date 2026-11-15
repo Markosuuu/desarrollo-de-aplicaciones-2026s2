@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.EstadoEstrategiaCotizacion;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

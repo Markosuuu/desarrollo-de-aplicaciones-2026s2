@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.Subasta;
+import com.prontaentrega.models.subastas.Subasta;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

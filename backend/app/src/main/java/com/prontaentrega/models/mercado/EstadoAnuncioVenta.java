@@ -1,4 +1,4 @@
-package com.prontaentrega.models.enums;
+package com.prontaentrega.models.mercado;
 
 public enum EstadoAnuncioVenta {
     PENDIENTE,

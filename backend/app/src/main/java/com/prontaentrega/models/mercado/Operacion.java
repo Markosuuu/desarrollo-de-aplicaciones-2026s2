@@ -1,12 +1,12 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.mercado;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
-import com.prontaentrega.models.enums.EstadoOperacion;
-import com.prontaentrega.models.enums.TipoOperacion;
+import com.prontaentrega.models.jugadores.Jugador;
+import com.prontaentrega.models.auth.Usuario;
 import lombok.*;
 
 /**

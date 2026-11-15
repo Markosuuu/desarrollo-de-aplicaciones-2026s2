@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

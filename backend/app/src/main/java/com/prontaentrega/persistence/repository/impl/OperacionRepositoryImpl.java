@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.Operacion;
+import com.prontaentrega.models.mercado.Operacion;
 import com.prontaentrega.persistence.dto.OperacionDTOSQL;
 import com.prontaentrega.persistence.dto.UsuarioDTOSQL;
 import com.prontaentrega.persistence.repository.OperacionRepository;

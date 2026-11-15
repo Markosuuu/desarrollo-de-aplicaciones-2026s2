@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.AnuncioVenta;
-import com.prontaentrega.models.enums.EstadoAnuncioVenta;
+import com.prontaentrega.models.mercado.AnuncioVenta;
+import com.prontaentrega.models.mercado.EstadoAnuncioVenta;
 import com.prontaentrega.persistence.dto.AnuncioVentaDTOSQL;
 import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
 import com.prontaentrega.persistence.dto.UsuarioDTOSQL;

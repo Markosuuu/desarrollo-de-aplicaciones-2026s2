@@ -1,4 +1,4 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.jugadores;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

@@ -1,9 +1,8 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.HistorialCotizacion;
+import com.prontaentrega.models.cotizacion.HistorialCotizacion;
 import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
 import com.prontaentrega.persistence.dto.HistorialCotizacionDTOSQL;
-import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.persistence.repository.dao.HistorialCotizacionDAOSQL;
 import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;

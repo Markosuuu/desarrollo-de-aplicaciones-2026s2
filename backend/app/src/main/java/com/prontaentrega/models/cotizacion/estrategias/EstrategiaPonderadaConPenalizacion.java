@@ -1,8 +1,8 @@
-package com.prontaentrega.models.estrategias;
+package com.prontaentrega.models.cotizacion.estrategias;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.DatosValoracion;
-import com.prontaentrega.models.EstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.DatosValoracion;
+import com.prontaentrega.models.cotizacion.EstrategiaCotizacion;
 import com.prontaentrega.models.exception.ConfiguracionNoCorrespondiente;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;

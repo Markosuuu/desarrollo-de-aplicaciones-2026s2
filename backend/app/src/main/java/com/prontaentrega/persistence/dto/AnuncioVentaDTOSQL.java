@@ -1,9 +1,7 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.AnuncioVenta;
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Usuario;
-import com.prontaentrega.models.enums.EstadoAnuncioVenta;
+import com.prontaentrega.models.mercado.AnuncioVenta;
+import com.prontaentrega.models.mercado.EstadoAnuncioVenta;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

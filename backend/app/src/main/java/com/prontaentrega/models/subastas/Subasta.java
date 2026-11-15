@@ -1,10 +1,12 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.subastas;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.auth.Usuario;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;

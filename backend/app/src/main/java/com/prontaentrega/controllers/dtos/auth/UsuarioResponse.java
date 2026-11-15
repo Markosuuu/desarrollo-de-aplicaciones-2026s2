@@ -1,6 +1,6 @@
 package com.prontaentrega.controllers.dtos.auth;
 
-import com.prontaentrega.models.Usuario;
+import com.prontaentrega.models.auth.Usuario;
 import java.math.BigDecimal;
 import java.util.UUID;
 

@@ -3,9 +3,12 @@ package com.prontaentrega.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.prontaentrega.models.builders.EstadisticasDeportivasDatos;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.models.jugadores.builders.EstadisticasDeportivasDatos;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.models.jugadores.Posicion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
+import com.prontaentrega.models.jugadores.Jugador;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

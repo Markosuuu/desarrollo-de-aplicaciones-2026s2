@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.TokenEstado;
+import com.prontaentrega.models.auth.TokenEstado;
 import com.prontaentrega.persistence.dto.TokenEstadoDTOSQL;
 import com.prontaentrega.persistence.repository.TokenEstadoRepository;
 import com.prontaentrega.persistence.repository.dao.TokenEstadoDAOSQL;

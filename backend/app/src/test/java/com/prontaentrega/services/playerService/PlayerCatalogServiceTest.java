@@ -1,8 +1,10 @@
 package com.prontaentrega.services.playerService;
 
-import com.prontaentrega.models.*;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.models.jugadores.Posicion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
+import com.prontaentrega.models.jugadores.Jugador;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerCatalogService;
 import com.prontaentrega.services.exceptions.PlayerNotFoundException;

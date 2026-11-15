@@ -1,4 +1,4 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.auth;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

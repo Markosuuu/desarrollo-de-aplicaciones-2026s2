@@ -1,9 +1,9 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.jugadores;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
-import com.prontaentrega.models.builders.EstadisticasDeportivasDatos;
+import com.prontaentrega.models.jugadores.builders.EstadisticasDeportivasDatos;
 import com.prontaentrega.models.exception.ValorNegativoException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

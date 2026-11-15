@@ -1,7 +1,7 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.Liga;
 import com.prontaentrega.persistence.PersistenceManager;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
@@ -16,8 +16,6 @@ import java.time.ZoneId;
 import java.util.Optional;
 import java.util.UUID;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

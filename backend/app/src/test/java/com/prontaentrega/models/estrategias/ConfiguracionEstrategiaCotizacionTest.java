@@ -3,11 +3,15 @@ package com.prontaentrega.models.estrategias;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
 import com.prontaentrega.controllers.dtos.cotizacion.CotizacionStrategyConfigRequest;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderadaConPenalizacion;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 

@@ -1,6 +1,6 @@
-package com.prontaentrega.models.builders;
+package com.prontaentrega.models.jugadores.builders;
 
-import com.prontaentrega.models.Jugador;
+import com.prontaentrega.models.jugadores.Jugador;
 import lombok.Builder;
 import lombok.Getter;
 

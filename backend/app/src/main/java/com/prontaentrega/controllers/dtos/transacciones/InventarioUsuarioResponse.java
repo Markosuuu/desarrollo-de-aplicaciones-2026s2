@@ -2,7 +2,7 @@ package com.prontaentrega.controllers.dtos.transacciones;
 
 import com.prontaentrega.controllers.dtos.auth.UsuarioResponse;
 import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
-import com.prontaentrega.models.InventarioUsuario;
+import com.prontaentrega.models.mercado.InventarioUsuario;
 
 import java.util.UUID;
 

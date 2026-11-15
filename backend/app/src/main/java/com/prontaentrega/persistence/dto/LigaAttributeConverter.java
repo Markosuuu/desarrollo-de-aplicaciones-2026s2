@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.models.jugadores.Liga;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository;
 
-import com.prontaentrega.models.HistorialCotizacion;
+import com.prontaentrega.models.cotizacion.HistorialCotizacion;
 
 import java.util.List;
 import java.util.UUID;

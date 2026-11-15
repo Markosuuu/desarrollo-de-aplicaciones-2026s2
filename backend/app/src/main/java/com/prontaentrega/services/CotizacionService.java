@@ -1,6 +1,6 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.*;
+import com.prontaentrega.models.cotizacion.*;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.CotizacionRepository.ActualizacionCotizacion;

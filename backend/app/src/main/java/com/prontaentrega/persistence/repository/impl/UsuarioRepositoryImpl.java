@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.Usuario;
+import com.prontaentrega.models.auth.Usuario;
 import com.prontaentrega.persistence.dto.UsuarioDTOSQL;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.persistence.repository.dao.UsuarioDAOSQL;

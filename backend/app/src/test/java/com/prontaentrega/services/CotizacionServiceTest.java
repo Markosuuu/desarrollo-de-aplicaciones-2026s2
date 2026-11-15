@@ -8,12 +8,12 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
-import com.prontaentrega.models.estrategias.EstrategiaPonderada;
-import com.prontaentrega.models.estrategias.EstrategiaPonderadaConPenalizacion;
+import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.EstadoEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderadaConPenalizacion;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;

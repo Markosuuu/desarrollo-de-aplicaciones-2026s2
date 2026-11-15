@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.HistorialCotizacion;
+import com.prontaentrega.models.cotizacion.HistorialCotizacion;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

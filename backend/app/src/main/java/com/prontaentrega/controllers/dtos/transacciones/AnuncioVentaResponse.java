@@ -1,6 +1,6 @@
 package com.prontaentrega.controllers.dtos.transacciones;
 
-import com.prontaentrega.models.AnuncioVenta;
+import com.prontaentrega.models.mercado.AnuncioVenta;
 import java.math.BigDecimal;
 import java.util.UUID;
 

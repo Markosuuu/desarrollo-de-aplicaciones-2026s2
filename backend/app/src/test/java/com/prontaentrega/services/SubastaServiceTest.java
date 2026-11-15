@@ -1,12 +1,10 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.EstadisticasDeportivas;
-import com.prontaentrega.models.InventarioUsuario;
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.models.Oferta;
-import com.prontaentrega.models.Usuario;
-import com.prontaentrega.models.Subasta;
+import com.prontaentrega.models.jugadores.*;
+import com.prontaentrega.models.mercado.InventarioUsuario;
+import com.prontaentrega.models.subastas.Oferta;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.subastas.Subasta;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OfertaRepository;
@@ -317,8 +315,8 @@ class SubastaServiceTest extends AbstractIntegrationTest {
                 (int) (System.currentTimeMillis() % 100000),
                 nombre,
                 "Equipo X",
-                com.prontaentrega.models.enums.Liga.LALIGA,
-                com.prontaentrega.models.enums.Posicion.FORWARD,
+                Liga.LALIGA,
+                Posicion.FORWARD,
                 25,
                 180,
                 70);

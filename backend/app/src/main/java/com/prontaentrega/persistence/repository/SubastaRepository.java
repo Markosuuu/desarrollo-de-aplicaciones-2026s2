@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository;
 
-import com.prontaentrega.models.Subasta;
+import com.prontaentrega.models.subastas.Subasta;
 import java.util.Optional;
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,10 +1,10 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.InventarioUsuario;
+import com.prontaentrega.models.mercado.InventarioUsuario;
 import com.prontaentrega.persistence.dto.InventarioUsuarioDTOSQL;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.dao.InventarioUsuarioDAOSQL;
-import java.util.List;
+
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.domain.Page;

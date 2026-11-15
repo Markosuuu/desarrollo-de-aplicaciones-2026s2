@@ -1,4 +1,4 @@
-package com.prontaentrega.models;
+package com.prontaentrega.models.cotizacion;
 
 import java.math.BigDecimal;
 

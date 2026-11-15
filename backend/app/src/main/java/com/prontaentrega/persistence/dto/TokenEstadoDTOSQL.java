@@ -1,8 +1,7 @@
 package com.prontaentrega.persistence.dto;
 
-import com.prontaentrega.models.TokenEstado;
+import com.prontaentrega.models.auth.TokenEstado;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

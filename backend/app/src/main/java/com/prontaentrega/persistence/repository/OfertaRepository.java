@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository;
 
-import com.prontaentrega.models.Oferta;
+import com.prontaentrega.models.subastas.Oferta;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
