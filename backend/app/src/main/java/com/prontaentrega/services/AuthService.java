@@ -3,6 +3,7 @@ package com.prontaentrega.services;
 import com.prontaentrega.authentication.JwtService;
 import com.prontaentrega.models.auth.TokenEstado;
 import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.exception.CampoInvalidoException;
 import com.prontaentrega.persistence.repository.TokenEstadoRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.dto.AuthResult;

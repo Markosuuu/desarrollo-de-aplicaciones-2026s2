@@ -1,4 +1,4 @@
-package com.prontaentrega.services.exceptions.auth;
+package com.prontaentrega.models.exception;
 
 public class CampoInvalidoException extends RuntimeException {
     public CampoInvalidoException(String message) {

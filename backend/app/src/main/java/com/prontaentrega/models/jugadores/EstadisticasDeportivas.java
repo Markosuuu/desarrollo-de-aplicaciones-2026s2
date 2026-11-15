@@ -44,7 +44,7 @@ public class EstadisticasDeportivas {
      * @param minutosJugados Minutos jugados
      */
     public EstadisticasDeportivas(
-            @NonNull Jugador jugador,
+            Jugador jugador,
             Boolean activo,
             Integer goles,
             Integer asistencias,

@@ -2,6 +2,8 @@ package com.prontaentrega.models.jugadores;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.prontaentrega.models.exception.PosicionNoExistenteException;
+
 import java.util.Arrays;
 
 public enum Posicion {
@@ -29,6 +31,6 @@ public enum Posicion {
         return Arrays.stream(values())
                 .filter(posicion -> posicion.value.equalsIgnoreCase(value.trim()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Posicion no soportada: " + value));
+                .orElseThrow(() -> new PosicionNoExistenteException("Posicion no soportada: " + value));
     }
 }

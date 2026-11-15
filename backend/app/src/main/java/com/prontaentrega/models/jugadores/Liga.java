@@ -2,6 +2,9 @@ package com.prontaentrega.models.jugadores;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.prontaentrega.models.exception.CampoFaltanteException;
+import com.prontaentrega.models.exception.LigaNoSoportadaException;
+
 import java.util.Arrays;
 
 public enum Liga {
@@ -28,8 +31,8 @@ public enum Liga {
             return Arrays.stream(values())
                     .filter(liga -> liga.value.equalsIgnoreCase(value.trim()))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Liga no soportada: " + value));
+                    .orElseThrow(() -> new LigaNoSoportadaException("Liga no soportada: " + value));
         }
-        throw new IllegalArgumentException("La liga es obligatoria");
+        throw new CampoFaltanteException("La liga es obligatoria");
     }
 }

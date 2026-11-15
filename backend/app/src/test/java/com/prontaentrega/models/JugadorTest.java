@@ -3,6 +3,8 @@ package com.prontaentrega.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import com.prontaentrega.models.exception.CampoFaltanteException;
+import com.prontaentrega.models.exception.ValorNegativoException;
 import com.prontaentrega.models.jugadores.builders.EstadisticasDeportivasDatos;
 import com.prontaentrega.models.jugadores.Liga;
 import com.prontaentrega.models.jugadores.Posicion;
@@ -10,16 +12,31 @@ import com.prontaentrega.models.jugadores.BolsaDeJugador;
 import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
 import com.prontaentrega.models.jugadores.Jugador;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Tests unitarios de dominio para las invariantes de Jugador.
- */
 @Tag("modelo")
 class JugadorTest {
+    private Jugador jugador;
+    private EstadisticasDeportivas estadisticas;
+    private BolsaDeJugador bolsa;
+
+    @BeforeEach
+    void setUp(){
+        jugador = new Jugador(1, "Messi", "Barcelona FC", Liga.LALIGA, Posicion.FORWARD,
+                40, 170, 70);
+
+        estadisticas = new EstadisticasDeportivas(jugador,
+                true, 10, 10,
+                BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
+                BigDecimal.ONE, BigDecimal.ONE, 120);
+
+        bolsa = new BolsaDeJugador(estadisticas, BigDecimal.ONE, LocalDateTime.now(), "Fuente", 100);
+    }
+
     @Test
     void actualizarEstadisticasShouldReplaceSportValues() {
         EstadisticasDeportivas estadisticas = getEstadisticas();
@@ -187,6 +204,280 @@ class JugadorTest {
 
         assertEquals(new BigDecimal("1"), bolsaJugador.getCotizacionActual());
         assertEquals(100, bolsaJugador.getTokensRestantes());
+    }
+
+    @Test
+    void noSeCreaUnJugadorSiNoVieneDeWhoScored() {
+        CampoFaltanteException ex = assertThrows(CampoFaltanteException.class,
+                () -> new Jugador(null, "Messi", "Barcelona FC", Liga.LALIGA, Posicion.FORWARD,
+                        40, 170, 70));
+
+        assertEquals("El ID de WhoScored es obligatorio", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnJugadorSiNoTieneLiga() {
+        CampoFaltanteException ex = assertThrows(CampoFaltanteException.class,
+                () -> new Jugador(1, "Messi", "Barcelona FC", null, Posicion.FORWARD,
+                        40, 170, 70));
+
+        assertEquals("La liga es obligatoria", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnJugadorSiNoTieneNombre() {
+        CampoFaltanteException ex = assertThrows(CampoFaltanteException.class,
+                () -> new Jugador(1, null, "Barcelona FC", Liga.LALIGA, Posicion.FORWARD,
+                        40, 170, 70));
+
+        assertEquals("El nombre es obligatorio", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnJugadorSiNoTieneEquipo() {
+        CampoFaltanteException ex = assertThrows(CampoFaltanteException.class,
+                () -> new Jugador(1, "Messi", null, Liga.LALIGA, Posicion.FORWARD,
+                        40, 170, 70));
+
+        assertEquals("El equipo es obligatorio", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnJugadorSiLaEdadEsNegativa() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new Jugador(1, "Messi", "Barcelona FC", Liga.LALIGA, Posicion.FORWARD,
+                        -40, 170, 70));
+
+        assertEquals("La edad no puede ser negativa", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnJugadorSiLaAlturaEsNegativa() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new Jugador(1, "Messi", "Barcelona FC", Liga.LALIGA, Posicion.FORWARD,
+                        40, -170, 70));
+
+        assertEquals("La altura no puede ser negativa", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnJugadorSiElPesoEsNegativo() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new Jugador(1, "Messi", "Barcelona FC", Liga.LALIGA, Posicion.FORWARD,
+                        40, 170, -70));
+
+        assertEquals("El peso no puede ser negativo", ex.getMessage());
+    }
+
+    @Test
+    void actualizarUnJugadorConValoresNulos_NoActualizaSusCampos() {
+        jugador.actualizar(null, null, null, null);
+
+        assertEquals(40, jugador.getEdad());
+        assertEquals(170, jugador.getAltura());
+        assertEquals(70, jugador.getPeso());
+        assertEquals(Posicion.FORWARD, jugador.getPosicion());
+    }
+
+    /* Tests de estadistícas deportivas */
+
+    @Test
+    void noSeCreanEstadisticasSiLosGolesSonNegativos() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, -10, 10,
+                        BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
+                        BigDecimal.ONE, BigDecimal.ONE, 120));
+
+        assertEquals("Los goles no pueden ser negativos", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreanEstadisticasSiLasAsistenciasSonNegativas() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, 10, -10,
+                        BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
+                        BigDecimal.ONE, BigDecimal.ONE, 120));
+
+        assertEquals("Las asistencias no pueden ser negativas", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreanEstadisticasSiLosDisparosPorPartidoSonNegativos() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, 10, 10,
+                        BigDecimal.valueOf(-1), BigDecimal.ONE, BigDecimal.ONE,
+                        BigDecimal.ONE, BigDecimal.ONE, 120));
+
+        assertEquals("Los disparos por partido no pueden ser negativos", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreanEstadisticasSiLosPasesSonNegativos() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, 10, 10,
+                        BigDecimal.ONE, BigDecimal.valueOf(-1), BigDecimal.ONE,
+                        BigDecimal.ONE, BigDecimal.ONE, 120));
+
+        assertEquals("Los key passes por partido no pueden ser negativos", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreanEstadisticasSiLosDribblesGanadosSonNegativos() {
+
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, 10, 10,
+                        BigDecimal.ONE, BigDecimal.ONE, BigDecimal.valueOf(-1),
+                        BigDecimal.ONE, BigDecimal.ONE, 120));
+
+        assertEquals("Los dribbles ganados por partido no pueden ser negativos", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreanEstadisticasSiLasFaltasSonNegativos() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, 10, 10,
+                        BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
+                        BigDecimal.valueOf(-1), BigDecimal.ONE, 120));
+
+        assertEquals("Las faltas cometidas por partido no pueden ser negativas", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreanEstadisticasSiElRatingEsNegativo() {
+
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, 10, 10,
+                        BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
+                        BigDecimal.ONE, BigDecimal.valueOf(-1), 120));
+
+        assertEquals("El rating no puede ser negativo", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreanEstadisticasSiLosMinutosSonNegativos() {
+        ValorNegativoException ex = assertThrows(ValorNegativoException.class,
+                () -> new EstadisticasDeportivas(jugador,
+                        true, 10, 10,
+                        BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ONE,
+                        BigDecimal.ONE, BigDecimal.ONE, -120));
+
+        assertEquals("Los minutos jugados no pueden ser negativos", ex.getMessage());
+    }
+
+    // Tests de BolsaDeJugador
+
+    @Test
+    void noSeCreaUnaBolsaSiNoTieneEstadisticasDeportivas() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> new BolsaDeJugador(null, BigDecimal.ONE, LocalDateTime.now(), "WhoScored", 100));
+
+        assertEquals("estadisticasDeportivas is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnaBolsaSiNoTieneCotizacionActual() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> new BolsaDeJugador(estadisticas, null, LocalDateTime.now(), "WhoScored", 100));
+
+        assertEquals("cotizacionActual is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnaBolsaSiNoTieneFechaDeActualizacion() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> new BolsaDeJugador(estadisticas, BigDecimal.ONE, null, "WhoScored", 100));
+
+        assertEquals("fechaActualizacion is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnaBolsaSiNoTieneFuente() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> new BolsaDeJugador(estadisticas, BigDecimal.ONE, LocalDateTime.now(), null, 100));
+
+        assertEquals("fuente is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnaBolsaSiNoTieneTokensRestantes() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> new BolsaDeJugador(estadisticas, BigDecimal.ONE, LocalDateTime.now(), "WhoScored", null));
+
+        assertEquals("tokensRestantes is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnaBolsaDesdeEstadisticasSiLasEstadisticasSonNulas() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> BolsaDeJugador.desdeEstadisticas(null, LocalDateTime.now()));
+
+        assertEquals("estadisticas is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void noSeCreaUnaBolsaDesdeEstadisticasSiLaFechaEsNula() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> BolsaDeJugador.desdeEstadisticas(estadisticas, null));
+
+        assertEquals("fecha is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void noSeActualizanLasEstadisticasSiLasNuevasEstadisticasSonNulas() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> bolsa.actualizarEstadisticas(null, LocalDateTime.now(), "WhoScored"));
+
+        assertEquals("estadisticas is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void noSeActualizanLasEstadisticasSiLaFechaEsNula() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> bolsa.actualizarEstadisticas(estadisticas, null, "WhoScored"));
+
+        assertEquals("fecha is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void noSeActualizanLasEstadisticasSiLaFuenteEsNula() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> bolsa.actualizarEstadisticas(estadisticas, LocalDateTime.now(), null));
+
+        assertEquals("fuente is marked non-null but is null", ex.getMessage());
+    }
+
+    // Posicion
+
+    @Test
+    void fromValue_deberiaDevolverNullSiElValorEsNulo() {
+        assertNull(Posicion.fromValue(null));
+    }
+
+    @Test
+    void fromValue_deberiaDevolverNullSiElValorEstaVacio() {
+        assertNull(Posicion.fromValue(""));
+    }
+
+    @Test
+    void fromValue_deberiaDevolverNullSiElValorSoloTieneEspacios() {
+        assertNull(Posicion.fromValue("   "));
+    }
+
+    // Liga
+
+    @Test
+    void fromValue_deberiaLanzarCampoFaltanteSiElValorEsNulo() {
+        CampoFaltanteException ex = assertThrows(CampoFaltanteException.class,
+                () -> Liga.fromValue(null));
+
+        assertEquals("La liga es obligatoria", ex.getMessage());
     }
 
 }

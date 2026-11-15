@@ -122,7 +122,8 @@ public class PlayerService {
 
     @Transactional
     public BolsaDeJugador searchById(UUID id) {
-        return jugadorRepository.findById(id).orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado: " + id));
+        return jugadorRepository.findById(id)
+                .orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado: " + id));
     }
 
     @Transactional

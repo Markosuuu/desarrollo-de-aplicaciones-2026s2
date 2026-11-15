@@ -7,6 +7,7 @@ import com.prontaentrega.models.exception.ValorNegativoException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.util.StringUtils;
 
 /**
  * Clase que representa un jugador
@@ -68,7 +69,7 @@ public class Jugador {
     }
 
     private static String validarTexto(String value, String message) {
-        if (value == null || value.isBlank()) {
+        if (!StringUtils.hasText(value)) {
             throw new CampoFaltanteException(message);
         }
         return value.trim();

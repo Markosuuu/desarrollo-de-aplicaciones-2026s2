@@ -34,14 +34,6 @@ public class BolsaDeJugador {
     private String fuente;
     private Integer tokensRestantes;
 
-    /**
-     * Constructor de la clase BolsaDeJugador
-     * @param estadisticasDeportivas Las estadísticas deportivas del jugador
-     * @param cotizacionActual La cotización actual del jugador
-     * @param fechaActualizacion La fecha de actualización de la bolsa
-     * @param fuente La fuente de los datos
-     * @param tokensRestantes Los tokens restantes en la bolsa
-     */
     public BolsaDeJugador(
             @NonNull EstadisticasDeportivas estadisticasDeportivas,
             @NonNull BigDecimal cotizacionActual,
@@ -66,15 +58,15 @@ public class BolsaDeJugador {
             @NonNull LocalDateTime fecha,
             @NonNull String fuente) {
         this.estadisticasDeportivas = estadisticas;
-        this.fechaActualizacion = fecha;
         this.fuente = fuente;
+        this.fechaActualizacion = fecha;
     }
 
     public void restarTokens(Integer cantidad) {
-        if (getTokensRestantes() < cantidad) {
+        if (this.tokensRestantes < cantidad) {
             throw new CantidadDeTokensException("La cantidad de tokens debe ser igual o menor a la cantidad actual");
         }
 
-        setTokensRestantes(getTokensRestantes() - cantidad);
+        this.tokensRestantes -=  cantidad;
     }
 }

@@ -301,7 +301,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
     }
 
     private Usuario saveUser(String nombre, String correo) {
-        Usuario usuario = new Usuario(nombre, correo, "hash");
+        Usuario usuario = new Usuario(nombre, correo, "hash1234");
         usuario.setCreditosDisponibles(BigDecimal.valueOf(1000));
         return usuarioRepository.save(usuario);
     }
