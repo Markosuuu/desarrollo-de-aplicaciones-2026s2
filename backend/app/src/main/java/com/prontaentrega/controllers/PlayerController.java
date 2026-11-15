@@ -5,7 +5,7 @@ import com.prontaentrega.controllers.dtos.jugadores.HistorialCotizacionResponse;
 import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
 import com.prontaentrega.models.jugadores.BolsaDeJugador;
 import com.prontaentrega.models.jugadores.Liga;
-import com.prontaentrega.services.HistorialCotizacionService;
+import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.PlayerCatalogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,13 +29,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class PlayerController {
     private final PlayerCatalogService playerCatalogService;
-    private final HistorialCotizacionService historialService;
+    private final CotizacionService cotizacionService;
+
     /**
      * Recibe el servicio de catalogo usado por los endpoints de jugadores.
      */
-    public PlayerController(PlayerCatalogService playerCatalogService, HistorialCotizacionService historialService) {
+    public PlayerController(PlayerCatalogService playerCatalogService, CotizacionService cotizacionService) {
         this.playerCatalogService = playerCatalogService;
-        this.historialService = historialService;
+        this.cotizacionService = cotizacionService;
     }
 
     /**
@@ -105,7 +106,7 @@ public class PlayerController {
             @PathVariable UUID id
     ) {
         List<HistorialCotizacionResponse> response =
-                historialService.buscarHistorial(id)
+                cotizacionService.buscarHistorialById(id)
                         .stream()
                         .map(HistorialCotizacionResponse::from)
                         .toList();

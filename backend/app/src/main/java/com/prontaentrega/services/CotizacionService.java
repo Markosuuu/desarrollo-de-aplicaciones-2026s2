@@ -279,4 +279,9 @@ public class CotizacionService {
             EstrategiaCotizacion strategy,
             ConfiguracionEstrategiaCotizacion configuracion) {
     }
+
+
+    public List<HistorialCotizacion> buscarHistorialById(UUID jugadorId) {
+        return historialRepository.buscarHistorialById(jugadorId);
+    }
 }

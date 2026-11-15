@@ -58,9 +58,8 @@ public class HistorialCotizacionRepositoryImpl implements HistorialCotizacionRep
     }
 
     @Override
-    public List<HistorialCotizacion> buscarPorBolsaId(UUID bolsaId) {
-        return historialDAO
-                .findByBolsaDeJugador_IdOrderByFechaAsc(bolsaId)
+    public List<HistorialCotizacion> buscarHistorialById(UUID jugadorId) {
+        return historialDAO.buscarHistorialById(jugadorId)
                 .stream()
                 .map(HistorialCotizacionDTOSQL::aModelo)
                 .toList();

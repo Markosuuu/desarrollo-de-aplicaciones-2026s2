@@ -8,6 +8,6 @@ import java.util.UUID;
 public interface HistorialCotizacionRepository {
     void guardarHistorial(List<HistorialCotizacion> actualizaciones);
 
-    List<HistorialCotizacion> buscarPorBolsaId(UUID bolsaId);
+    List<HistorialCotizacion> buscarHistorialById(UUID jugadorId);
     void deleteAll();
 }
