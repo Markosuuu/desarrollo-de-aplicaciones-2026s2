@@ -38,20 +38,36 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, ex.getCode(), ex.getMessage());
     }
 
-    /**
-     * Maneja intentos de registrar usuarios duplicados.
-     */
-    @ExceptionHandler(DuplicateUserException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicate(DuplicateUserException ex) {
-        return error(HttpStatus.CONFLICT, "CORREO_DUPLICADO", ex.getMessage());
+    @ExceptionHandler(CampoInvalidoException.class)
+    public ResponseEntity<ErrorResponse> handleCampoInvalido(CampoInvalidoException ex) {
+        return error(HttpStatus.BAD_REQUEST, "CREDENCIALES_INVALIDAS",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(CampoRequeridoException.class)
+    public ResponseEntity<ErrorResponse> handleCampoInvalido(CampoRequeridoException ex) {
+        return error(HttpStatus.BAD_REQUEST, "CREDENCIALES_INVALIDAS",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(ContraseniaEquivocadaException.class)
+    public ResponseEntity<ErrorResponse> handleCampoInvalido(ContraseniaEquivocadaException ex) {
+        return error(HttpStatus.UNAUTHORIZED, "CREDENCIALES_INVALIDAS",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(CorreoNoExistenteException.class)
+    public ResponseEntity<ErrorResponse> handleCampoInvalido(CorreoNoExistenteException ex) {
+        return error(HttpStatus.UNAUTHORIZED, "CREDENCIALES_INVALIDAS",
+                ex.getMessage());
     }
 
     /**
-     * Maneja credenciales invalidas de autenticacion.
+     * Maneja intentos de registrar usuarios duplicados.
      */
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
-        return error(HttpStatus.UNAUTHORIZED, "CREDENCIALES_INVALIDAS", "Credenciales invalidas");
+    @ExceptionHandler(UsuarioRepetidoException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicate(UsuarioRepetidoException ex) {
+        return error(HttpStatus.CONFLICT, "CORREO_DUPLICADO", ex.getMessage());
     }
 
     /**
@@ -158,6 +174,8 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.CONFLICT, "SUBASTA_MODIFICADA_CONCURRENTEMENTE",
                 "La subasta cambió mientras se procesaba la solicitud; vuelve a intentarlo");
     }
+
+
 
     private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message) {
         ErrorResponse response = new ErrorResponse(

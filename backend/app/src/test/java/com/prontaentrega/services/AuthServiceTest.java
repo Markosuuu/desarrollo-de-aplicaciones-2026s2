@@ -5,15 +5,13 @@ import com.prontaentrega.models.auth.Usuario;
 import com.prontaentrega.persistence.repository.TokenEstadoRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.dto.AuthResult;
-import com.prontaentrega.services.exceptions.DuplicateUserException;
-import com.prontaentrega.services.exceptions.ValidationException;
+import com.prontaentrega.services.exceptions.*;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -98,8 +96,8 @@ public class AuthServiceTest extends AbstractIntegrationTest {
     void registerShouldRejectDuplicateEmail() {
         authService.register("Ana", "ana@example.com", "clave123");
 
-        DuplicateUserException exception = assertThrows(
-                DuplicateUserException.class,
+        UsuarioRepetidoException exception = assertThrows(
+                UsuarioRepetidoException.class,
                 () -> authService.register("Maria", "ana@example.com", "clave456")
         );
 
@@ -107,106 +105,93 @@ public class AuthServiceTest extends AbstractIntegrationTest {
                 "Ya existe una cuenta con ese correo registrado",
                 exception.getMessage()
         );
-        // Aca estoy testeando por mensaje y CREO recordar algo de epers de que esto no estaba muy bien pero ahora
-        // me entraron dudas, si queres borralo o si no, dejemoslo. Tengo pesima memoria y eso que era ayudante en
-        // epers te pido perdon marcsos. Los test abajo de este tambien lo hacen :(
 
         assertEquals(1, usuarioRepository.count());
     }
 
     /** Se verifica que no se permita registrar un usuario sin un nombre válido. */
     @Test
-    void registerShouldRejectBlankName() {
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+    void noDejaRegistrarseConNombresInvalidos() {
+        CampoRequeridoException exception = assertThrows(
+                CampoRequeridoException.class,
                 () -> authService.register("   ", "ana@example.com", "clave123")
         );
 
-        assertEquals("VALIDACION_INVALIDA", exception.getCode());
         assertEquals("Nombre requerido", exception.getMessage());
     }
 
     /** Se verifica que no se permita registrar un usuario con un correo inválido. */
     @Test
-    void registerShouldRejectInvalidEmail() {
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+    void noDejaRegistraseConCorreoInvalido() {
+        CampoInvalidoException exception = assertThrows(
+                CampoInvalidoException.class,
                 () -> authService.register("Ana", "ana@", "clave123")
         );
 
-        assertEquals("VALIDACION_INVALIDA", exception.getCode());
-        assertEquals("Correo invalido", exception.getMessage());
+        assertEquals("Correo inválido", exception.getMessage());
     }
 
-    /** Se verifica que no se permita registrar un usuario con una contraseña menor a ocho caracteres. */
     @Test
-    void registerShouldRejectPasswordShorterThanEightCharacters() {
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+    void noDejaRegistraseConContraseniaMenorAOchoCaracteres() {
+        CampoInvalidoException exception = assertThrows(
+                CampoInvalidoException.class,
                 () -> authService.register("Ana", "ana@example.com", "abc1234")
         );
 
-        assertEquals("VALIDACION_INVALIDA", exception.getCode());
-        assertEquals("Password invalido", exception.getMessage());
+        assertEquals("Contraseña inválida", exception.getMessage());
     }
 
     /** Se verifica que no se permita registrar un usuario con una contraseña sin letras. */
     @Test
-    void registerShouldRejectPasswordWithoutLetters() {
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+    void noDejaRegistraseConUnaContraseñaSinLetras() {
+        CampoInvalidoException exception = assertThrows(
+                CampoInvalidoException.class,
                 () -> authService.register("Ana", "ana@example.com", "12345678")
         );
 
-        assertEquals("VALIDACION_INVALIDA", exception.getCode());
-        assertEquals("Password invalido", exception.getMessage());
+        assertEquals("Contraseña inválida", exception.getMessage());
     }
 
     /** Se verifica que no se permita registrar un usuario con una contraseña sin números. */
     @Test
-    void registerShouldRejectPasswordWithoutNumbers() {
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+    void noDejaRegistrarseConUnaContraseñaSinNumeros() {
+        CampoInvalidoException exception = assertThrows(
+                CampoInvalidoException.class,
                 () -> authService.register("Ana", "ana@example.com", "abcdefgh")
         );
 
-        assertEquals("VALIDACION_INVALIDA", exception.getCode());
-        assertEquals("Password invalido", exception.getMessage());
+        assertEquals("Contraseña inválida", exception.getMessage());
     }
 
-    /** Se verifica que no se permita registrar un usuario con el nombre nulo. */
     @Test
-    void registerShouldHandleNullName() {
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+    void noDejaRegistrarseSinNombre() {
+        CampoRequeridoException exception = assertThrows(
+                CampoRequeridoException.class,
                 () -> authService.register(null, "ana@example.com", "clave123")
         );
 
-        assertEquals("VALIDACION_INVALIDA", exception.getCode());
         assertEquals("Nombre requerido", exception.getMessage());
     }
+
     /** Se verifica que no se permita registrar un usuario con el correo nulo. */
     @Test
-    void registerShouldHandleNullEmail() {
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+    void noDejaRegistrarseConCorreoVacioTest() {
+        CampoRequeridoException exception = assertThrows(
+                CampoRequeridoException.class,
                 () -> authService.register("Ana", null, "clave123")
         );
 
-        assertEquals("VALIDACION_INVALIDA", exception.getCode());
-        assertEquals("Correo invalido", exception.getMessage());
+        assertEquals("Correo requerido", exception.getMessage());
     }
 
-    /** Se verifica que no se permita registrar un usuario con una contraseña nula. */
     @Test
-    void registerShouldHandleNullPassword() {
-        ValidationException exception = assertThrows(
-                ValidationException.class,
+    void noDejaRegistraseConContraseñaNula() {
+        CampoRequeridoException exception = assertThrows(
+                CampoRequeridoException.class,
                 () -> authService.register("Ana", "ana@example.com", null)
         );
 
-        assertEquals("VALIDACION_INVALIDA", exception.getCode());
-        assertEquals("Password invalido", exception.getMessage());
+        assertEquals("Contraseña requerida", exception.getMessage());
     }
 
 
@@ -229,28 +214,26 @@ public class AuthServiceTest extends AbstractIntegrationTest {
         assertEquals("ana@example.com", response.usuario().getCorreo());
     }
 
-    /** Se verifica que no se permita iniciar sesión con un correo que no existe. */
     @Test
-    void loginShouldRejectUnknownEmail() {
-        BadCredentialsException exception = assertThrows(
-                BadCredentialsException.class,
+    void noDejaLoguearseConCorreoDesconocido() {
+        CorreoNoExistenteException exception = assertThrows(
+                CorreoNoExistenteException.class,
                 () -> authService.login("unknown@example.com", "clave123")
         );
 
-        assertEquals("Invalid credentials", exception.getMessage());
+        assertEquals("No existe el correo: unknown@example.com", exception.getMessage());
     }
 
-    /** Se verifica que no se permita iniciar sesión con una contraseña incorrecta. */
     @Test
-    void loginShouldRejectInvalidPassword() {
+    void noSeLogueaSiLaContraseñaEsIncorrecta() {
         authService.register("Ana", "ana@example.com", "clave123");
 
-        BadCredentialsException exception = assertThrows(
-                BadCredentialsException.class,
+        ContraseniaEquivocadaException exception = assertThrows(
+                ContraseniaEquivocadaException.class,
                 () -> authService.login("ana@example.com", "clave456")
         );
 
-        assertEquals("Invalid credentials", exception.getMessage());
+        assertEquals("La contraseña no coincide", exception.getMessage());
     }
 
     /** Se verifica que al iniciar sesión se normalice correctamente el correo. */
