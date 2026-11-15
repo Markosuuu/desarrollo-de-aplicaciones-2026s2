@@ -43,7 +43,8 @@ public class InventarioUsuario {
     }
 
     public void quitarTokens(Integer cantidadTokens) {
-        this.tokensEnVenta = this.tokensEnVenta - cantidadTokens;
+        setTokensEnVenta(Math.max(0, (getTokensEnVenta() - cantidadTokens)));
+        setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 
     public void ponerTokensEnVenta(Integer cantidad) {
@@ -73,7 +74,7 @@ public class InventarioUsuario {
 
     public void cancelarVenta(Integer cantidadTokens) {
         setTokensDisponibles(getTokensDisponibles() + cantidadTokens);
-        setTokensEnVenta(getTokensEnVenta() - cantidadTokens);
+        setTokensEnVenta(Math.max(0, getTokensEnVenta() - cantidadTokens));
         setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 }
