@@ -39,6 +39,7 @@ public class InventarioUsuario {
 
     public void agregarTokens(Integer cantidadTokens) {
         this.tokensDisponibles = this.tokensDisponibles + cantidadTokens;
+        setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 
     public void quitarTokens(Integer cantidadTokens) {
@@ -48,11 +49,31 @@ public class InventarioUsuario {
     public void ponerTokensEnVenta(Integer cantidad) {
 
         if (getTokensDisponibles() < cantidad) {
-            throw new CantidadDeTokensException("No posees suficientes tokens para subastar");
+            throw new CantidadDeTokensException("No posees suficientes tokens para la transacción");
         }
 
         setTokensDisponibles(getTokensDisponibles() - cantidad);
         setTokensEnVenta(getTokensEnVenta() + cantidad);
+        setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+    }
+
+    public void actualizarPorVenta(Integer cantidad, int cantidadTokensEnVenta) {
+        if (cantidadTokensEnVenta > getTokensEnVenta()) {
+            throw new CantidadDeTokensException("La publicación ya no tiene tokens disponibles");
+        }
+
+        this.quitarTokens(cantidad);
+        this.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+    }
+
+    public void actualizarPorCompra(Integer cantidadSolicitada) {
+        this.agregarTokens(cantidadSolicitada);
+        this.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+    }
+
+    public void cancelarVenta(Integer cantidadTokens) {
+        setTokensDisponibles(getTokensDisponibles() + cantidadTokens);
+        setTokensEnVenta(getTokensEnVenta() - cantidadTokens);
         setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
     }
 }

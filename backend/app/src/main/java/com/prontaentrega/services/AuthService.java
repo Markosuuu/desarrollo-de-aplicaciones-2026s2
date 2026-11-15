@@ -7,10 +7,7 @@ import com.prontaentrega.persistence.repository.TokenEstadoRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.services.exceptions.*;
-import com.prontaentrega.services.exceptions.auth.CampoInvalidoException;
-import com.prontaentrega.services.exceptions.auth.CampoRequeridoException;
-import com.prontaentrega.services.exceptions.auth.ContraseniaEquivocadaException;
-import com.prontaentrega.services.exceptions.auth.CorreoNoExistenteException;
+import com.prontaentrega.services.exceptions.auth.*;
 import io.jsonwebtoken.Claims;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -48,7 +45,6 @@ public class AuthService {
      * @param correo Correo electrónico del usuario a registrar.
      * @param password Contraseña del usuario a registrar.
      * @return Un objeto AuthResult que contiene los detalles del usuario registrado y el token JWT generado.
-     * @throws ValidationException Si el nombre, correo o contraseña no cumplen con los criterios de validación.
      * @throws UsuarioRepetidoException Si ya existe un usuario registrado con el mismo correo.
      */
     @Transactional

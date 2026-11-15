@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import com.prontaentrega.models.exception.CantidadDeTokensException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -67,5 +68,13 @@ public class BolsaDeJugador {
         this.estadisticasDeportivas = estadisticas;
         this.fechaActualizacion = fecha;
         this.fuente = fuente;
+    }
+
+    public void restarTokens(Integer cantidad) {
+        if (getTokensRestantes() < cantidad) {
+            throw new CantidadDeTokensException("La cantidad de tokens debe ser igual o menor a la cantidad actual");
+        }
+
+        setTokensRestantes(getTokensRestantes() - cantidad);
     }
 }

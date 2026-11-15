@@ -313,7 +313,7 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         BolsaDeJugador bolsa = crearBolsa("Jugador buy cerrado");
         darInventario(vendedor.id(), bolsa, 10);
         UUID anuncioId = publicar(vendedor.id(), bolsa, 3);
-        mercadoService.comprar(comprador1.id(), anuncioId);
+        mercadoService.comprar(comprador1.id(), anuncioId, 3);
 
         mockMvc.perform(post("/api/orders/buy")
                         .header("Authorization", bearer(comprador2))
@@ -406,7 +406,7 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         BolsaDeJugador bolsa = crearBolsa("Jugador transacciones");
         darInventario(vendedor.id(), bolsa, 10);
         UUID anuncioId = publicar(vendedor.id(), bolsa, 3);
-        mercadoService.comprar(comprador.id(), anuncioId);
+        mercadoService.comprar(comprador.id(), anuncioId, 3);
 
         mockMvc.perform(get("/api/users/{id}/transactions", vendedor.id())
                         .header("Authorization", bearer(vendedor)))

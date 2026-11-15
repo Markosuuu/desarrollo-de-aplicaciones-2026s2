@@ -38,9 +38,9 @@ public class JugadorRepositoryImpl implements JugadorRepository {
     }
 
     @Override
-    public BolsaDeJugador findById(UUID id) {
-        Optional<BolsaDeJugadorDTOSQL> response = daosql.findBolsaByPlayerId(id);
-        return response.map(BolsaDeJugadorDTOSQL::aModelo).orElse(null);
+    public Optional<BolsaDeJugador> findById(UUID id) {
+        return daosql.findBolsaByPlayerId(id)
+                .map(BolsaDeJugadorDTOSQL::aModelo);
     }
 
     /**

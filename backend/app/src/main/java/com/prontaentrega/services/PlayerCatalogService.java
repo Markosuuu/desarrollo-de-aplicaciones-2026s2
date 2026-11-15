@@ -9,6 +9,7 @@ import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
 import com.prontaentrega.services.exceptions.PlayerNotFoundException;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import com.prontaentrega.services.scraping.PlayerScrapper;
 import com.prontaentrega.services.scraping.whoscoredscrapper.ScrappedPlayerMapper;
 import java.time.LocalDateTime;
@@ -122,13 +123,7 @@ public class PlayerCatalogService {
 
     @Transactional
     public BolsaDeJugador searchById(UUID id) {
-        BolsaDeJugador response = jugadorRepository.findById(id);
-        if (response != null) {
-            return response;
-        }
-        else {
-            throw new PlayerNotFoundException("No se encontro un jugador con el id dado.");
-        }
+        return jugadorRepository.findById(id).orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado: " + id));
     }
 
     @Transactional

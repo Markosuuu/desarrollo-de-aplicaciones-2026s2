@@ -1,4 +1,4 @@
-package com.prontaentrega.services.exceptions;
+package com.prontaentrega.services.exceptions.auth;
 
 public class UsuarioRepetidoException extends RuntimeException {
     public UsuarioRepetidoException(String message) {

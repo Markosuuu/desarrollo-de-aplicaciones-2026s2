@@ -1,4 +1,4 @@
-package com.prontaentrega.services.exceptions;
+package com.prontaentrega.services.exceptions.auth;
 
 import java.util.UUID;
 

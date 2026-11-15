@@ -45,4 +45,22 @@ public class AnuncioVenta {
         this.creadoEn = LocalDateTime.now(ZoneId.systemDefault());
         this.actualizadoEn = this.creadoEn;
     }
+
+    public void actualizarTokensEnVenta(Integer cantidadSolicitada) {
+
+        int cantidadRestante = getCantidadTokens() - cantidadSolicitada;
+        setCantidadTokens(cantidadRestante);
+        setPrecioTotal(getPrecioPorToken().multiply(BigDecimal.valueOf(cantidadRestante)));
+
+        if (cantidadRestante == 0) {
+            setEstado(EstadoAnuncioVenta.COMPLETADA);
+        }
+
+        setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+    }
+
+    public void cancelarAnuncio() {
+        setEstado(EstadoAnuncioVenta.CANCELADA);
+        setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+    }
 }

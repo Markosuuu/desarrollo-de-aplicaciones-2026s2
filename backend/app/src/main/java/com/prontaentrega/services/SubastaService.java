@@ -15,7 +15,6 @@ import com.prontaentrega.persistence.repository.OfertaRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.persistence.repository.SubastaRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
-import com.prontaentrega.services.exceptions.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,6 +23,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.prontaentrega.services.exceptions.auth.UsuarioNoEncontradoException;
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
+import com.prontaentrega.services.exceptions.mercado.CreditosInsuficientesException;
+import com.prontaentrega.services.exceptions.mercado.InventarioNoEncontradoException;
+import com.prontaentrega.services.exceptions.mercado.SinAutorizacionExpcetion;
+import com.prontaentrega.services.exceptions.subastas.IdempotencyKeyException;
+import com.prontaentrega.services.exceptions.subastas.OfertaInvalidaException;
+import com.prontaentrega.services.exceptions.subastas.SubastaNoActivaException;
+import com.prontaentrega.services.exceptions.subastas.SubastaNoEncontradaException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -111,7 +120,7 @@ public class SubastaService {
         Usuario vendedor = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new UsuarioNoEncontradoException(usuarioId));
 
-        BolsaDeJugador bolsa = Optional.ofNullable(jugadorRepository.findById(jugadorId))
+        BolsaDeJugador bolsa = jugadorRepository.findById(jugadorId)
                 .orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado con el id: " + jugadorId));
 
         validarCreacionSubasta(cantidad, precioInicial, vencimiento, usuarioId, jugadorId);

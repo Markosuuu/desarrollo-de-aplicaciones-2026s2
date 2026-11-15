@@ -5,9 +5,12 @@ import com.prontaentrega.models.jugadores.Posicion;
 import com.prontaentrega.models.jugadores.BolsaDeJugador;
 import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
 import com.prontaentrega.models.jugadores.Jugador;
+import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
+import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
+import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.services.PlayerCatalogService;
-import com.prontaentrega.services.exceptions.PlayerNotFoundException;
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.Tag;
 import org.springframework.data.domain.Page;
@@ -34,8 +37,20 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     @Autowired
     private JugadorRepository jugadorRepository;
 
+    @Autowired
+    private InventarioUsuarioRepository inventarioRepository;
+
+    @Autowired
+    private OperacionRepository operacionRepository;
+
+    @Autowired
+    private AnuncioVentaRepository anuncioVentaRepository;
+
     @BeforeEach
     void clean() {
+        inventarioRepository.deleteAll();
+        operacionRepository.deleteAll();
+        anuncioVentaRepository.deleteAll();
         jugadorRepository.deleteAll();
     }
 
@@ -372,11 +387,12 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
 
     @Test
     void searchByIdNoExistenteArrojaException() {
-        PlayerNotFoundException e = assertThrows(
-                PlayerNotFoundException.class,
-                () -> playerCatalogService.searchById(new UUID(1,2))
+        UUID id = new UUID(1,2);
+        JugadorNoEncontradoException e = assertThrows(
+                JugadorNoEncontradoException.class,
+                () -> playerCatalogService.searchById(id)
         );
-        assertEquals("No se encontro un jugador con el id dado.", e.getMessage());
+        assertEquals("Jugador no encontrado: " + id, e.getMessage());
     }
 
 

@@ -4,13 +4,14 @@ import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.services.exceptions.*;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.exceptions.ProviderUnavailableException;
-import com.prontaentrega.services.exceptions.ValidationException;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
+import com.prontaentrega.services.exceptions.auth.*;
 import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
-import com.prontaentrega.services.exceptions.auth.CampoInvalidoException;
-import com.prontaentrega.services.exceptions.auth.CampoRequeridoException;
-import com.prontaentrega.services.exceptions.auth.ContraseniaEquivocadaException;
-import com.prontaentrega.services.exceptions.auth.CorreoNoExistenteException;
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
+import com.prontaentrega.services.exceptions.mercado.*;
+import com.prontaentrega.services.exceptions.subastas.OfertaInvalidaException;
+import com.prontaentrega.services.exceptions.subastas.SubastaNoActivaException;
+import com.prontaentrega.services.exceptions.subastas.SubastaNoEncontradaException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,13 +34,6 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, code, "Datos invalidos");
     }
 
-    /**
-     * Maneja errores de validacion generados por servicios.
-     */
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex) {
-        return error(HttpStatus.BAD_REQUEST, ex.getCode(), ex.getMessage());
-    }
 
     @ExceptionHandler(CampoInvalidoException.class)
     public ResponseEntity<ErrorResponse> handleCampoInvalido(CampoInvalidoException ex) {

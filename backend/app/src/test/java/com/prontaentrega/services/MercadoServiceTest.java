@@ -17,7 +17,9 @@ import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
-import com.prontaentrega.services.exceptions.*;
+import com.prontaentrega.services.exceptions.auth.UsuarioNoEncontradoException;
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
+import com.prontaentrega.services.exceptions.mercado.*;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -96,14 +98,14 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 2).getId();
 
         assertThrows(VendedorComprandoTokensPropiosException.class,
-                () -> mercadoService.comprar(seller.getId(), anuncioId));
+                () -> mercadoService.comprar(seller.getId(), anuncioId, 2));
 
         Usuario buyer = saveUser("Comprador", uniqueEmail("comprador@test.com"));
         buyer.setCreditosDisponibles(BigDecimal.ZERO);
         usuarioRepository.save(buyer);
 
         assertThrows(CreditosInsuficientesException.class,
-                () -> mercadoService.comprar(buyer.getId(), anuncioId));
+                () -> mercadoService.comprar(buyer.getId(), anuncioId, 1));
     }
 
     @Test
@@ -121,10 +123,10 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         usuarioRepository.save(buyer2);
 
         UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 5).getId();
-        mercadoService.comprar(buyer1.getId(), anuncioId);
+        mercadoService.comprar(buyer1.getId(), anuncioId, 5);
 
         assertThrows(AnuncioNoPendienteException.class,
-                () -> mercadoService.comprar(buyer2.getId(), anuncioId));
+                () -> mercadoService.comprar(buyer2.getId(), anuncioId, null));
     }
 
     @Test
@@ -189,7 +191,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
         inventarioUsuarioRepository.save(new InventarioUsuario(seller, bolsa, 10, 0));
         UUID anuncioId = mercadoService.vender(seller.getId(), jugadorId, 3).getId();
-        mercadoService.comprar(buyer.getId(), anuncioId);
+        mercadoService.comprar(buyer.getId(), anuncioId, 3);
 
         Page<Operacion> history = mercadoService.getTransaccionesById(seller.getId(), 1, 20);
         assertEquals(1, history.getTotalElements());
@@ -229,7 +231,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
 
         UUID vendidoId = mercadoService.vender(seller.getId(), jugadorId, 1).getId();
         UUID pendienteId = mercadoService.vender(seller.getId(), jugadorId, 1).getId();
-        mercadoService.comprar(buyer.getId(), vendidoId);
+        mercadoService.comprar(buyer.getId(), vendidoId, 1);
 
         Page<AnuncioVenta> resultado = mercadoService.getAnuncios(1, 10);
 
@@ -399,7 +401,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         inventarioUsuarioRepository.save(new InventarioUsuario(vendedor, bolsa, 10, 0));
 
         UUID anuncioId = mercadoService.vender(vendedor.getId(), jugadorId, 5).getId();
-        mercadoService.comprar(comprador.getId(), anuncioId);
+        mercadoService.comprar(comprador.getId(), anuncioId, 5);
 
         assertThrows(AnuncioNoPendienteException.class,
                 () -> mercadoService.cancelarVenta(vendedor.getId(), anuncioId));
@@ -477,7 +479,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
         mercadoService.comprarSuper(buyer.getId(), jugadorId, 3);
 
         Usuario compradorActualizado = usuarioRepository.findById(buyer.getId()).orElseThrow();
-        BolsaDeJugador bolsaActualizada = jugadorRepository.findById(jugadorId);
+        BolsaDeJugador bolsaActualizada = jugadorRepository.findById(jugadorId).get();
         InventarioUsuario inventario = inventarioUsuarioRepository
                 .findByUsuarioIdAndJugadorId(buyer.getId(), jugadorId).orElseThrow();
 
@@ -533,7 +535,7 @@ class MercadoServiceTest extends AbstractIntegrationTest {
 
         mercadoService.comprarSuper(buyer.getId(), jugadorId, todos);
 
-        assertEquals(0, jugadorRepository.findById(jugadorId).getTokensRestantes());
+        assertEquals(0, jugadorRepository.findById(jugadorId).get().getTokensRestantes());
     }
 
     private Usuario saveUser(String nombre, String correo) {
