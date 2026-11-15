@@ -29,8 +29,8 @@ import com.prontaentrega.services.exceptions.mercado.CreditosInsuficientesExcept
 import com.prontaentrega.services.exceptions.mercado.InventarioNoEncontradoException;
 import com.prontaentrega.services.exceptions.mercado.SinAutorizacionExpcetion;
 import com.prontaentrega.services.exceptions.subastas.IdempotencyKeyException;
-import com.prontaentrega.services.exceptions.subastas.OfertaInvalidaException;
-import com.prontaentrega.services.exceptions.subastas.SubastaNoActivaException;
+import com.prontaentrega.models.exception.OfertaInvalidaException;
+import com.prontaentrega.models.exception.SubastaNoActivaException;
 import com.prontaentrega.services.exceptions.subastas.SubastaNoEncontradaException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -215,9 +215,9 @@ public class SubastaService {
     }
 
     private void devolverTokensAlPropietario(Subasta subasta) {
-        Usuario vendedor = buscarUsuario(subasta.getPropietarioId());
+        Usuario vendedor = buscarUsuario(subasta.getPropietario().getId());
 
-        UUID jugadorId = subasta.getJugadorId();
+        UUID jugadorId = subasta.getBolsaDeJugador().getEstadisticasDeportivas().getJugador().getId();
         BolsaDeJugador bolsa = subasta.getBolsaDeJugador();
         InventarioUsuario inventario = buscarInventario(vendedor.getId(), jugadorId, vendedor, bolsa);
 
@@ -226,7 +226,7 @@ public class SubastaService {
     }
 
     private void liquidarVenta(Subasta subasta, Oferta ofertaGanadora) {
-        Usuario vendedor = buscarUsuario(subasta.getPropietarioId());
+        Usuario vendedor = buscarUsuario(subasta.getPropietario().getId());
 
         Usuario ganador = buscarUsuario(ofertaGanadora.getUsuarioId());
 
@@ -235,7 +235,7 @@ public class SubastaService {
         usuarioRepository.save(ganador);
         usuarioRepository.save(vendedor);
 
-        UUID jugadorId = subasta.getJugadorId();
+        UUID jugadorId = subasta.getBolsaDeJugador().getEstadisticasDeportivas().getJugador().getId();
         BolsaDeJugador bolsa = subasta.getBolsaDeJugador();
 
         InventarioUsuario inventarioGanador = buscarInventario(ganador.getId(), jugadorId, ganador, bolsa);

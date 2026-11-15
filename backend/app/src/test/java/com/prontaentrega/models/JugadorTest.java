@@ -3,10 +3,7 @@ package com.prontaentrega.models;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import com.prontaentrega.models.exception.CampoFaltanteException;
-import com.prontaentrega.models.exception.LigaNoSoportadaException;
-import com.prontaentrega.models.exception.PosicionNoExistenteException;
-import com.prontaentrega.models.exception.ValorNegativoException;
+import com.prontaentrega.models.exception.*;
 import com.prontaentrega.models.jugadores.builders.EstadisticasDeportivasDatos;
 import com.prontaentrega.models.jugadores.Liga;
 import com.prontaentrega.models.jugadores.Posicion;
@@ -502,6 +499,22 @@ class JugadorTest {
                 () -> bolsa.actualizarEstadisticas(estadisticas, LocalDateTime.now(), null));
 
         assertEquals("fuente is marked non-null but is null", ex.getMessage());
+    }
+
+    @Test
+    void unaBolsaRestaLaCantidadDeTokensQueLeResta() {
+        assertEquals(100, bolsa.getTokensRestantes());
+        bolsa.restarTokens(50);
+        assertEquals(50, bolsa.getTokensRestantes());
+    }
+
+    @Test
+    void restarTokensNoPuedeSuperarLaCantidadRestante() {
+        CantidadDeTokensException ex = assertThrows(CantidadDeTokensException.class,
+                () ->bolsa.restarTokens(101));
+
+        assertEquals("La cantidad de tokens debe ser igual o menor a la cantidad actual",
+                ex.getMessage());
     }
 
     // Posicion

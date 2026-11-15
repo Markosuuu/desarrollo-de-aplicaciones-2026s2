@@ -115,7 +115,6 @@ public class UsuarioTest {
         LocalDateTime fecha = user.getActualizadoEn();
         user.sumarCreditos(BigDecimal.valueOf(50));
 
-        assertNotEquals(fecha, user.getActualizadoEn());
         assertTrue(user.getActualizadoEn().isAfter(fecha));
     }
 }

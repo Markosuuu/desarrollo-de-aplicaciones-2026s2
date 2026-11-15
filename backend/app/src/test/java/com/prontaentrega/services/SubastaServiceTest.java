@@ -12,7 +12,7 @@ import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.persistence.repository.SubastaRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
-import com.prontaentrega.services.exceptions.subastas.OfertaInvalidaException;
+import com.prontaentrega.models.exception.OfertaInvalidaException;
 import com.prontaentrega.services.exceptions.subastas.IdempotencyKeyException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;

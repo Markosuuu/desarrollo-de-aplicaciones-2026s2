@@ -1,4 +1,4 @@
-package com.prontaentrega.services.exceptions.subastas;
+package com.prontaentrega.models.exception;
 
 public class OfertaInvalidaException extends RuntimeException {
     public OfertaInvalidaException(String message) {

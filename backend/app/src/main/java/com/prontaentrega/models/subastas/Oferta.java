@@ -6,6 +6,8 @@ import java.time.ZoneId;
 import java.util.UUID;
 
 import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.exception.CampoFaltanteException;
+import com.prontaentrega.models.exception.ValorNegativoException;
 import lombok.*;
 
 @Getter
@@ -20,21 +22,29 @@ public class Oferta {
     private Boolean esSuperior;
     private final String idempotencyKey;
 
-    public Oferta(Subasta subasta, Usuario usuario, BigDecimal puja, String idempotencyKey) {
-        this.subasta = subasta;
-        this.usuario = usuario;
-        this.puja = puja;
-        this.esSuperior = true;
-        this.creadoEn = LocalDateTime.now(ZoneId.systemDefault());
-        this.idempotencyKey = idempotencyKey;
+    public Oferta(
+            @NonNull Subasta subasta,
+            @NonNull Usuario usuario,
+            @NonNull BigDecimal puja,
+            @NonNull String idempotencyKey) {
+        this(subasta, usuario, puja, LocalDateTime.now(ZoneId.systemDefault()), idempotencyKey);
     }
 
     public Oferta(
-            Subasta subasta,
-            Usuario usuario,
-            BigDecimal puja,
-            LocalDateTime creadoEn,
-            String idempotencyKey) {
+            @NonNull Subasta subasta,
+            @NonNull Usuario usuario,
+            @NonNull BigDecimal puja,
+            @NonNull LocalDateTime creadoEn,
+            @NonNull String idempotencyKey) {
+
+        if (puja.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ValorNegativoException("La puja debe ser mayor que 0");
+        }
+
+        if (idempotencyKey.isBlank()) {
+            throw new CampoFaltanteException("La clave de idempotencia es obligatoria");
+        }
+
         this.subasta = subasta;
         this.usuario = usuario;
         this.puja = puja;
