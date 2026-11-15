@@ -2,6 +2,7 @@ package com.prontaentrega.controllers.exceptions;
 
 import com.prontaentrega.models.exception.CampoInvalidoException;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
+import com.prontaentrega.models.exception.AnuncioNoPendienteException;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.exceptions.jugadores.ProviderUnavailableException;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;

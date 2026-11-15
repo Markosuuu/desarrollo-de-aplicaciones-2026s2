@@ -5,13 +5,10 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
 
+import com.prontaentrega.models.exception.ValorNegativoException;
 import com.prontaentrega.models.jugadores.Jugador;
 import com.prontaentrega.models.auth.Usuario;
 import lombok.*;
-
-/**
- * Nuevamente es un contenedor, igual este me parece necesario
- */
 
 @Getter
 @Setter
@@ -29,9 +26,24 @@ public class Operacion {
     private final EstadoOperacion estado;
     private final LocalDateTime creadaEn;
 
-    public Operacion(Usuario usuario, Usuario contraparte, Jugador jugador, Integer cantidad,
-                    BigDecimal precioPorToken, BigDecimal total, TipoOperacion tipo,
-                    EstadoOperacion estado) {
+    public Operacion(
+            @NonNull Usuario usuario,
+            @NonNull Usuario contraparte,
+            @NonNull Jugador jugador,
+            @NonNull Integer cantidad,
+            @NonNull BigDecimal precioPorToken,
+            @NonNull BigDecimal total,
+            @NonNull TipoOperacion tipo,
+            @NonNull EstadoOperacion estado) {
+
+        if (cantidad <= 0) {
+            throw new ValorNegativoException("La cantidad debe ser mayor que 0");
+        }
+
+        if (total.compareTo(BigDecimal.ZERO) < 0) {
+            throw new ValorNegativoException("El total no puede ser negativo");
+        }
+
         this.usuario = usuario;
         this.contraparte = contraparte;
         this.jugador = jugador;

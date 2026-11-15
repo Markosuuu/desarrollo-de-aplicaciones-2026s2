@@ -1,4 +1,4 @@
-package com.prontaentrega.services.exceptions.mercado;
+package com.prontaentrega.models.exception;
 
 public class AnuncioNoPendienteException extends RuntimeException {
     public AnuncioNoPendienteException(String message) {

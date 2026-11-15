@@ -1,14 +1,11 @@
 package com.prontaentrega.services;
 
 import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.exception.AnuncioNoPendienteException;
+import com.prontaentrega.models.jugadores.*;
 import com.prontaentrega.models.mercado.EstadoAnuncioVenta;
-import com.prontaentrega.models.jugadores.Liga;
-import com.prontaentrega.models.jugadores.Posicion;
 import com.prontaentrega.models.mercado.TipoOperacion;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
-import com.prontaentrega.models.jugadores.BolsaDeJugador;
-import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
-import com.prontaentrega.models.jugadores.Jugador;
 import com.prontaentrega.models.mercado.AnuncioVenta;
 import com.prontaentrega.models.mercado.InventarioUsuario;
 import com.prontaentrega.models.mercado.Operacion;

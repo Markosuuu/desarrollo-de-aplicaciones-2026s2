@@ -1,5 +1,6 @@
 package com.prontaentrega.services;
 
+import com.prontaentrega.models.exception.AnuncioNoPendienteException;
 import com.prontaentrega.models.mercado.AnuncioVenta;
 import com.prontaentrega.models.jugadores.BolsaDeJugador;
 import com.prontaentrega.models.jugadores.Jugador;
