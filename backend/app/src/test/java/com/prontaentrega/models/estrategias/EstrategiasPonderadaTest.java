@@ -99,11 +99,184 @@ class EstrategiasPonderadaTest {
         assertEquals("La configuración no corresponde a la estrategia ponderada", e.getMessage());
     }
 
+    // Datos nulos (líneas 63-65)
+
+    @Test
+    void calcular_deberiaRechazarSiLosDatosSonNulos() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(null, configuracion));
+
+        assertEquals("Faltan métricas requeridas para valorar al jugador", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiLaCotizacionVigenteEsNula() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos(null, 3, 0, "1", "2", "3", "4", "5"), configuracion));
+
+        assertEquals("Faltan métricas requeridas para valorar al jugador", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiLosGolesSonNulos() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", null, 0, "1", "2", "3", "4", "5"), configuracion));
+
+        assertEquals("Faltan métricas requeridas para valorar al jugador", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiLasAsistenciasSonNulas() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, null, "1", "2", "3", "4", "5"), configuracion));
+
+        assertEquals("Faltan métricas requeridas para valorar al jugador", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiLosPasesClaveSonNulos() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "1", null, "3", "4", "5"), configuracion));
+
+        assertEquals("Faltan métricas requeridas para valorar al jugador", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiLosRegatesGanadosSonNulos() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "1", "2", null, "4", "5"), configuracion));
+
+        assertEquals("Faltan métricas requeridas para valorar al jugador", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiLasFaltasCometidasSonNulas() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "1", "2", "3", null, "5"), configuracion));
+
+        assertEquals("Faltan métricas requeridas para valorar al jugador", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiElRatingEsNulo() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "1", "2", "3", "4", null), configuracion));
+
+        assertEquals("Faltan métricas requeridas para valorar al jugador", e.getMessage());
+    }
+
+// Valores negativos enteros (línea 69)
+
+    @Test
+    void calcular_deberiaRechazarSiLasAsistenciasSonNegativas() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, -1, "1", "2", "3", "4", "5"), configuracion));
+
+        assertEquals("Las métricas del jugador contienen valores inválidos", e.getMessage());
+    }
+
+// Valores negativos decimales (líneas 78-79)
+
+    @Test
+    void calcular_deberiaRechazarSiLosDisparosPorPartidoSonNegativos() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "-1", "2", "3", "4", "5"), configuracion));
+
+        assertEquals("Las métricas del jugador contienen valores inválidos", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiLosPasesClavePorPartidoSonNegativos() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "1", "-2", "3", "4", "5"), configuracion));
+
+        assertEquals("Las métricas del jugador contienen valores inválidos", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiLosRegatesGanadosPorPartidoSonNegativos() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "1", "2", "-3", "4", "5"), configuracion));
+
+        assertEquals("Las métricas del jugador contienen valores inválidos", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiLasFaltasCometidasPorPartidoSonNegativas() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "1", "2", "3", "-4", "5"), configuracion));
+
+        assertEquals("Las métricas del jugador contienen valores inválidos", e.getMessage());
+    }
+
+    @Test
+    void calcular_deberiaRechazarSiElRatingEsNegativo() {
+        ConfiguracionEstrategiaPonderada configuracion = configuracionPonderada(
+                "1", "0", "0", "0", "0", "0", "0", "2");
+
+        DatosValoracionInvalidaException e = assertThrows(DatosValoracionInvalidaException.class,
+                () -> estrategiaPonderada.calcular(
+                        datos("10", 3, 0, "1", "2", "3", "4", "-5"), configuracion));
+
+        assertEquals("Las métricas del jugador contienen valores inválidos", e.getMessage());
+    }
+
     /** Crea una proyección de jugador con las métricas indicadas para cada caso unitario. */
     private DatosValoracion datos(String cotizacion, Integer goles, Integer asistencias,
                                   String disparos, String pases, String regates,
                                   String faltas, String rating) {
-        return new DatosValoracion(UUID.randomUUID(), new BigDecimal(cotizacion), goles,
+        return new DatosValoracion(UUID.randomUUID(), decimal(cotizacion), goles,
                 asistencias, decimal(disparos), decimal(pases), decimal(regates),
                 decimal(faltas), decimal(rating));
     }
