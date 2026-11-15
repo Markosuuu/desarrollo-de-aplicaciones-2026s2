@@ -10,9 +10,9 @@ import com.prontaentrega.models.jugadores.BolsaDeJugador;
 import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
 import com.prontaentrega.models.jugadores.Jugador;
 import com.prontaentrega.persistence.repository.JugadorRepository;
-import com.prontaentrega.services.PlayerCatalogService;
+import com.prontaentrega.services.PlayerService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
-import com.prontaentrega.services.exceptions.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.jugadores.ProviderUnavailableException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -37,14 +37,14 @@ import org.springframework.test.context.DynamicPropertySource;
  */
 @SpringBootTest
 @Tag("integracion")
-class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
+class PlayerServiceRefreshTest extends AbstractIntegrationTest {
 
     private static final AtomicInteger providerStatus = new AtomicInteger(200);
     private static final AtomicReference<String> providerBody = new AtomicReference<>(validPayload());
     private static HttpServer server;
 
     @Autowired
-    private PlayerCatalogService playerCatalogService;
+    private PlayerService playerService;
 
     @Autowired
     private JugadorRepository jugadorRepository;
@@ -78,7 +78,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
     @Test
     void refreshShouldPersistPlayers() {
         RefreshCatalogResponse response =
-                playerCatalogService.refreshFromWhoScored();
+                playerService.refreshFromWhoScored();
 
         assertEquals(2, response.created());
         assertEquals(0, response.updated());
@@ -100,14 +100,14 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
     @Test
     void refreshShouldUpdateExistingPlayers() {
         RefreshCatalogResponse first =
-                playerCatalogService.refreshFromWhoScored();
+                playerService.refreshFromWhoScored();
 
         assertEquals(2, first.created());
 
         providerBody.set(updatedPayload());
 
         RefreshCatalogResponse second =
-                playerCatalogService.refreshFromWhoScored();
+                playerService.refreshFromWhoScored();
 
         assertEquals(0, second.created());
         assertEquals(2, second.updated());
@@ -140,7 +140,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
 
         ProviderUnavailableException exception = assertThrows(
                 ProviderUnavailableException.class,
-                () -> playerCatalogService.refreshFromWhoScored()
+                () -> playerService.refreshFromWhoScored()
         );
 
         assertEquals("PAGINACION_INVALIDA", exception.getCode());
@@ -192,7 +192,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
 
         ProviderUnavailableException exception = assertThrows(
                 ProviderUnavailableException.class,
-                () -> playerCatalogService.refreshFromWhoScored()
+                () -> playerService.refreshFromWhoScored()
         );
 
         assertEquals("SIN_DATOS_UTILES", exception.getCode());
@@ -240,7 +240,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
 
         ProviderUnavailableException exception = assertThrows(
                 ProviderUnavailableException.class,
-                () -> playerCatalogService.refreshFromWhoScored()
+                () -> playerService.refreshFromWhoScored()
         );
 
         assertEquals("WHOSCORED_NO_DISPONIBLE", exception.getCode());
@@ -332,7 +332,7 @@ class PlayerCatalogServiceRefreshTest extends AbstractIntegrationTest {
             """);
 
         RefreshCatalogResponse response =
-                playerCatalogService.refreshFromWhoScored();
+                playerService.refreshFromWhoScored();
 
         assertTrue(response.success());
         assertEquals("Actualizacion completada correctamente", response.message());

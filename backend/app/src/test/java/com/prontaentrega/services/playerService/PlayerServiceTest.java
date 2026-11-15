@@ -9,7 +9,7 @@ import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
-import com.prontaentrega.services.PlayerCatalogService;
+import com.prontaentrega.services.PlayerService;
 import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import org.junit.jupiter.api.Tag;
@@ -30,9 +30,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 @SpringBootTest
 @Tag("integracion")
-public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
+public class PlayerServiceTest extends AbstractIntegrationTest {
     @Autowired
-    private PlayerCatalogService playerCatalogService;
+    private PlayerService playerService;
 
     @Autowired
     private JugadorRepository jugadorRepository;
@@ -112,7 +112,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 null,
@@ -130,7 +130,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 "Inter Miami",
                 null,
@@ -147,7 +147,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 "Messi",
@@ -165,7 +165,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 Liga.BUNDESLIGA,
                 null,
                 null,
@@ -184,7 +184,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(2, "Eder Aller", "Barcelona", Liga.LALIGA);
         saveJugador(3, "Luis Suarez", "Inter Miami", Liga.BUNDESLIGA);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 Liga.BUNDESLIGA,
                 "Inter Miami",
                 "Messi",
@@ -207,7 +207,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
         saveJugador(2, "Enzo Fernandez", "Chelsea", Liga.PREMIER_LEAGUE);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 Liga.BUNDESLIGA,
                 "  Inter Miami  ",
                 "  Messi  ",
@@ -224,7 +224,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldReturnRequestedPlayersPerPage() {
         saveManyJugadores(3);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 null,
@@ -245,7 +245,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldReturnPlayersFromRequestedPage() {
         saveManyJugadores(3);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 null,
@@ -266,7 +266,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldReturnEmptyResponseWhenNoPlayersMatch() {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 "Jugador inexistente",
@@ -284,7 +284,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldUseFirstPageWhenPageIsLessThanOne() {
         saveManyJugadores(3);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 null,
@@ -302,7 +302,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldLimitPerPageToFifty() {
         saveManyJugadores(51);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 null,
@@ -321,7 +321,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchFiftyPerPageShouldReturnFifty() {
         saveManyJugadores(51);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 null,
@@ -340,7 +340,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void search49PerPageShouldReturn49Elements() {
         saveManyJugadores(51);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 null,
@@ -359,7 +359,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void searchShouldUseOneWhenPerPageIsLessThanOne() {
         saveManyJugadores(3);
 
-        Page<BolsaDeJugador> response = playerCatalogService.search(
+        Page<BolsaDeJugador> response = playerService.search(
                 null,
                 null,
                 null,
@@ -378,7 +378,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         BolsaDeJugador savedBolsa = saveJugador(15, "Julian Alvarez", "Boca", Liga.LALIGA);
         Jugador savedJugador = savedBolsa.getEstadisticasDeportivas().getJugador();
 
-        BolsaDeJugador response = playerCatalogService.searchById(savedJugador.getId());
+        BolsaDeJugador response = playerService.searchById(savedJugador.getId());
         Jugador responseJugador = response.getEstadisticasDeportivas().getJugador();
 
         assertEquals("Julian Alvarez", responseJugador.getNombre());
@@ -390,7 +390,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         UUID id = new UUID(1,2);
         JugadorNoEncontradoException e = assertThrows(
                 JugadorNoEncontradoException.class,
-                () -> playerCatalogService.searchById(id)
+                () -> playerService.searchById(id)
         );
         assertEquals("Jugador no encontrado: " + id, e.getMessage());
     }
@@ -411,7 +411,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
         jugadorRepository.save(player2);
         jugadorRepository.save(player3);
 
-        Page<BolsaDeJugador> response = playerCatalogService.getRankingByNombre(
+        Page<BolsaDeJugador> response = playerService.getRankingByNombre(
                 1, 10, "Messi"
         );
 
@@ -433,7 +433,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void rankingByNameShouldNormalizeInvalidPageAndSize() {
         saveJugador(1, "Lionel Messi", "Inter Miami", Liga.BUNDESLIGA);
 
-        Page<BolsaDeJugador> response = playerCatalogService.getRankingByNombre(
+        Page<BolsaDeJugador> response = playerService.getRankingByNombre(
                 0, 0, "Messi"
         );
 
@@ -446,7 +446,7 @@ public class PlayerCatalogServiceTest extends AbstractIntegrationTest {
     void rankingByNameShouldLimitPageSizeTo50() {
         saveManyJugadores(55);
 
-        Page<BolsaDeJugador> response = playerCatalogService.getRankingByNombre(
+        Page<BolsaDeJugador> response = playerService.getRankingByNombre(
                 1, 100, "Jugador"
         );
 

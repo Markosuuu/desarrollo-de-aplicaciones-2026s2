@@ -9,11 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** Asegura la existencia del registro de coordinación sin seleccionar una estrategia. */
 @Component
-public class QuoteStrategyStateInitializer implements ApplicationRunner {
+public class EstadoEstrategiaCotizacionInitializer implements ApplicationRunner {
     private final EstadoEstrategiaCotizacionDAOSQL estadoDAO;
 
     /** Construye el inicializador con el DAO del estado global. */
-    public QuoteStrategyStateInitializer(EstadoEstrategiaCotizacionDAOSQL estadoDAO) {
+    public EstadoEstrategiaCotizacionInitializer(EstadoEstrategiaCotizacionDAOSQL estadoDAO) {
         this.estadoDAO = estadoDAO;
     }
 

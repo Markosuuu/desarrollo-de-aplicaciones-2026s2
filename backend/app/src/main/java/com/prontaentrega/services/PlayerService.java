@@ -7,8 +7,7 @@ import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
-import com.prontaentrega.services.exceptions.PlayerNotFoundException;
-import com.prontaentrega.services.exceptions.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.jugadores.ProviderUnavailableException;
 import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import com.prontaentrega.services.scraping.PlayerScrapper;
 import com.prontaentrega.services.scraping.whoscoredscrapper.ScrappedPlayerMapper;
@@ -29,15 +28,15 @@ import org.springframework.transaction.annotation.Transactional;
  * mantener las reglas de dominio en sus componentes correspondientes.
  */
 @Service
-public class PlayerCatalogService {
+public class PlayerService {
     private final PersistenceManager playerPersistenceManager;
     private final JugadorRepository jugadorRepository;
     private final PlayerScrapper playerScrapper;
     private final ScrappedPlayerMapper scrappedPlayerMapper;
 
-    public PlayerCatalogService(JugadorRepository jugadorRepository,
-                                PlayerScrapper playerScrapper,
-                                ScrappedPlayerMapper scrappedPlayerMapper, PersistenceManager playerPersistenceManager) {
+    public PlayerService(JugadorRepository jugadorRepository,
+                         PlayerScrapper playerScrapper,
+                         ScrappedPlayerMapper scrappedPlayerMapper, PersistenceManager playerPersistenceManager) {
         this.jugadorRepository = jugadorRepository;
         this.playerScrapper = playerScrapper;
         this.scrappedPlayerMapper = scrappedPlayerMapper;
@@ -194,6 +193,7 @@ public class PlayerCatalogService {
         return value == null || value.isBlank() ? null : value.trim();
     }
 
+    @Transactional
     public Page<BolsaDeJugador> getRankingByNombre(int page, int perPage, String nombre) {
         int safePage = Math.max(page, 1);
         int safePerPage = Math.clamp(perPage, 1, 50);

@@ -1,9 +1,8 @@
 package com.prontaentrega.controllers.exceptions;
 
 import com.prontaentrega.models.exception.CantidadDeTokensException;
-import com.prontaentrega.services.exceptions.*;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
-import com.prontaentrega.services.exceptions.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.jugadores.ProviderUnavailableException;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.services.exceptions.auth.*;
 import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
@@ -90,25 +89,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja la ausencia de catalogo local disponible.
-     */
-    @ExceptionHandler(CatalogUnavailableException.class)
-    public ResponseEntity<ErrorResponse> handleCatalogUnavailable(CatalogUnavailableException ex) {
-        return error(HttpStatus.SERVICE_UNAVAILABLE, "CATALOGO_NO_DISPONIBLE", ex.getMessage());
-    }
-
-    /**
      * Maneja fallas de WhoScored conservando el contrato del endpoint de actualizacion.
      */
     @ExceptionHandler(ProviderUnavailableException.class)
     public ResponseEntity<RefreshCatalogResponse> handleProviderUnavailable(ProviderUnavailableException ex) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(RefreshCatalogResponse.failure(ex.getMessage()));
-    }
-
-    // t_odo: hay que volar este
-    @ExceptionHandler(PlayerNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlePlayerNotFound(PlayerNotFoundException ex) {
-        return error(HttpStatus.NOT_FOUND, "JUGADOR NO ENCONTRADO", ex.getMessage());
     }
 
     @ExceptionHandler(CantidadDeTokensException.class)

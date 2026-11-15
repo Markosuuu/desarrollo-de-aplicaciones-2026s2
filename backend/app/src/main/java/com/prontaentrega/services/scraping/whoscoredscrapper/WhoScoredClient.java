@@ -3,7 +3,7 @@ package com.prontaentrega.services.scraping.whoscoredscrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
-import com.prontaentrega.services.exceptions.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.jugadores.ProviderUnavailableException;
 import java.net.http.HttpClient;
 import java.time.Duration;
 
