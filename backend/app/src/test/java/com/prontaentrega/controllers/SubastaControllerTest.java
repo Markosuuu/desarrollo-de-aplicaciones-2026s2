@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("integracion")
+@Tag("e2e")
 class SubastaControllerTest extends AbstractIntegrationTest {
     private static final AtomicInteger PLAYER_SEQUENCE = new AtomicInteger(10000);
 

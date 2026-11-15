@@ -44,7 +44,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("integracion")
+@Tag("e2e")
 public class MercadoControllerTest extends AbstractIntegrationTest {
     private static final AtomicInteger JUGADOR_SEQUENCE = new AtomicInteger(1000);
 

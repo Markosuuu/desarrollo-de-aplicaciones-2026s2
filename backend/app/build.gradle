@@ -74,8 +74,9 @@ tasks.register('e2eTest', Test) {
     }
     shouldRunAfter tasks.named('integrationTest')
 }
+
 jacocoTestReport {
-    dependsOn test, integrationTest
+    dependsOn test, integrationTest, e2eTest
 
     executionData.from(
             fileTree(layout.buildDirectory.dir('jacoco')) {
