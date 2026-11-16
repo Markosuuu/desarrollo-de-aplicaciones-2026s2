@@ -110,4 +110,9 @@ public class Subasta {
         int comparacion = puja.compareTo(obtenerOfertaMinima());
         return ofertaActual == null ? comparacion >= 0 : comparacion > 0;
     }
+
+    public void asignarOfertaGanadora(@NonNull Oferta oferta) {
+        this.ofertaActual = oferta;
+        this.actualizadoEn = LocalDateTime.now(ZoneId.systemDefault());
+    }
 }

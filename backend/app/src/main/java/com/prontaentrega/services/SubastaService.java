@@ -246,7 +246,7 @@ public class SubastaService {
         inventarioUsuarioRepository.save(inventarioGanador);
         inventarioUsuarioRepository.save(inventarioVendedor);
 
-        subasta.actualizarPostorMasGrande(ofertaGanadora);
+        subasta.asignarOfertaGanadora(ofertaGanadora);
 
         Operacion operacionCompra = new Operacion(
                 ganador,

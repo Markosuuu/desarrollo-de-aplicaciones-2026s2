@@ -130,8 +130,8 @@ class SubastaServiceTest extends AbstractIntegrationTest {
             () -> subastaService.ofertar(seller.getId(), subasta.getId(), BigDecimal.valueOf(200), "bid-3"));
     }
 
-        @Test
-        void shouldSettleAuctionAndTransferTokensToHighestBidder() {
+    @Test
+    void shouldSettleAuctionAndTransferTokensToHighestBidder() {
         Usuario seller = saveUser("Vendedor cierre", "seller-close@test.com");
         Usuario buyer = saveUser("Ganador", "buyer-close@test.com");
         BolsaDeJugador bolsa = saveJugador("Jugador cierre");
@@ -155,10 +155,10 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         assertEquals(3, sellerInventory.getTokensDisponibles());
         assertEquals(0, sellerInventory.getTokensEnVenta());
         assertEquals(2, buyerInventory.getTokensDisponibles());
-            assertEquals(2,
-                    operacionRepository.findByUsuarioId(seller.getId(), Pageable.unpaged()).getTotalElements()
-                            + operacionRepository.findByUsuarioId(buyer.getId(), Pageable.unpaged()).getTotalElements());
-        }
+        assertEquals(2,
+                operacionRepository.findByUsuarioId(seller.getId(), Pageable.unpaged()).getTotalElements()
+                        + operacionRepository.findByUsuarioId(buyer.getId(), Pageable.unpaged()).getTotalElements());
+    }
 
     @Test
     void shouldFallBackToNextBidderWhenHighestBidderCannotPay() {
@@ -185,7 +185,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturnReservedTokensWhenAuctionHasNoBids() throws InterruptedException {
+    void shouldReturnReservedTokensWhenAuctionHasNoBids() {
         Usuario seller = saveUser("Vendedor retorno", "seller-return@test.com");
         BolsaDeJugador bolsa = saveJugador("Jugador retorno");
         UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
@@ -193,8 +193,11 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         inventario.ponerTokensEnVenta(3);
         inventarioUsuarioRepository.save(inventario);
 
+        LocalDateTime ahora = LocalDateTime.now();
         Subasta subasta = new Subasta(
-            seller, bolsa, 3, BigDecimal.valueOf(10), LocalDateTime.now().minusMinutes(1));
+                seller, bolsa, 3, BigDecimal.valueOf(10),
+                ahora.minusMinutes(1), ahora.minusHours(1));
+        subastaRepository.save(subasta);
         subastaRepository.save(subasta);
         subastaService.resolverSubastasVencidas();
 

@@ -614,4 +614,51 @@ public class SubastaTest {
 
         assertEquals(usuarioId, oferta.getUsuarioId());
     }
+
+
+    @Test
+    void asignarOfertaGanadora_deberiaAsignarLaOfertaComoOfertaActual() {
+        Oferta ganadora = oferta("120");
+
+        subasta.asignarOfertaGanadora(ganadora);
+
+        assertSame(ganadora, subasta.getOfertaActual());
+    }
+
+    @Test
+    void asignarOfertaGanadora_deberiaPermitirReasignarUnaOfertaConLaMismaPuja() {
+        subasta.actualizarPostorMasGrande(oferta("120"));
+        Oferta ganadora = oferta("120");
+
+        subasta.asignarOfertaGanadora(ganadora);
+
+        assertSame(ganadora, subasta.getOfertaActual());
+    }
+
+    @Test
+    void asignarOfertaGanadora_deberiaPermitirAsignarSiLaSubastaYaVencio() {
+        Subasta vencida = subastaVencida();
+        Oferta ganadora = oferta("120");
+
+        vencida.asignarOfertaGanadora(ganadora);
+
+        assertSame(ganadora, vencida.getOfertaActual());
+    }
+
+    @Test
+    void asignarOfertaGanadora_deberiaActualizarLaFechaDeActualizacion() {
+        LocalDateTime antes = subasta.getActualizadoEn();
+
+        subasta.asignarOfertaGanadora(oferta("120"));
+
+        assertFalse(subasta.getActualizadoEn().isBefore(antes));
+    }
+
+    @Test
+    void asignarOfertaGanadora_deberiaRechazarSiLaOfertaEsNula() {
+        NullPointerException ex = assertThrows(NullPointerException.class,
+                () -> subasta.asignarOfertaGanadora(null));
+
+        assertEquals("oferta is marked non-null but is null", ex.getMessage());
+    }
 }

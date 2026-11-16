@@ -87,11 +87,13 @@ public class UsuarioTest {
     }
 
     @Test
-    void restarCreditosAUnUsuarioLoActualiza(){
-        LocalDateTime fecha = user.getActualizadoEn();
+    void restarCreditosAUnUsuarioLoActualiza() {
+        LocalDateTime fechaVieja = LocalDateTime.now().minusDays(1);
+        user.setActualizadoEn(fechaVieja);
+
         user.restarCreditos(BigDecimal.valueOf(50));
 
-        assertTrue(user.getActualizadoEn().isAfter(fecha));
+        assertTrue(user.getActualizadoEn().isAfter(fechaVieja));
     }
 
     @Test
@@ -111,10 +113,12 @@ public class UsuarioTest {
     }
 
     @Test
-    void sumarCreditosAUnUsuarioLoActualiza(){
-        LocalDateTime fecha = user.getActualizadoEn();
+    void sumarCreditosAUnUsuarioLoActualiza() {
+        LocalDateTime fechaVieja = LocalDateTime.now().minusDays(1);
+        user.setActualizadoEn(fechaVieja);
+
         user.sumarCreditos(BigDecimal.valueOf(50));
 
-        assertTrue(user.getActualizadoEn().isAfter(fecha));
+        assertTrue(user.getActualizadoEn().isAfter(fechaVieja));
     }
 }
