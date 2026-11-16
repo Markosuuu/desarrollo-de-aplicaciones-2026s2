@@ -181,8 +181,7 @@ class SubastaControllerTest extends AbstractIntegrationTest {
 
         mockMvc.perform(patch("/api/subastas/{id}/cerrar", auctionId)
                         .header("Authorization", bearer(seller))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("motivo", "POR_PROPIETARIO"))))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ganadorId").value(buyer.id().toString()))
                 .andExpect(jsonPath("$.montoFinal").value(80))
@@ -202,8 +201,7 @@ class SubastaControllerTest extends AbstractIntegrationTest {
 
         mockMvc.perform(patch("/api/subastas/{id}/cerrar", auctionId)
                         .header("Authorization", bearer(seller))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("motivo", "POR_PROPIETARIO"))))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         ofertar(buyer, auctionId, 90, "buyer-closed-2")

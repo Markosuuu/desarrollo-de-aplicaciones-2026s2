@@ -173,19 +173,18 @@ public class SubastaService {
      * Cierra una subasta activa
      * @param usuarioId Id del propietario de la subasta
      * @param subastaId Id de la subasta
-     * @param motivo Motivo por el que se cierra
      * @return Una subasta cerrada
      * @throws SubastaNoEncontradaException Cuando no existe la subasta
      * @throws SinAutorizacionExpcetion Cuando un usuario quiere cerrar una subasta que no le pertenece
      * @throws SubastaNoActivaException Cuando se quiere cerrar una subasta que no está activa
      */
     @Transactional
-    public Subasta cerrarSubasta(UUID usuarioId, UUID subastaId, String motivo) {
+    public Subasta cerrarSubasta(UUID usuarioId, UUID subastaId) {
         Subasta subasta = buscarSubasta(subastaId);
 
         validarCerrarSubasta(usuarioId, subasta);
 
-        return resolverCierre(subasta, motivo);
+        return resolverCierre(subasta);
     }
 
     @Transactional
@@ -193,12 +192,12 @@ public class SubastaService {
         List<Subasta> subastasVencidas = subastaRepository.getSubastasVencidasActivas();
 
         for (Subasta subasta : subastasVencidas) {
-            resolverCierre(subasta, "POR_TIEMPO");
+            resolverCierre(subasta);
         }
     }
 
     @Transactional
-    protected Subasta resolverCierre(Subasta subasta, String motivo) {
+    protected Subasta resolverCierre(Subasta subasta) {
         ofertaRepository.findOfertaGanadora(subasta.getId())
                 .ifPresentOrElse(
                         oferta -> {
@@ -209,7 +208,7 @@ public class SubastaService {
                         () -> devolverTokensAlPropietario(subasta)
                 );
 
-        subasta.cerrarSubasta(motivo);
+        subasta.cerrarSubasta();
         subastaRepository.save(subasta);
         return subasta;
     }

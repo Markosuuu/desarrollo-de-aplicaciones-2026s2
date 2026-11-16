@@ -64,7 +64,6 @@ public class SubastaTest {
         assertThat(subasta.getPrecioInicial()).isEqualByComparingTo("100");
         assertTrue(subasta.getActiva());
         assertNull(subasta.getOfertaActual());
-        assertNull(subasta.getMotivoCierre());
     }
 
     @Test
@@ -262,7 +261,7 @@ public class SubastaTest {
 
     @Test
     void actualizarPostorMasGrande_deberiaRechazarSiLaSubastaEstaCerrada() {
-        subasta.cerrarSubasta("Cerrada por el propietario");
+        subasta.cerrarSubasta();
 
         SubastaNoActivaException ex = assertThrows(SubastaNoActivaException.class,
                 () -> subasta.actualizarPostorMasGrande(oferta("120")));
@@ -315,21 +314,12 @@ public class SubastaTest {
         assertSame(actual, subasta.getOfertaActual());
     }
 
-// cerrarSubasta
-
-    @Test
-    void cerrarSubasta_deberiaDesactivarLaSubastaYGuardarElMotivo() {
-        subasta.cerrarSubasta("Finalizada por vencimiento");
-
-        assertFalse(subasta.getActiva());
-        assertEquals("Finalizada por vencimiento", subasta.getMotivoCierre());
-    }
-
+    // cerrarSubasta
     @Test
     void cerrarSubasta_deberiaActualizarLaFechaDeActualizacion() {
         LocalDateTime antes = subasta.getActualizadoEn();
 
-        subasta.cerrarSubasta("Finalizada por vencimiento");
+        subasta.cerrarSubasta();
 
         assertFalse(subasta.getActualizadoEn().isBefore(antes));
     }
@@ -338,7 +328,7 @@ public class SubastaTest {
     void cerrarSubasta_deberiaPermitirCerrarUnaSubastaVencida() {
         Subasta vencida = subastaVencida();
 
-        vencida.cerrarSubasta("Finalizada por vencimiento");
+        vencida.cerrarSubasta();
 
         assertFalse(vencida.getActiva());
     }
@@ -348,29 +338,19 @@ public class SubastaTest {
         Oferta ganadora = oferta("120");
         subasta.actualizarPostorMasGrande(ganadora);
 
-        subasta.cerrarSubasta("Finalizada por vencimiento");
+        subasta.cerrarSubasta();
 
         assertSame(ganadora, subasta.getOfertaActual());
     }
 
     @Test
-    void cerrarSubasta_deberiaRechazarSiElMotivoEsNulo() {
-        NullPointerException ex = assertThrows(NullPointerException.class,
-                () -> subasta.cerrarSubasta(null));
-
-        assertEquals("motivo is marked non-null but is null", ex.getMessage());
-        assertTrue(subasta.getActiva());
-    }
-
-    @Test
     void cerrarSubasta_deberiaRechazarSiLaSubastaYaEstaCerrada() {
-        subasta.cerrarSubasta("Primer motivo");
+        subasta.cerrarSubasta();
 
         SubastaNoActivaException ex = assertThrows(SubastaNoActivaException.class,
-                () -> subasta.cerrarSubasta("Segundo motivo"));
+                () -> subasta.cerrarSubasta());
 
         assertEquals("La subasta ya está cerrada", ex.getMessage());
-        assertEquals("Primer motivo", subasta.getMotivoCierre());
     }
 
     // Oferta: constructor, casos exitosos

@@ -60,9 +60,6 @@ public class SubastaDTOSQL {
     @Column(name = "actualizado_en", nullable = false)
     private LocalDateTime actualizadoEn;
 
-    @Column(name = "motivo_cierre")
-    private String motivoCierre;
-
     @Version
     private Long version;
 
@@ -82,7 +79,6 @@ public class SubastaDTOSQL {
         dto.vencimiento = subasta.getVencimiento();
         dto.creadoEn = subasta.getCreadoEn();
         dto.actualizadoEn = subasta.getActualizadoEn();
-        dto.motivoCierre = subasta.getMotivoCierre();
         return dto;
     }
 
@@ -100,7 +96,6 @@ public class SubastaDTOSQL {
         }
         subasta.setActiva(activa);
         subasta.setActualizadoEn(actualizadoEn);
-        subasta.setMotivoCierre(motivoCierre);
         return subasta;
     }
 }

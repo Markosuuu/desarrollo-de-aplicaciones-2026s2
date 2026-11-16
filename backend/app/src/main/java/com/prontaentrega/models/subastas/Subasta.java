@@ -30,7 +30,6 @@ public class Subasta {
     private Oferta ofertaActual;
     private Boolean activa;
     private LocalDateTime actualizadoEn;
-    private String motivoCierre;
 
     public Subasta(
             @NonNull Usuario propietario,
@@ -74,7 +73,7 @@ public class Subasta {
     }
 
     public void actualizarPostorMasGrande(@NonNull Oferta oferta) {
-        if (!activa) {
+        if (Boolean.FALSE.equals(activa)) {
             throw new SubastaNoActivaException("La subasta no está activa");
         }
 
@@ -90,12 +89,11 @@ public class Subasta {
         this.actualizadoEn = LocalDateTime.now(ZoneId.systemDefault());
     }
 
-    public void cerrarSubasta(@NonNull String motivo) {
-        if (!activa) {
+    public void cerrarSubasta() {
+        if (Boolean.FALSE.equals(activa)) {
             throw new SubastaNoActivaException("La subasta ya está cerrada");
         }
 
-        this.motivoCierre = motivo;
         this.activa = false;
         this.actualizadoEn = LocalDateTime.now(ZoneId.systemDefault());
     }

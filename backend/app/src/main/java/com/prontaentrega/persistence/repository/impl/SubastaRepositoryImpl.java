@@ -69,7 +69,6 @@ public class SubastaRepositoryImpl implements SubastaRepository {
             dto.setVencimiento(subasta.getVencimiento());
             dto.setCreadoEn(subasta.getCreadoEn());
             dto.setActualizadoEn(subasta.getActualizadoEn());
-            dto.setMotivoCierre(subasta.getMotivoCierre());
         }
         return dto;
     }

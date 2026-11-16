@@ -95,11 +95,10 @@ public class SubastaController {
 
     @PatchMapping("/{id}/cerrar")
     public ResponseEntity<CerrarSubastaResponse> cerrarSubasta(
-            @PathVariable UUID id,
-            @RequestBody(required = false) CerrarSubastaRequest request
+            @PathVariable UUID id
     ) {
         UUID usuarioId = currentUserId();
-        Subasta subasta = subastaService.cerrarSubasta(usuarioId, id, request.motivo());
+        Subasta subasta = subastaService.cerrarSubasta(usuarioId, id);
         return ResponseEntity.ok(CerrarSubastaResponse.from(subasta));
     }
 
