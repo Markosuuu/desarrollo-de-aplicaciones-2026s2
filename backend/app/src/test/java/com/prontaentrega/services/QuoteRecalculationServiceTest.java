@@ -6,13 +6,14 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.prontaentrega.models.DatosValoracion;
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.models.EstrategiaCotizacion;
-import com.prontaentrega.models.estrategias.EstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.DatosValoracion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.EstadoEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.EstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderada;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
+import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import java.math.BigDecimal;
 import java.util.List;
@@ -33,6 +34,7 @@ class QuoteRecalculationServiceTest {
     private CotizacionRepository strategyRepository;
     @Mock
     private HistorialCotizacionRepository historialCotizacionRepository;
+    private JugadorRepository jugadorRepository;
 
     /** Usa la configuración activa, actualiza cotización vigente y cuenta jugadores omitidos. */
     @Test
@@ -42,7 +44,7 @@ class QuoteRecalculationServiceTest {
         org.mockito.Mockito.doReturn(ConfiguracionEstrategiaPonderada.class)
                 .when(strategyRepository).tipoConfiguracion("ponderada");
         CotizacionService recalculationService = new CotizacionService(
-                strategyRepository, historialCotizacionRepository, List.of(strategy));
+                strategyRepository, historialCotizacionRepository, jugadorRepository,  List.of(strategy));
         ConfiguracionEstrategiaPonderada config = new ConfiguracionEstrategiaPonderada(
                 BigDecimal.ONE, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, new BigDecimal("2"));

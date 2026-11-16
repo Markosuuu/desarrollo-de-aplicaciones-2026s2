@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository;
 
-import com.prontaentrega.models.Usuario;
+import com.prontaentrega.models.auth.Usuario;
 
 import java.util.Optional;
 import java.util.UUID;

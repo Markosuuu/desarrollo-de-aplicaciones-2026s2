@@ -1,9 +1,9 @@
 package com.prontaentrega.controllers.exceptions;
 
 import com.prontaentrega.controllers.CotizacionController;
-import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
-import com.prontaentrega.services.exceptions.QuoteRequestValidationException;
-import com.prontaentrega.services.exceptions.QuoteStrategyNotFoundException;
+import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
+import com.prontaentrega.services.exceptions.cotizacion.ConfiguracionNoValidaParaEstrategiaException;
+import com.prontaentrega.services.exceptions.cotizacion.EstrategiaNoExistenteException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -28,22 +28,22 @@ public class CotizacionExceptionHandler {
 
     /** Devuelve 400 para campos ausentes, desconocidos o reglas de formato del request. */
     @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class,
-            QuoteRequestValidationException.class})
+            ConfiguracionNoValidaParaEstrategiaException.class})
     public ResponseEntity<CotizacionErrorResponse> handleRequestValidation(Exception exception) {
-        String message = exception instanceof QuoteRequestValidationException
+        String message = exception instanceof ConfiguracionNoValidaParaEstrategiaException
                 ? exception.getMessage() : "Los datos enviados no cumplen el contrato de cotizaciones";
         return error(HttpStatus.BAD_REQUEST, "CONFIGURACION_INVALIDA", message);
     }
 
     /** Devuelve 404 para un identificador de estrategia que no está registrado. */
-    @ExceptionHandler(QuoteStrategyNotFoundException.class)
-    public ResponseEntity<CotizacionErrorResponse> handleStrategyNotFound(QuoteStrategyNotFoundException exception) {
+    @ExceptionHandler(EstrategiaNoExistenteException.class)
+    public ResponseEntity<CotizacionErrorResponse> handleStrategyNotFound(EstrategiaNoExistenteException exception) {
         return error(HttpStatus.NOT_FOUND, "ESTRATEGIA_NO_ENCONTRADA", exception.getMessage());
     }
 
     /** Devuelve 409 para estado incompleto, conflicto o resultado de cotización inválido. */
-    @ExceptionHandler(QuoteOperationConflictException.class)
-    public ResponseEntity<CotizacionErrorResponse> handleConflict(QuoteOperationConflictException exception) {
+    @ExceptionHandler(NoHayEstrategiaActivaConfiguradaException.class)
+    public ResponseEntity<CotizacionErrorResponse> handleConflict(NoHayEstrategiaActivaConfiguradaException exception) {
         return error(HttpStatus.CONFLICT, "CONFLICTO_COTIZACION", exception.getMessage());
     }
 

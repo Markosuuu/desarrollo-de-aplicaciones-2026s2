@@ -2,7 +2,7 @@ package com.prontaentrega.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.prontaentrega.models.DatosValoracion;
+import com.prontaentrega.models.cotizacion.DatosValoracion;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.CotizacionRepository.ActualizacionCotizacion;
 import com.prontaentrega.utils.AbstractIntegrationTest;

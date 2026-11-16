@@ -4,6 +4,7 @@ import {
   cancelListing,
   createSellOrder,
   fetchListings,
+  comprarSuper,
 } from "../api/marketApi";
 
 afterEach(() => {
@@ -184,6 +185,23 @@ describe("marketApi", () => {
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:8080/api/orders/listing%2Fcon%20espacios",
       expect.any(Object),
+    );
+  });
+
+  test("compra una cantidad de tokens al superusuario", async () => {
+    const fetchMock = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(mockResponse({ success: true }));
+
+    // await buyListing("listing-1", 2, "token-test");
+    await comprarSuper("jugador-1", 2, "token-test");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:8080/api/orders/super/buy",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ jugadorId: "jugador-1", cantidad: 2 }),
+      }),
     );
   });
 });

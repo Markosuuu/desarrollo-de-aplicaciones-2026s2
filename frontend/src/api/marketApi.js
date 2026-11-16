@@ -85,3 +85,11 @@ export function cancelListing(anuncioId, token) {
     token,
   });
 }
+
+export function comprarSuper(jugadorId, cantidad, token) {
+  return request(`/orders/super/buy`, {
+    method: "POST",
+    token,
+    body: { jugadorId, cantidad },
+  });
+}

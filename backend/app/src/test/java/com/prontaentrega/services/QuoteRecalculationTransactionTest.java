@@ -3,8 +3,8 @@ package com.prontaentrega.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.EstadoEstrategiaCotizacion;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;

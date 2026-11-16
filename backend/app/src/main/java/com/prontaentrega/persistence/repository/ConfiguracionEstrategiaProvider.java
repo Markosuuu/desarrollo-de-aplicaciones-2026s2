@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
 import java.util.Optional;
 
 /** Adaptador tipado de persistencia para la configuración de una estrategia registrada. */

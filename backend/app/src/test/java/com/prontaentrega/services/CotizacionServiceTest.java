@@ -1,6 +1,7 @@
 package com.prontaentrega.services;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.doReturn;
@@ -8,21 +9,24 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
-import com.prontaentrega.models.estrategias.EstrategiaPonderada;
-import com.prontaentrega.models.estrategias.EstrategiaPonderadaConPenalizacion;
+import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.EstadoEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderadaConPenalizacion;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
+import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
+import com.prontaentrega.services.exceptions.cotizacion.ConfiguracionIncompletaException;
+import com.prontaentrega.services.exceptions.cotizacion.EstrategiaActivaNoDisponibleException;
+import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -38,6 +42,7 @@ class CotizacionServiceTest {
     @Mock
     private CotizacionRepository strategyRepository;
     private HistorialCotizacionRepository historialRepository;
+    private JugadorRepository jugadorRepository;
     private CotizacionService administrationService;
 
     /** Registra las dos estrategias y valida su asociación tipada con los providers. */
@@ -51,7 +56,7 @@ class CotizacionServiceTest {
                 .when(strategyRepository).tipoConfiguracion("ponderada-con-penalizacion");
         when(strategyRepository.estrategiaIdsConfigurables())
                 .thenReturn(java.util.Set.of("ponderada", "ponderada-con-penalizacion"));
-        administrationService = new CotizacionService(strategyRepository, historialRepository,
+        administrationService = new CotizacionService(strategyRepository, historialRepository, jugadorRepository,
                 List.of(new EstrategiaPonderada(), new EstrategiaPonderadaConPenalizacion()));
     }
 
@@ -97,17 +102,19 @@ class CotizacionServiceTest {
                 .thenReturn(Optional.of(new EstadoEstrategiaCotizacion(null)));
         when(strategyRepository.buscarConfiguracion("ponderada")).thenReturn(Optional.empty());
 
-        org.assertj.core.api.Assertions.assertThatThrownBy(
+        assertThatThrownBy(
                 () -> administrationService.activarEstrategia("ponderada"))
-                .isInstanceOf(com.prontaentrega.services.exceptions.QuoteOperationConflictException.class);
+                .isInstanceOf(ConfiguracionIncompletaException.class);
+
         verify(strategyRepository, never()).guardarEstado(
                 new EstadoEstrategiaCotizacion("ponderada"));
+
         verify(strategyRepository, never()).buscarPagina(null, 200);
     }
 
     @Test
     void consultarActivaSinConfigurarArrojaExcepcion() {
-        QuoteOperationConflictException error = assertThrows(QuoteOperationConflictException.class,
+        NoHayEstrategiaActivaConfiguradaException error = assertThrows(NoHayEstrategiaActivaConfiguradaException.class,
                 () -> administrationService.consultarActiva());
         assertEquals(error.getMessage(),"No hay una estrategia activa configurada");
     }
@@ -117,8 +124,10 @@ class CotizacionServiceTest {
         when(strategyRepository.buscarEstado()).thenReturn(
                 Optional.of(new EstadoEstrategiaCotizacion("estrategia inexistente"))
         );
-        QuoteOperationConflictException error = assertThrows(QuoteOperationConflictException.class,
-                () -> administrationService.consultarActiva());
+        EstrategiaActivaNoDisponibleException error =
+                assertThrows(EstrategiaActivaNoDisponibleException.class,
+                        () -> administrationService.consultarActiva());
+
         assertEquals(error.getMessage(),"La estrategia activa no está disponible");
     }
 
@@ -130,7 +139,7 @@ class CotizacionServiceTest {
         when(strategyRepository.buscarConfiguracion("ponderada")).thenReturn(
                 Optional.of(configuracionPonderada())
         );
-        CotizacionService.QuoteStrategyView response = administrationService.consultarActiva();
+        CotizacionService.EstrategiaEstado response = administrationService.consultarActiva();
 
         assertEquals(response.strategyId(), "ponderada");
         assertTrue(response.active());
@@ -138,7 +147,7 @@ class CotizacionServiceTest {
 
     @Test
     void listarEstrategiasRetornaLasEstrategiasPersistidas() {
-        List<CotizacionService.QuoteStrategyView> lista = administrationService.listarEstrategias();
+        List<CotizacionService.EstrategiaEstado> lista = administrationService.listarEstrategias();
         assertTrue(!lista.isEmpty());
         assertEquals(lista.size(), 2);
         assertTrue(lista.stream().anyMatch(str -> Objects.equals(str.strategyId(), "ponderada")));

@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
 import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -28,7 +28,7 @@ import org.springframework.test.web.servlet.MockMvc;
 /** Comprueba aislamiento de las operaciones administrativas con clave maestra. */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("integracion")
+@Tag("e2e")
 class CotizacionControllerSecurityTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;

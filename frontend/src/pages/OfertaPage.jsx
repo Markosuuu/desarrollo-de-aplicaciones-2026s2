@@ -70,7 +70,7 @@ export default function OfertaPage() {
       setCreditsLoading(false);
       setCreditsError("No se pudo identificar al usuario.");
     } else {
-      console.log(user)
+      console.log(user);
       setCreditsLoading(true);
       setCreditsError("");
       fetchUserInventory(user.id, token)

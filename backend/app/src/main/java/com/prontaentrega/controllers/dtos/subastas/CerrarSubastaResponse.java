@@ -1,6 +1,6 @@
 package com.prontaentrega.controllers.dtos.subastas;
 
-import com.prontaentrega.models.Subasta;
+import com.prontaentrega.models.subastas.Subasta;
 import java.math.BigDecimal;
 import java.util.UUID;
 

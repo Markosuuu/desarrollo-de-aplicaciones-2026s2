@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.SubastaDTOSQL;
+import com.prontaentrega.persistence.dto.subastas.SubastaDTOSQL;
 import jakarta.persistence.LockModeType;
 import java.util.Optional;
 import java.time.LocalDateTime;
@@ -42,4 +42,6 @@ public interface SubastaDAOSQL extends JpaRepository<SubastaDTOSQL, UUID> {
         ORDER BY s.vencimiento ASC
     """)
     Page<SubastaDTOSQL> findAllByUsuarioOJugador(@Param("user") String user, @Param("jugador") String jugador, Pageable pageable);
+
+    List<SubastaDTOSQL> findAllByActivaAndVencimientoLessThanEqual(boolean activa, LocalDateTime ahora);
 }

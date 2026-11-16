@@ -1,8 +1,8 @@
 package com.prontaentrega.persistence.repository;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.DatosValoracion;
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.DatosValoracion;
+import com.prontaentrega.models.cotizacion.EstadoEstrategiaCotizacion;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;

@@ -3,12 +3,11 @@ package com.prontaentrega.controllers;
 import com.prontaentrega.controllers.dtos.jugadores.CatalogResponse;
 import com.prontaentrega.controllers.dtos.jugadores.HistorialCotizacionResponse;
 import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
-import com.prontaentrega.controllers.dtos.transacciones.ComprarTokensSuperRequest;
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.services.HistorialCotizacionService;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
-import com.prontaentrega.services.PlayerCatalogService;
+import com.prontaentrega.services.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -31,14 +30,15 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api")
 public class PlayerController {
-    private final PlayerCatalogService playerCatalogService;
-    private final HistorialCotizacionService historialService;
+    private final PlayerService playerService;
+    private final CotizacionService cotizacionService;
+
     /**
      * Recibe el servicio de catalogo usado por los endpoints de jugadores.
      */
-    public PlayerController(PlayerCatalogService playerCatalogService, HistorialCotizacionService historialService) {
-        this.playerCatalogService = playerCatalogService;
-        this.historialService = historialService;
+    public PlayerController(PlayerService playerService, CotizacionService cotizacionService) {
+        this.playerService = playerService;
+        this.cotizacionService = cotizacionService;
     }
 
     /**
@@ -60,7 +60,7 @@ public class PlayerController {
             @RequestParam(defaultValue = "20") int perPage) {
 
         log.info("⌛ Buscando los jugadores");
-        Page<BolsaDeJugador> jugadores = playerCatalogService.search(liga, equipo, nombre, page, perPage);
+        Page<BolsaDeJugador> jugadores = playerService.search(liga, equipo, nombre, page, perPage);
 
         List<PlayerResponse> players = jugadores.getContent().stream()
             .map(PlayerResponse::from)
@@ -93,14 +93,14 @@ public class PlayerController {
         log.info("⌛ Actualizando catalogo de jugadores desde WhoScored");
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(playerCatalogService.refreshFromWhoScored());
+                .body(playerService.refreshFromWhoScored());
     }
 
     @GetMapping("/players/{id}")
     public ResponseEntity<PlayerResponse> searchById(@PathVariable UUID id) {
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(PlayerResponse.from(playerCatalogService.searchById(id)));
+                .body(PlayerResponse.from(playerService.searchById(id)));
     }
 
     @GetMapping("/players/{id}/quotes")
@@ -108,7 +108,7 @@ public class PlayerController {
             @PathVariable UUID id
     ) {
         List<HistorialCotizacionResponse> response =
-                historialService.buscarHistorial(id)
+                cotizacionService.buscarHistorialById(id)
                         .stream()
                         .map(HistorialCotizacionResponse::from)
                         .toList();
@@ -122,7 +122,7 @@ public class PlayerController {
             @PathVariable LocalDate fecha
             ) {
         HistorialCotizacionResponse response = HistorialCotizacionResponse.from(
-                historialService.buscarHistorialPorFecha(id, fecha)
+                cotizacionService.buscarHistorialPorFecha(id, fecha)
         );
 
         return ResponseEntity.ok(response);
@@ -131,7 +131,7 @@ public class PlayerController {
     @GetMapping("/players/ranking")
     public ResponseEntity<CatalogResponse> getRanking(@RequestParam(defaultValue = "1") int page,
                                                       @RequestParam(defaultValue = "20") int perPage) {
-        Page<BolsaDeJugador> jugadores = playerCatalogService.getRanking(page, perPage);
+        Page<BolsaDeJugador> jugadores = playerService.getRanking(page, perPage);
 
         List<PlayerResponse> players = jugadores.getContent().stream()
                 .map(PlayerResponse::from)
@@ -155,9 +155,9 @@ public class PlayerController {
         Page<BolsaDeJugador> jugadores;
 
         if (!StringUtils.hasText(request.nombre())) {
-            jugadores = playerCatalogService.getRanking(page, perPage);
+            jugadores = playerService.getRanking(page, perPage);
         } else {
-            jugadores = playerCatalogService.getRankingByNombre(page, perPage, request.nombre());
+            jugadores = playerService.getRankingByNombre(page, perPage, request.nombre());
         }
 
         List<PlayerResponse> jugadoresResponse = jugadores.getContent().stream()

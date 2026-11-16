@@ -9,10 +9,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prontaentrega.models.*;
-import com.prontaentrega.models.enums.EstadoAnuncioVenta;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.mercado.EstadoAnuncioVenta;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.models.jugadores.Posicion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
+import com.prontaentrega.models.jugadores.Jugador;
+import com.prontaentrega.models.mercado.AnuncioVenta;
+import com.prontaentrega.models.mercado.InventarioUsuario;
 import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
@@ -39,7 +44,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("integracion")
+@Tag("e2e")
 public class MercadoControllerTest extends AbstractIntegrationTest {
     private static final AtomicInteger JUGADOR_SEQUENCE = new AtomicInteger(1000);
 
@@ -308,7 +313,7 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         BolsaDeJugador bolsa = crearBolsa("Jugador buy cerrado");
         darInventario(vendedor.id(), bolsa, 10);
         UUID anuncioId = publicar(vendedor.id(), bolsa, 3);
-        mercadoService.comprar(comprador1.id(), anuncioId);
+        mercadoService.comprar(comprador1.id(), anuncioId, 3);
 
         mockMvc.perform(post("/api/orders/buy")
                         .header("Authorization", bearer(comprador2))
@@ -401,7 +406,7 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         BolsaDeJugador bolsa = crearBolsa("Jugador transacciones");
         darInventario(vendedor.id(), bolsa, 10);
         UUID anuncioId = publicar(vendedor.id(), bolsa, 3);
-        mercadoService.comprar(comprador.id(), anuncioId);
+        mercadoService.comprar(comprador.id(), anuncioId, 3);
 
         mockMvc.perform(get("/api/users/{id}/transactions", vendedor.id())
                         .header("Authorization", bearer(vendedor)))

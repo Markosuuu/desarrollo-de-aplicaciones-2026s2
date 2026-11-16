@@ -1,10 +1,8 @@
 package com.prontaentrega.controllers;
 
 import com.prontaentrega.controllers.dtos.PageResponse;
-import com.prontaentrega.controllers.dtos.transacciones.*;
-import com.prontaentrega.models.AnuncioVenta;
-import com.prontaentrega.models.InventarioUsuario;
-import com.prontaentrega.models.Operacion;
+import com.prontaentrega.controllers.dtos.mercado.*;
+import com.prontaentrega.models.mercado.AnuncioVenta;
 import com.prontaentrega.services.MercadoService;
 
 import jakarta.validation.Valid;
