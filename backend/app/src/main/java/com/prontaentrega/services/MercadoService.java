@@ -1,5 +1,6 @@
 package com.prontaentrega.services;
 
+import com.prontaentrega.auditoria.Auditable;
 import com.prontaentrega.models.exception.AnuncioNoPendienteException;
 import com.prontaentrega.models.mercado.AnuncioVenta;
 import com.prontaentrega.models.jugadores.BolsaDeJugador;
@@ -61,6 +62,7 @@ public class MercadoService {
      * @param size Cantidad de anuncios por página
      * @return Lista de anuncios de venta
      */
+    @Auditable("getAnuncios")
     public Page<AnuncioVenta> getAnuncios(int page, int size) {
         Pageable pageable = toPageable(page, size);
         return anuncioVentaRepository.findByEstado(EstadoAnuncioVenta.PENDIENTE, pageable);
@@ -78,6 +80,7 @@ public class MercadoService {
      * @throws CantidadDeTokensException Si la cantidad de tokens es inválida o insuficiente para vender
      * @return El anuncio de venta creado
      */
+    @Auditable("vender")
     public AnuncioVenta vender(UUID usuarioId, UUID jugadorId, Integer cantidad) {
         if (cantidad == null || cantidad <= 0) {
             throw new CantidadDeTokensException("La cantidad debe ser mayor a cero");
@@ -110,6 +113,7 @@ public class MercadoService {
      * @throws CantidadDeTokensException Si la cantidad de tokens en el anuncio es mayor a la cantidad de tokens en venta del vendedor
      */
     @Transactional
+    @Auditable("comprar")
     public void comprar(UUID compradorId, UUID anuncioId, Integer cantidadSolicitada) {
         AnuncioVenta anuncio = buscarAnuncio(anuncioId);
 
@@ -178,6 +182,7 @@ public class MercadoService {
      * @throws AnuncioNoPendienteException Si el anuncio no está pendiente
      */
     @Transactional
+    @Auditable("cancelarVenta")
     public void cancelarVenta(UUID vendedorId, UUID anuncioId) {
         AnuncioVenta anuncio = buscarAnuncio(anuncioId);
 
@@ -201,6 +206,7 @@ public class MercadoService {
      * @param usuarioId El ID del usuario
      * @return Una lista de las transacciones del usuario
      */
+    @Auditable("getTransaccionesById")
     public Page<Operacion> getTransaccionesById(UUID usuarioId, int page, int size) {
         Pageable pageable = toPageable(page, size);
         return operacionRepository.findByUsuarioId(usuarioId, pageable);
@@ -219,6 +225,7 @@ public class MercadoService {
      * @throws CreditosInsuficientesException Si el comprador no tiene suficientes créditos
      * @throws CantidadDeTokensException Si la cantidad de tokens en el anuncio es mayor a la cantidad de tokens en venta del vendedor o si la cantidad pedida es menor a 1
      */
+    @Auditable("comprarSuper")
     public void comprarSuper(UUID compradorId, UUID jugadorId, Integer cantidad) {
         if (cantidad == null || cantidad <= 0) {
             throw new CantidadDeTokensException("La cantidad debe ser mayor a cero");
@@ -259,6 +266,7 @@ public class MercadoService {
      * @return Una lista con el inventario del usuario dado.
      * @throws UsuarioNoEncontradoException Si el usuario dado no existe.
      */
+    @Auditable("getInventarioById")
     public Page<InventarioUsuario> getInventarioById(UUID usuarioId, int page, int size) {
         if (!usuarioRepository.existsById(usuarioId)) {
             throw new UsuarioNoEncontradoException("Usuario no encontrado con el id: " + usuarioId.toString());

@@ -1,5 +1,6 @@
 package com.prontaentrega.services;
 
+import com.prontaentrega.auditoria.Auditable;
 import com.prontaentrega.models.jugadores.BolsaDeJugador;
 import com.prontaentrega.models.mercado.InventarioUsuario;
 import com.prontaentrega.models.subastas.Oferta;
@@ -70,6 +71,7 @@ public class SubastaService {
      * @param size Tamaño de la página
      * @return Todas las subastas paginadas
      */
+    @Auditable("listarSubastas")
     public Page<Subasta> listarSubastas(int page, int size) {
         int normalizedPage = Math.max(page, 1) - 1;
         int normalizedSize = Math.max(size, 1);
@@ -83,6 +85,7 @@ public class SubastaService {
      * @return Una subasta
      * @throws SubastaNoEncontradaException Cuando no existe la subasta
      */
+    @Auditable("ObtenerSubasta")
     public Subasta obtenerSubasta(UUID subastaId) {
         return subastaRepository.findById(subastaId)
                 .orElseThrow(() -> new SubastaNoEncontradaException(subastaId));
@@ -93,6 +96,7 @@ public class SubastaService {
      * @param subastaId Id de una subasta
      * @return Una lista de ofertas
      */
+    @Auditable("obtenerOfertas")
     public List<Oferta> obtenerOfertas(UUID subastaId) {
         return ofertaRepository.findBySubastaIdOrderByPujaDesc(subastaId);
     }
@@ -111,6 +115,7 @@ public class SubastaService {
      * @return Una subasta
      */
     @Transactional
+    @Auditable("crearSubasta")
     public Subasta crearSubasta(
             UUID usuarioId,
             UUID jugadorId,
@@ -147,6 +152,7 @@ public class SubastaService {
      * @return Una oferta
      */
     @Transactional
+    @Auditable("ofertar")
     public Oferta ofertar(UUID usuarioId, UUID subastaId, BigDecimal puja, String idempotencyKey) {
 
         Oferta ofertaPrevia = validarIdempotencia(usuarioId, subastaId, puja, idempotencyKey);
@@ -179,6 +185,7 @@ public class SubastaService {
      * @throws SubastaNoActivaException Cuando se quiere cerrar una subasta que no está activa
      */
     @Transactional
+    @Auditable("cerrarSubasta")
     public Subasta cerrarSubasta(UUID usuarioId, UUID subastaId) {
         Subasta subasta = buscarSubasta(subastaId);
 
@@ -271,6 +278,7 @@ public class SubastaService {
         operacionRepository.save(operacionVenta);
     }
 
+    @Auditable("listarSubastasPorNombre")
     public Page<Subasta> listarSubastasPorNombre(int page, int size, String user, String jugador) {
         int normalizedPage = Math.max(page, 1) - 1;
         int normalizedSize = Math.max(size, 1);
