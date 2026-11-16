@@ -12,6 +12,8 @@ import com.prontaentrega.services.PlayerCatalogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -110,6 +112,18 @@ public class PlayerController {
                         .stream()
                         .map(HistorialCotizacionResponse::from)
                         .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/players/{id}/quotes/{fecha}")
+    public ResponseEntity<HistorialCotizacionResponse> buscarHistorialPorFecha(
+            @PathVariable UUID id,
+            @PathVariable LocalDate fecha
+            ) {
+        HistorialCotizacionResponse response = HistorialCotizacionResponse.from(
+                historialService.buscarHistorialPorFecha(id, fecha)
+        );
 
         return ResponseEntity.ok(response);
     }

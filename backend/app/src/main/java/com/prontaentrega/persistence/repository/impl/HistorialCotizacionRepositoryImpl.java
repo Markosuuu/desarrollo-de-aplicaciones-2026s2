@@ -11,8 +11,10 @@ import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -70,5 +72,17 @@ public class HistorialCotizacionRepositoryImpl implements HistorialCotizacionRep
     @Override
     public void deleteAll() {
         historialDAO.deleteAll();
+    }
+
+    @Override
+    public Optional<HistorialCotizacion> findFirstByBolsaIdAndFechaLessThanOrderByFechaDesc(UUID id, LocalDateTime inicioDia) {
+        Optional<HistorialCotizacionDTOSQL> res = historialDAO.findFirstByBolsaDeJugador_IdAndFechaIsLessThanOrderByFechaDesc(id, inicioDia);
+        return res.map(HistorialCotizacionDTOSQL::aModelo);
+    }
+
+    @Override
+    public Optional<HistorialCotizacion> findFirstByBolsaIdAndFechaGreaterThanEqualOrderByFechaAsc(UUID id, LocalDateTime inicioDia) {
+        Optional<HistorialCotizacionDTOSQL> res = historialDAO.findFirstByBolsaDeJugador_IdAndFechaIsGreaterThanEqualOrderByFechaAsc(id, inicioDia);
+        return res.map(HistorialCotizacionDTOSQL::aModelo);
     }
 }
