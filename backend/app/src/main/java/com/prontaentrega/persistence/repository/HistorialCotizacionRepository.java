@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository;
 
-import com.prontaentrega.models.HistorialCotizacion;
+import com.prontaentrega.models.cotizacion.HistorialCotizacion;
 
 import java.util.List;
 import java.util.UUID;
@@ -8,6 +8,6 @@ import java.util.UUID;
 public interface HistorialCotizacionRepository {
     void guardarHistorial(List<HistorialCotizacion> actualizaciones);
 
-    List<HistorialCotizacion> buscarPorBolsaId(UUID bolsaId);
+    List<HistorialCotizacion> buscarHistorialById(UUID jugadorId);
     void deleteAll();
 }

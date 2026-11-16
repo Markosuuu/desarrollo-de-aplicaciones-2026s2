@@ -1,13 +1,13 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.InventarioUsuario;
-import com.prontaentrega.models.Oferta;
-import com.prontaentrega.models.Operacion;
-import com.prontaentrega.models.Subasta;
-import com.prontaentrega.models.Usuario;
-import com.prontaentrega.models.enums.EstadoOperacion;
-import com.prontaentrega.models.enums.TipoOperacion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.mercado.InventarioUsuario;
+import com.prontaentrega.models.subastas.Oferta;
+import com.prontaentrega.models.mercado.Operacion;
+import com.prontaentrega.models.subastas.Subasta;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.mercado.EstadoOperacion;
+import com.prontaentrega.models.mercado.TipoOperacion;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
@@ -15,19 +15,27 @@ import com.prontaentrega.persistence.repository.OfertaRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.persistence.repository.SubastaRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
-import com.prontaentrega.services.exceptions.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import com.prontaentrega.services.exceptions.auth.UsuarioNoEncontradoException;
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
+import com.prontaentrega.services.exceptions.mercado.CreditosInsuficientesException;
+import com.prontaentrega.services.exceptions.mercado.InventarioNoEncontradoException;
+import com.prontaentrega.services.exceptions.mercado.SinAutorizacionExpcetion;
+import com.prontaentrega.services.exceptions.subastas.IdempotencyKeyException;
+import com.prontaentrega.models.exception.OfertaInvalidaException;
+import com.prontaentrega.models.exception.SubastaNoActivaException;
+import com.prontaentrega.services.exceptions.subastas.SubastaNoEncontradaException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.lang.Nullable;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -109,16 +117,13 @@ public class SubastaService {
             Integer cantidad,
             BigDecimal precioInicial,
             LocalDateTime vencimiento) {
-        Usuario vendedor = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UsuarioNoEncontradoException(usuarioId));
+        Usuario vendedor = buscarUsuario(usuarioId);
 
-        BolsaDeJugador bolsa = Optional.ofNullable(jugadorRepository.findById(jugadorId))
-                .orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado con el id: " + jugadorId));
+        BolsaDeJugador bolsa = buscarJugador(jugadorId);
 
         validarCreacionSubasta(cantidad, precioInicial, vencimiento, usuarioId, jugadorId);
 
-        InventarioUsuario inventario = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(usuarioId, jugadorId)
-                .orElse(new InventarioUsuario(vendedor, bolsa, 0, 0));
+        InventarioUsuario inventario = buscarInventario(usuarioId, jugadorId, vendedor, bolsa);
 
         inventario.ponerTokensEnVenta(cantidad);
         inventarioUsuarioRepository.save(inventario);
@@ -147,23 +152,11 @@ public class SubastaService {
         Oferta ofertaPrevia = validarIdempotencia(usuarioId, subastaId, puja, idempotencyKey);
         if (ofertaPrevia != null) return ofertaPrevia;
 
-        Subasta subasta = subastaRepository.findByIdForUpdate(subastaId)
-                .orElseThrow(() -> new SubastaNoEncontradaException(subastaId));
+        Subasta subasta = buscarSubasta(subastaId);
 
-        validarOferta(usuarioId, puja, subasta);
+        Usuario comprador = buscarUsuario(usuarioId);
 
-        BigDecimal ofertaMinima = subasta.obtenerOfertaMinima();
-
-        if (puja.compareTo(ofertaMinima) <= 0) {
-            throw new OfertaInvalidaException("La puja debe superar la oferta actual");
-        }
-
-        Usuario comprador = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UsuarioNoEncontradoException(usuarioId));
-
-        if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(puja) < 0) {
-            throw new CreditosInsuficientesException("No tienes suficientes créditos para ofertar");
-        }
+        validarOferta(usuarioId, puja, subasta, comprador);
 
         ofertaRepository.actualizarSuperior(subastaId);
 
@@ -180,127 +173,87 @@ public class SubastaService {
      * Cierra una subasta activa
      * @param usuarioId Id del propietario de la subasta
      * @param subastaId Id de la subasta
-     * @param motivo Motivo por el que se cierra
      * @return Una subasta cerrada
      * @throws SubastaNoEncontradaException Cuando no existe la subasta
      * @throws SinAutorizacionExpcetion Cuando un usuario quiere cerrar una subasta que no le pertenece
      * @throws SubastaNoActivaException Cuando se quiere cerrar una subasta que no está activa
      */
     @Transactional
-    public Subasta cerrarSubasta(UUID usuarioId, UUID subastaId, String motivo) {
-        Subasta subasta = subastaRepository.findByIdForUpdate(subastaId)
-                .orElseThrow(() -> new SubastaNoEncontradaException(subastaId));
+    public Subasta cerrarSubasta(UUID usuarioId, UUID subastaId) {
+        Subasta subasta = buscarSubasta(subastaId);
 
         validarCerrarSubasta(usuarioId, subasta);
 
-        return resolverCierre(subasta, motivo);
+        return resolverCierre(subasta);
     }
 
     @Transactional
     public void resolverSubastasVencidas() {
-        LocalDateTime ahora = LocalDateTime.now(ZoneId.systemDefault());
+        List<Subasta> subastasVencidas = subastaRepository.getSubastasVencidasActivas();
 
-        List<UUID> idsVencidas = subastaRepository.findIdsVencidas(ahora);
-
-        for (UUID id : idsVencidas) {
-            subastaRepository.findByIdForUpdate(id).ifPresent(subasta -> {
-                if (Boolean.TRUE.equals(subasta.getActiva())
-                        && !subasta.getVencimiento().isAfter(ahora)) {
-                    resolverCierre(subasta, "POR_TIEMPO");
-                }
-            });
+        for (Subasta subasta : subastasVencidas) {
+            resolverCierre(subasta);
         }
     }
 
-    private Subasta resolverCierre(Subasta subasta, String motivo) {
-        List<Oferta> ofertas = ofertaRepository.findBySubastaIdOrderByPujaDesc(subasta.getId()).stream()
-                .sorted(Comparator.comparing(Oferta::getPuja).reversed())
-                .toList();
+    @Transactional
+    protected Subasta resolverCierre(Subasta subasta) {
+        ofertaRepository.findOfertaGanadora(subasta.getId())
+                .ifPresentOrElse(
+                        oferta -> {
+                            oferta.setEsSuperior(true);
+                            ofertaRepository.save(oferta);
+                            liquidarVenta(subasta, oferta);
+                        },
+                        () -> devolverTokensAlPropietario(subasta)
+                );
 
-        Oferta ofertaGanadora = null;
-        for (Oferta oferta : ofertas) {
-            Usuario postor = usuarioRepository.findById(oferta.getUsuarioId())
-                    .orElseThrow(() -> new UsuarioNoEncontradoException(oferta.getUsuarioId()));
-            if (postor.getCreditosDisponibles() != null && postor.getCreditosDisponibles().compareTo(oferta.getPuja()) >= 0) {
-                ofertaGanadora = oferta;
-                break;
-            }
-        }
-
-        if (ofertaGanadora == null) {
-            devolverTokensAlPropietario(subasta);
-        } else {
-            ofertaGanadora.setEsSuperior(true);
-            ofertaRepository.save(ofertaGanadora);
-            liquidarVenta(subasta, ofertaGanadora);
-        }
-
-        subasta.setMotivoCierre(motivo);
-        subasta.setActiva(false);
-        subasta.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+        subasta.cerrarSubasta();
         subastaRepository.save(subasta);
         return subasta;
     }
 
     private void devolverTokensAlPropietario(Subasta subasta) {
-        Usuario vendedor = usuarioRepository.findById(subasta.getPropietarioId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException(subasta.getPropietarioId()));
+        Usuario vendedor = buscarUsuario(subasta.getPropietario().getId());
 
-        UUID jugadorId = subasta.getJugadorId();
+        UUID jugadorId = subasta.getBolsaDeJugador().getEstadisticasDeportivas().getJugador().getId();
         BolsaDeJugador bolsa = subasta.getBolsaDeJugador();
-        InventarioUsuario inventario = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(vendedor.getId(), jugadorId)
-                .orElse(new InventarioUsuario(vendedor, bolsa, 0, 0));
+        InventarioUsuario inventario = buscarInventario(vendedor.getId(), jugadorId, vendedor, bolsa);
 
-        int actuales = inventario.getTokensDisponibles() == null ? 0 : inventario.getTokensDisponibles();
-        int enVenta = inventario.getTokensEnVenta() == null ? 0 : inventario.getTokensEnVenta();
-        inventario.setTokensDisponibles(actuales + subasta.getCantidadOfrecida());
-        inventario.setTokensEnVenta(Math.max(0, enVenta - subasta.getCantidadOfrecida()));
-        inventario.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+        inventario.cancelarVenta(subasta.getCantidadOfrecida());
         inventarioUsuarioRepository.save(inventario);
     }
 
     private void liquidarVenta(Subasta subasta, Oferta ofertaGanadora) {
-        Usuario vendedor = usuarioRepository.findById(subasta.getPropietarioId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException(subasta.getPropietarioId()));
+        Usuario vendedor = buscarUsuario(subasta.getPropietario().getId());
 
-        Usuario ganador = usuarioRepository.findById(ofertaGanadora.getUsuarioId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException(ofertaGanadora.getUsuarioId()));
-
-        BigDecimal totalPuja = ofertaGanadora.getPuja();
-        BigDecimal precioPorToken = totalPuja.divide(
-            BigDecimal.valueOf(subasta.getCantidadOfrecida()),
-            2,
-            java.math.RoundingMode.HALF_UP);
+        Usuario ganador = buscarUsuario(ofertaGanadora.getUsuarioId());
 
         ganador.restarCreditos(ofertaGanadora.getPuja());
         vendedor.sumarCreditos(ofertaGanadora.getPuja());
         usuarioRepository.save(ganador);
         usuarioRepository.save(vendedor);
 
-        UUID jugadorId = subasta.getJugadorId();
+        UUID jugadorId = subasta.getBolsaDeJugador().getEstadisticasDeportivas().getJugador().getId();
         BolsaDeJugador bolsa = subasta.getBolsaDeJugador();
 
-        InventarioUsuario inventarioGanador = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(ganador.getId(), jugadorId)
-                .orElse(new InventarioUsuario(ganador, bolsa, 0, 0));
-        InventarioUsuario inventarioVendedor = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(vendedor.getId(), jugadorId)
-                .orElse(new InventarioUsuario(vendedor, bolsa, 0, 0));
+        InventarioUsuario inventarioGanador = buscarInventario(ganador.getId(), jugadorId, ganador, bolsa);
+        InventarioUsuario inventarioVendedor = buscarInventario(vendedor.getId(), jugadorId, vendedor, bolsa);
 
-        inventarioGanador.setTokensDisponibles((inventarioGanador.getTokensDisponibles() == null ? 0 : inventarioGanador.getTokensDisponibles()) + subasta.getCantidadOfrecida());
-        inventarioVendedor.setTokensEnVenta(Math.max(0, (inventarioVendedor.getTokensEnVenta() == null ? 0 : inventarioVendedor.getTokensEnVenta()) - subasta.getCantidadOfrecida()));
-        inventarioGanador.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
-        inventarioVendedor.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+        inventarioGanador.agregarTokens(subasta.getCantidadOfrecida());
+        inventarioVendedor.quitarTokens(subasta.getCantidadOfrecida());
         inventarioUsuarioRepository.save(inventarioGanador);
         inventarioUsuarioRepository.save(inventarioVendedor);
 
-        subasta.setOfertaActual(ofertaGanadora);
+        subasta.asignarOfertaGanadora(ofertaGanadora);
 
         Operacion operacionCompra = new Operacion(
                 ganador,
                 vendedor,
                 bolsa.getEstadisticasDeportivas().getJugador(),
                 subasta.getCantidadOfrecida(),
-                precioPorToken,
-                totalPuja,
+                subasta.getBolsaDeJugador().getCotizacionActual(),
+                ofertaGanadora.getPuja(),
                 TipoOperacion.COMPRA,
                 EstadoOperacion.COMPLETADA);
 
@@ -309,8 +262,8 @@ public class SubastaService {
                 ganador,
                 bolsa.getEstadisticasDeportivas().getJugador(),
                 subasta.getCantidadOfrecida(),
-                precioPorToken,
-                totalPuja,
+                subasta.getBolsaDeJugador().getCotizacionActual(),
+                ofertaGanadora.getPuja(),
                 TipoOperacion.VENTA,
                 EstadoOperacion.COMPLETADA);
 
@@ -318,28 +271,59 @@ public class SubastaService {
         operacionRepository.save(operacionVenta);
     }
 
-    private static void validarOferta(UUID usuarioId, BigDecimal puja, Subasta subasta) {
-        if (Boolean.FALSE.equals(subasta.getActiva())) {
-            throw new SubastaNoActivaException("La subasta ya no está activa");
+    public Page<Subasta> listarSubastasPorNombre(int page, int size, String user, String jugador) {
+        int normalizedPage = Math.max(page, 1) - 1;
+        int normalizedSize = Math.max(size, 1);
+        Pageable pageable = PageRequest.of(normalizedPage, normalizedSize);
+        return subastaRepository.findByNombre(user, jugador, pageable);
+    }
+
+    @NonNull
+    private Usuario buscarUsuario(UUID usuarioId) {
+        return usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNoEncontradoException(usuarioId));
+    }
+
+    @NonNull
+    private InventarioUsuario buscarInventario(UUID usuarioId, UUID jugadorId, Usuario vendedor, BolsaDeJugador bolsa) {
+        return inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(usuarioId, jugadorId)
+                .orElse(new InventarioUsuario(vendedor, bolsa, 0, 0));
+    }
+
+    @NonNull
+    private BolsaDeJugador buscarJugador(UUID jugadorId) {
+        return jugadorRepository.findById(jugadorId)
+                .orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado con el id: " + jugadorId));
+    }
+
+    @NonNull
+    private Subasta buscarSubasta(UUID subastaId) {
+        return subastaRepository.findByIdForUpdate(subastaId)
+                .orElseThrow(() -> new SubastaNoEncontradaException(subastaId));
+    }
+
+    private Oferta validarIdempotencia(UUID usuarioId, UUID subastaId, BigDecimal puja, String idempotencyKey) {
+        if (idempotencyKey == null || idempotencyKey.isBlank() || idempotencyKey.length() > 255) {
+            throw new OfertaInvalidaException("La clave de idempotencia es obligatoria y debe tener hasta 255 caracteres");
         }
 
-        if (!subasta.getVencimiento().isAfter(LocalDateTime.now(ZoneId.systemDefault()))) {
-            throw new SubastaNoActivaException("La subasta ya venció");
-        }
+        Optional<Oferta> ofertaPrevia = ofertaRepository.findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
+        if (ofertaPrevia.isPresent()) {
+            Oferta oferta = ofertaPrevia.get();
 
-        if (subasta.getPropietario().getId().equals(usuarioId)) {
-            throw new OfertaInvalidaException("El propietario no puede ofertar en su propia subasta");
+            if (!oferta.getSubastaId().equals(subastaId) || oferta.getPuja().compareTo(puja) != 0) {
+                throw new IdempotencyKeyException(
+                        "La clave de idempotencia ya fue utilizada con otros datos");
+            }
+            return oferta;
         }
-
-        if (puja == null || puja.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new OfertaInvalidaException("La puja debe ser mayor a cero");
-        }
+        return null;
     }
 
     private void validarCreacionSubasta(Integer cantidad,
-                                               BigDecimal precioInicial,
-                                               LocalDateTime vencimiento,
-                                               UUID userId, UUID jugadorID
+                                        BigDecimal precioInicial,
+                                        LocalDateTime vencimiento,
+                                        UUID userId, UUID jugadorID
     ) {
         if (cantidad == null || cantidad < 1) {
             throw new CantidadDeTokensException("La cantidad de tokens debe ser mayor o igual a 1");
@@ -373,28 +357,29 @@ public class SubastaService {
         }
     }
 
-    private Oferta validarIdempotencia(UUID usuarioId, UUID subastaId, BigDecimal puja, String idempotencyKey) {
-        if (idempotencyKey == null || idempotencyKey.isBlank() || idempotencyKey.length() > 255) {
-            throw new OfertaInvalidaException("La clave de idempotencia es obligatoria y debe tener hasta 255 caracteres");
+    private static void validarOferta(UUID usuarioId, BigDecimal puja, Subasta subasta, Usuario comprador) {
+        if (Boolean.FALSE.equals(subasta.getActiva())) {
+            throw new SubastaNoActivaException("La subasta ya no está activa");
         }
 
-        Optional<Oferta> ofertaPrevia = ofertaRepository.findByUsuarioIdAndIdempotencyKey(usuarioId, idempotencyKey);
-        if (ofertaPrevia.isPresent()) {
-            Oferta oferta = ofertaPrevia.get();
-
-            if (!oferta.getSubastaId().equals(subastaId) || oferta.getPuja().compareTo(puja) != 0) {
-                throw new IdempotencyKeyException(
-                        "La clave de idempotencia ya fue utilizada con otros datos");
-            }
-            return oferta;
+        if (!subasta.getVencimiento().isAfter(LocalDateTime.now(ZoneId.systemDefault()))) {
+            throw new SubastaNoActivaException("La subasta ya venció");
         }
-        return null;
-    }
 
-    public Page<Subasta> listarSubastasPorNombre(int page, int size, String user, String jugador) {
-        int normalizedPage = Math.max(page, 1) - 1;
-        int normalizedSize = Math.max(size, 1);
-        Pageable pageable = PageRequest.of(normalizedPage, normalizedSize);
-        return subastaRepository.findByNombre(user, jugador, pageable);
+        if (subasta.getPropietario().getId().equals(usuarioId)) {
+            throw new OfertaInvalidaException("El propietario no puede ofertar en su propia subasta");
+        }
+
+        if (puja == null || puja.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new OfertaInvalidaException("La puja debe ser mayor a cero");
+        }
+
+        if (puja.compareTo(subasta.obtenerOfertaMinima()) <= 0) {
+            throw new OfertaInvalidaException("La puja debe superar la oferta actual");
+        }
+
+        if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(puja) < 0) {
+            throw new CreditosInsuficientesException("No tienes suficientes créditos para ofertar");
+        }
     }
 }

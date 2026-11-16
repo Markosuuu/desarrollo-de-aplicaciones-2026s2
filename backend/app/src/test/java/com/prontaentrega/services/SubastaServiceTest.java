@@ -1,12 +1,10 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.EstadisticasDeportivas;
-import com.prontaentrega.models.InventarioUsuario;
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.models.Oferta;
-import com.prontaentrega.models.Usuario;
-import com.prontaentrega.models.Subasta;
+import com.prontaentrega.models.jugadores.*;
+import com.prontaentrega.models.mercado.InventarioUsuario;
+import com.prontaentrega.models.subastas.Oferta;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.subastas.Subasta;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OfertaRepository;
@@ -14,8 +12,8 @@ import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.persistence.repository.SubastaRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
-import com.prontaentrega.services.exceptions.OfertaInvalidaException;
-import com.prontaentrega.services.exceptions.IdempotencyKeyException;
+import com.prontaentrega.models.exception.OfertaInvalidaException;
+import com.prontaentrega.services.exceptions.subastas.IdempotencyKeyException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -132,8 +130,8 @@ class SubastaServiceTest extends AbstractIntegrationTest {
             () -> subastaService.ofertar(seller.getId(), subasta.getId(), BigDecimal.valueOf(200), "bid-3"));
     }
 
-        @Test
-        void shouldSettleAuctionAndTransferTokensToHighestBidder() {
+    @Test
+    void shouldSettleAuctionAndTransferTokensToHighestBidder() {
         Usuario seller = saveUser("Vendedor cierre", "seller-close@test.com");
         Usuario buyer = saveUser("Ganador", "buyer-close@test.com");
         BolsaDeJugador bolsa = saveJugador("Jugador cierre");
@@ -143,7 +141,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         Subasta subasta = subastaService.crearSubasta(
             seller.getId(), jugadorId, 2, BigDecimal.valueOf(50), futureDeadline());
         subastaService.ofertar(buyer.getId(), subasta.getId(), BigDecimal.valueOf(80), "winner-bid");
-        subastaService.cerrarSubasta(seller.getId(), subasta.getId(), "Por propietario");
+        subastaService.cerrarSubasta(seller.getId(), subasta.getId());
 
         Usuario savedSeller = usuarioRepository.findById(seller.getId()).orElseThrow();
         Usuario savedBuyer = usuarioRepository.findById(buyer.getId()).orElseThrow();
@@ -157,10 +155,10 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         assertEquals(3, sellerInventory.getTokensDisponibles());
         assertEquals(0, sellerInventory.getTokensEnVenta());
         assertEquals(2, buyerInventory.getTokensDisponibles());
-            assertEquals(2,
-                    operacionRepository.findByUsuarioId(seller.getId(), Pageable.unpaged()).getTotalElements()
-                            + operacionRepository.findByUsuarioId(buyer.getId(), Pageable.unpaged()).getTotalElements());
-        }
+        assertEquals(2,
+                operacionRepository.findByUsuarioId(seller.getId(), Pageable.unpaged()).getTotalElements()
+                        + operacionRepository.findByUsuarioId(buyer.getId(), Pageable.unpaged()).getTotalElements());
+    }
 
     @Test
     void shouldFallBackToNextBidderWhenHighestBidderCannotPay() {
@@ -178,7 +176,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         highestBidder.setCreditosDisponibles(BigDecimal.ZERO);
         usuarioRepository.save(highestBidder);
 
-        subastaService.cerrarSubasta(seller.getId(), subasta.getId(), "Por propietario");
+        subastaService.cerrarSubasta(seller.getId(), subasta.getId());
 
         Subasta cerrada = subastaService.obtenerSubasta(subasta.getId());
         assertEquals(nextBidder.getId(), cerrada.getOfertaActual().getUsuarioId());
@@ -187,7 +185,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void shouldReturnReservedTokensWhenAuctionHasNoBids() throws InterruptedException {
+    void shouldReturnReservedTokensWhenAuctionHasNoBids() {
         Usuario seller = saveUser("Vendedor retorno", "seller-return@test.com");
         BolsaDeJugador bolsa = saveJugador("Jugador retorno");
         UUID jugadorId = bolsa.getEstadisticasDeportivas().getJugador().getId();
@@ -195,8 +193,11 @@ class SubastaServiceTest extends AbstractIntegrationTest {
         inventario.ponerTokensEnVenta(3);
         inventarioUsuarioRepository.save(inventario);
 
+        LocalDateTime ahora = LocalDateTime.now();
         Subasta subasta = new Subasta(
-            seller, bolsa, 3, BigDecimal.valueOf(10), LocalDateTime.now().minusMinutes(1));
+                seller, bolsa, 3, BigDecimal.valueOf(10),
+                ahora.minusMinutes(1), ahora.minusHours(1));
+        subastaRepository.save(subasta);
         subastaRepository.save(subasta);
         subastaService.resolverSubastasVencidas();
 
@@ -303,7 +304,7 @@ class SubastaServiceTest extends AbstractIntegrationTest {
     }
 
     private Usuario saveUser(String nombre, String correo) {
-        Usuario usuario = new Usuario(nombre, correo, "hash");
+        Usuario usuario = new Usuario(nombre, correo, "hash1234");
         usuario.setCreditosDisponibles(BigDecimal.valueOf(1000));
         return usuarioRepository.save(usuario);
     }
@@ -317,8 +318,8 @@ class SubastaServiceTest extends AbstractIntegrationTest {
                 (int) (System.currentTimeMillis() % 100000),
                 nombre,
                 "Equipo X",
-                com.prontaentrega.models.enums.Liga.LALIGA,
-                com.prontaentrega.models.enums.Posicion.FORWARD,
+                Liga.LALIGA,
+                Posicion.FORWARD,
                 25,
                 180,
                 70);

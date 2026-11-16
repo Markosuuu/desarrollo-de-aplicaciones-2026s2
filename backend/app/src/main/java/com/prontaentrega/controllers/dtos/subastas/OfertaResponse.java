@@ -1,7 +1,7 @@
 package com.prontaentrega.controllers.dtos.subastas;
 
 import com.prontaentrega.controllers.dtos.auth.UsuarioResponse;
-import com.prontaentrega.models.Oferta;
+import com.prontaentrega.models.subastas.Oferta;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;

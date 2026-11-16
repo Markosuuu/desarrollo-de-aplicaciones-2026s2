@@ -2,8 +2,8 @@ package com.prontaentrega.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.EstadoEstrategiaCotizacion;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.dao.EstadoEstrategiaCotizacionDAOSQL;
 import com.prontaentrega.utils.AbstractIntegrationTest;

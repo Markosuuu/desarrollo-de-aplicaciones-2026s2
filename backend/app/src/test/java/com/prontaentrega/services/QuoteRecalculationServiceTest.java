@@ -6,11 +6,11 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.prontaentrega.models.DatosValoracion;
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.models.EstrategiaCotizacion;
-import com.prontaentrega.models.estrategias.EstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.DatosValoracion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.EstadoEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.EstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderada;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;

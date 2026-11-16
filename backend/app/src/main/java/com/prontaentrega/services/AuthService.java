@@ -1,16 +1,14 @@
 package com.prontaentrega.services;
 
 import com.prontaentrega.authentication.JwtService;
-import com.prontaentrega.models.TokenEstado;
-import com.prontaentrega.models.Usuario;
+import com.prontaentrega.models.auth.TokenEstado;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.exception.CampoInvalidoException;
 import com.prontaentrega.persistence.repository.TokenEstadoRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.services.dto.AuthResult;
-import com.prontaentrega.services.exceptions.DuplicateUserException;
-import com.prontaentrega.services.exceptions.ValidationException;
+import com.prontaentrega.services.exceptions.auth.*;
 import io.jsonwebtoken.Claims;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -18,6 +16,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 public class AuthService {
@@ -46,24 +45,18 @@ public class AuthService {
      * @param correo Correo electrónico del usuario a registrar.
      * @param password Contraseña del usuario a registrar.
      * @return Un objeto AuthResult que contiene los detalles del usuario registrado y el token JWT generado.
-     * @throws ValidationException Si el nombre, correo o contraseña no cumplen con los criterios de validación.
-     * @throws DuplicateUserException Si ya existe un usuario registrado con el mismo correo.
+     * @throws UsuarioRepetidoException Si ya existe un usuario registrado con el mismo correo.
      */
     @Transactional
     public AuthResult register(String nombre, String correo, String password) {
-        String n = normalizeName(nombre);
-        String c = normalizeEmail(correo);
-        String p = password;
+        String nombreUser = normalizeName(nombre);
+        String correoUser = normalizeEmail(correo);
 
-        validateNombre(n);
-        validateCorreo(c);
-        validatePassword(p);
+        validarNombre(nombreUser);
+        validarCorreo(correoUser);
+        validarPassword(password);
 
-        if (usuarioRepository.existsByCorreoIgnoreCase(c)) {
-            throw new DuplicateUserException("Ya existe una cuenta con ese correo registrado");
-        }
-
-        Usuario usuario = new Usuario(n, c, passwordEncoder.encode(p));
+        Usuario usuario = new Usuario(nombreUser, correoUser, passwordEncoder.encode(password));
         Usuario saved = usuarioRepository.save(usuario);
         String token = jwtService.generateToken(saved.getId(), saved.getCorreo());
         persistTokenState(saved.getId(), token);
@@ -83,12 +76,12 @@ public class AuthService {
      */
     @Transactional
     public AuthResult login(String correo, String password) {
-        String c = normalizeEmail(correo);
-        Usuario usuario = usuarioRepository.findByCorreoIgnoreCase(c)
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+        String correoUser = normalizeEmail(correo);
+        Usuario usuario = usuarioRepository.findByCorreoIgnoreCase(correoUser)
+                .orElseThrow(() -> new CorreoNoExistenteException("No existe el correo: " + correo));
 
         if (!passwordEncoder.matches(password, usuario.getPasswordHash())) {
-            throw new BadCredentialsException("Invalid credentials");
+            throw new ContraseniaEquivocadaException("La contraseña no coincide");
         }
 
         String token = jwtService.generateToken(usuario.getId(), usuario.getCorreo());
@@ -100,34 +93,44 @@ public class AuthService {
         Claims claims = jwtService.parseToken(token);
         TokenEstado tokenEstado = tokenEstadoRepository.findByUsuarioId(usuarioId)
                 .orElse(new TokenEstado());
-        tokenEstado.setUsuarioId(usuarioId);
-        tokenEstado.setJtiVigente(UUID.fromString(claims.getId()));
-        tokenEstado.setVersionToken((tokenEstado.getVersionToken() == null ? 0 : tokenEstado.getVersionToken()) + 1);
-        tokenEstado.setEmitidaEn(LocalDateTime.now(ZoneId.systemDefault()));
-        tokenEstado.setExpiraEn(LocalDateTime.now(ZoneId.systemDefault()).plusMinutes(60));
+
+        tokenEstado.actualizarToken(usuarioId, claims);
         tokenEstadoRepository.save(tokenEstado);
     }
 
-    private void validateNombre(String nombre) {
-        if (nombre == null || nombre.isBlank()) {
-            throw new ValidationException("VALIDACION_INVALIDA", "Nombre requerido");
-        }
-    }
 
     private static final Pattern EMAIL_PATTERN =
             Pattern.compile("^[A-Za-z0-9._%+-]{1,64}@(?:[A-Za-z0-9-]{1,63}\\.){1,10}[A-Za-z]{2,63}$");
 
-    private void validateCorreo(String correo) {
-        if (correo == null || correo.length() > 254 || !EMAIL_PATTERN.matcher(correo).matches()) {
-            throw new ValidationException("VALIDACION_INVALIDA", "Correo invalido");
+    private void validarNombre(String nombre) {
+        if (!StringUtils.hasText(nombre)) {
+            throw new CampoRequeridoException("Nombre requerido");
         }
     }
 
-    private void validatePassword(String password) {
-        if (password == null || password.length() < 8 || password.length() > 72
+    private void validarCorreo(String correo) {
+        if (!StringUtils.hasText(correo)) {
+            throw new CampoRequeridoException("Correo requerido");
+        }
+
+        if (correo.length() > 254 || !EMAIL_PATTERN.matcher(correo).matches()) {
+            throw new CampoInvalidoException("Correo inválido");
+        }
+
+        if (usuarioRepository.existsByCorreoIgnoreCase(correo)) {
+            throw new UsuarioRepetidoException("Ya existe una cuenta con ese correo registrado");
+        }
+    }
+
+    private void validarPassword(String password) {
+        if (!StringUtils.hasText(password)) {
+            throw new CampoRequeridoException("Contraseña requerida");
+        }
+
+        if (password.length() < 8 || password.length() > 72
                 || password.chars().noneMatch(Character::isLetter)
                 || password.chars().noneMatch(Character::isDigit)) {
-            throw new ValidationException("VALIDACION_INVALIDA", "Password invalido");
+            throw new CampoInvalidoException("Contraseña inválida");
         }
     }
 

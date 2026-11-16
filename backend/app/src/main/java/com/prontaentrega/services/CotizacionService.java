@@ -1,14 +1,13 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.*;
+import com.prontaentrega.models.cotizacion.*;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.CotizacionRepository.ActualizacionCotizacion;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
-import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
-import com.prontaentrega.services.exceptions.QuoteRequestValidationException;
-import com.prontaentrega.services.exceptions.QuoteStrategyNotFoundException;
+import com.prontaentrega.services.exceptions.cotizacion.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -18,14 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Servicio encargado de coordinar las estrategias y la
- * cotizacion de los jugadores
- */
 @Service
 public class CotizacionService {
     private static final int PAGE_SIZE = 200;
@@ -34,14 +30,9 @@ public class CotizacionService {
     private final HistorialCotizacionRepository historialRepository;
     private final Map<String, EstrategiaCotizacion> estrategias;
 
-    /**
-     * Constructor del servicio de cotización.
-     * @param cotizacionRepository
-     * @param estrategias
-     */
     public CotizacionService(CotizacionRepository cotizacionRepository,
                              HistorialCotizacionRepository historialRepository,
-                             List<EstrategiaCotizacion> estrategias) {
+                             List<EstrategiaCotizacion> estrategias) throws EstrategiasInconsistentesException {
         this.cotizacionRepository = cotizacionRepository;
         this.historialRepository = historialRepository;
         this.estrategias = new HashMap<>();
@@ -49,35 +40,36 @@ public class CotizacionService {
         validacionesConstructor(cotizacionRepository, estrategias);
     }
 
-    private void validacionesConstructor(CotizacionRepository cotizacionRepository, List<EstrategiaCotizacion> estrategias) {
+    private void validacionesConstructor(CotizacionRepository cotizacionRepository, List<EstrategiaCotizacion> estrategias) throws EstrategiasInconsistentesException {
         for (EstrategiaCotizacion estrategia : estrategias) {
             EstrategiaCotizacion previous = this.estrategias.put(estrategia.estrategiaId(), estrategia);
 
             if (previous != null) {
-                throw new IllegalStateException("ID de estrategia duplicado: " + estrategia.estrategiaId());
+                throw new EstrategiaDuplicadaException("Estrategia repetida: " + estrategia.estrategiaId());
             }
 
             if (!estrategia.tipoConfiguracion().equals(
                     cotizacionRepository.tipoConfiguracion(estrategia.estrategiaId()))) {
-                throw new IllegalStateException(
+                throw new EstrategiasInconsistentesException(
                         "El provider no coincide con la configuración de " + estrategia.estrategiaId());
             }
         }
 
         if (!this.estrategias.keySet().equals(cotizacionRepository.estrategiaIdsConfigurables())) {
-            throw new IllegalStateException(
+            throw new InconsistenciaDeEstrategiasConfigurablesException(
                     "Los providers de configuración deben corresponder uno a uno con las estrategias");
         }
     }
 
-    /** Recalcula todas las bolsas con la estrategia activa en un snapshot transaccional. */
     @Transactional(isolation = Isolation.REPEATABLE_READ)
     public ResultadoRecotizacion recalcularEstrategiaActiva() {
-          EstrategiaActiva estrategiaActiva = obtenerEstrategiaActiva();
+        EstrategiaActiva estrategiaActiva = obtenerEstrategiaActiva();
+
         int[] contadores = procesarTodasLasPaginas(
                 estrategiaActiva.strategy(),
                 estrategiaActiva.configuracion()
         );
+
         return new ResultadoRecotizacion(
                 estrategiaActiva.strategyId(),
                 contadores[0],
@@ -87,31 +79,35 @@ public class CotizacionService {
 
     /** Devuelve la selección activa y su configuración persistida. */
     @Transactional(readOnly = true)
-    public QuoteStrategyView consultarActiva() {
+    public EstrategiaEstado consultarActiva() {
         String activeId = cotizacionRepository.buscarEstado()
                 .map(EstadoEstrategiaCotizacion::estrategiaActivaId)
                 .orElse(null);
+
         if (activeId == null) {
-            throw new QuoteOperationConflictException("No hay una estrategia activa configurada");
+            throw new NoHayEstrategiaActivaConfiguradaException("No hay una estrategia activa configurada");
         }
+
         EstrategiaCotizacion strategy = estrategias.get(activeId);
         if (strategy == null) {
-            throw new QuoteOperationConflictException("La estrategia activa no está disponible");
+            throw new EstrategiaActivaNoDisponibleException("La estrategia activa no está disponible");
         }
+
         ConfiguracionEstrategiaCotizacion config = buscarConfiguracion(strategy);
 
-        return new QuoteStrategyView(strategy.estrategiaId(), strategy.nombreEstrategia(), true, config);
+        return new EstrategiaEstado(strategy.estrategiaId(), strategy.nombreEstrategia(), true, config);
     }
 
     /** Devuelve las estrategias registradas y las configuraciones independientes disponibles. */
     @Transactional(readOnly = true)
-    public List<QuoteStrategyView> listarEstrategias() {
+    public List<EstrategiaEstado> listarEstrategias() {
         String activeId = cotizacionRepository.buscarEstado()
                 .map(EstadoEstrategiaCotizacion::estrategiaActivaId)
                 .orElse(null);
+
         return estrategias.values().stream()
                 .sorted(Comparator.comparing(EstrategiaCotizacion::estrategiaId))
-                .map(strategy -> new QuoteStrategyView(strategy.estrategiaId(),
+                .map(strategy -> new EstrategiaEstado(strategy.estrategiaId(),
                         strategy.nombreEstrategia(),
                         strategy.estrategiaId().equals(activeId),
                         cotizacionRepository.buscarConfiguracion(strategy.estrategiaId()).orElse(null)))
@@ -125,8 +121,10 @@ public class CotizacionService {
 
         EstrategiaCotizacion strategy = buscarEstrategia(strategyId);
         validarTipoConfiguracion(strategy, configuracion);
+
         cotizacionRepository.bloquearEstado().orElseThrow(() ->
-                new QuoteOperationConflictException("El estado de estrategias no está inicializado"));
+                new NoHayEstrategiaActivaConfiguradaException("El estado de estrategias no está inicializado"));
+
         cotizacionRepository.guardarConfiguracion(strategyId, configuracion);
         return configuracion;
     }
@@ -136,7 +134,7 @@ public class CotizacionService {
     public ResultadoRecotizacion activarEstrategia(String strategyId) {
         EstrategiaCotizacion strategy = buscarEstrategia(strategyId);
         cotizacionRepository.bloquearEstado().orElseThrow(() ->
-                new QuoteOperationConflictException("El estado de estrategias no está inicializado"));
+                new NoHayEstrategiaActivaConfiguradaException("El estado de estrategias no está inicializado"));
         buscarConfiguracion(strategy);
         cotizacionRepository.guardarEstado(new EstadoEstrategiaCotizacion(strategy.estrategiaId()));
         return recalcularEstrategiaActiva();
@@ -144,26 +142,26 @@ public class CotizacionService {
 
     private EstrategiaActiva obtenerEstrategiaActiva() {
         EstadoEstrategiaCotizacion estado = cotizacionRepository.bloquearEstado()
-                .orElseThrow(() -> new QuoteOperationConflictException(
+                .orElseThrow(() -> new NoHayEstrategiaActivaConfiguradaException(
                         "No hay una estrategia activa configurada"));
         String strategyId = estado.estrategiaActivaId();
         if (strategyId == null) {
-            throw new QuoteOperationConflictException(
+            throw new NoHayEstrategiaActivaConfiguradaException(
                     "No hay una estrategia activa configurada");
         }
 
         EstrategiaCotizacion strategy = estrategias.get(strategyId);
         if (strategy == null) {
-            throw new QuoteOperationConflictException(
+            throw new NoHayEstrategiaActivaConfiguradaException(
                     "La estrategia activa no está disponible");
         }
 
         ConfiguracionEstrategiaCotizacion configuracion = cotizacionRepository
                 .buscarConfiguracion(strategyId)
-                .orElseThrow(() -> new QuoteOperationConflictException(
+                .orElseThrow(() -> new NoHayEstrategiaActivaConfiguradaException(
                         "La configuración de la estrategia activa está incompleta"));
         if (!strategy.tipoConfiguracion().isInstance(configuracion)) {
-            throw new QuoteOperationConflictException(
+            throw new NoHayEstrategiaActivaConfiguradaException(
                     "La configuración persistida no corresponde a la estrategia activa");
         }
         return new EstrategiaActiva(strategyId, strategy, configuracion);
@@ -184,12 +182,16 @@ public class CotizacionService {
 
             List<ActualizacionCotizacion> updates =
                     calcularActualizaciones(page, strategy, configuracion);
+
             skippedPlayers += page.size() - updates.size();
+
             if (!updates.isEmpty()) {
                 processedPlayers += persistirActualizaciones(updates);
             }
+
             cursor = page.getLast().bolsaId();
         }
+
         return new int[]{processedPlayers, skippedPlayers};
     }
 
@@ -212,7 +214,7 @@ public class CotizacionService {
     private int persistirActualizaciones(List<ActualizacionCotizacion> updates) {
         int updatedPlayers = cotizacionRepository.actualizarCotizaciones(updates);
         if (updatedPlayers != updates.size()) {
-            throw new QuoteOperationConflictException(
+            throw new NoHayEstrategiaActivaConfiguradaException(
                     "No se pudieron actualizar todas las cotizaciones calculadas");
         }
 
@@ -236,7 +238,7 @@ public class CotizacionService {
     private EstrategiaCotizacion buscarEstrategia(String strategyId) {
         EstrategiaCotizacion strategy = estrategias.get(strategyId);
         if (strategy == null) {
-            throw new QuoteStrategyNotFoundException("La estrategia solicitada no existe");
+            throw new EstrategiaNoExistenteException("La estrategia solicitada no existe");
         }
         return strategy;
     }
@@ -245,9 +247,11 @@ public class CotizacionService {
     private ConfiguracionEstrategiaCotizacion buscarConfiguracion(EstrategiaCotizacion strategy) {
         ConfiguracionEstrategiaCotizacion configuracion = cotizacionRepository
                 .buscarConfiguracion(strategy.estrategiaId())
-                .orElseThrow(() -> new QuoteOperationConflictException(
+                .orElseThrow(() -> new ConfiguracionIncompletaException(
                         "La configuración de la estrategia está incompleta"));
+
         validarTipoConfiguracion(strategy, configuracion);
+
         return configuracion;
     }
 
@@ -255,19 +259,23 @@ public class CotizacionService {
     private void validarTipoConfiguracion(EstrategiaCotizacion strategy,
                                           ConfiguracionEstrategiaCotizacion configuracion) {
         if (configuracion == null || !strategy.tipoConfiguracion().isInstance(configuracion)) {
-            throw new QuoteRequestValidationException(
+            throw new ConfiguracionNoValidaParaEstrategiaException(
                     "La configuración no corresponde a la estrategia solicitada");
         }
     }
 
-    /** Vista de administración para respuesta HTTP y verificación de estado. */
-    public record QuoteStrategyView(String strategyId, String strategyName,
-                                    boolean active, Object config) {
+    public record EstrategiaEstado(String strategyId, String strategyName,
+                                   boolean active, Object config) {
     }
 
     private record EstrategiaActiva(
             String strategyId,
             EstrategiaCotizacion strategy,
             ConfiguracionEstrategiaCotizacion configuracion) {
+    }
+
+
+    public List<HistorialCotizacion> buscarHistorialById(UUID jugadorId) {
+        return historialRepository.buscarHistorialById(jugadorId);
     }
 }

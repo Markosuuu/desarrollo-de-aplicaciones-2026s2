@@ -1,10 +1,14 @@
 package com.prontaentrega.controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prontaentrega.models.*;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.models.jugadores.Posicion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
+import com.prontaentrega.models.jugadores.Jugador;
+import com.prontaentrega.models.mercado.InventarioUsuario;
+import com.prontaentrega.models.subastas.Subasta;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OfertaRepository;
@@ -38,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("integracion")
+@Tag("e2e")
 class SubastaControllerTest extends AbstractIntegrationTest {
     private static final AtomicInteger PLAYER_SEQUENCE = new AtomicInteger(10000);
 
@@ -177,8 +181,7 @@ class SubastaControllerTest extends AbstractIntegrationTest {
 
         mockMvc.perform(patch("/api/subastas/{id}/cerrar", auctionId)
                         .header("Authorization", bearer(seller))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("motivo", "POR_PROPIETARIO"))))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ganadorId").value(buyer.id().toString()))
                 .andExpect(jsonPath("$.montoFinal").value(80))
@@ -198,8 +201,7 @@ class SubastaControllerTest extends AbstractIntegrationTest {
 
         mockMvc.perform(patch("/api/subastas/{id}/cerrar", auctionId)
                         .header("Authorization", bearer(seller))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(Map.of("motivo", "POR_PROPIETARIO"))))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
 
         ofertar(buyer, auctionId, 90, "buyer-closed-2")

@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.JugadorDTOSQL;
+import com.prontaentrega.persistence.dto.jugadores.JugadorDTOSQL;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 

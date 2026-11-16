@@ -1,6 +1,6 @@
 package com.prontaentrega.controllers.dtos.jugadores;
 
-import com.prontaentrega.models.HistorialCotizacion;
+import com.prontaentrega.models.cotizacion.HistorialCotizacion;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

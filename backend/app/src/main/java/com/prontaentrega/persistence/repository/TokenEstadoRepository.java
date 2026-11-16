@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository;
 
-import com.prontaentrega.models.TokenEstado;
+import com.prontaentrega.models.auth.TokenEstado;
 
 import java.util.Optional;
 import java.util.UUID;
