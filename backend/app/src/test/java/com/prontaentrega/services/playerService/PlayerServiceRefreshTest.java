@@ -12,7 +12,7 @@ import com.prontaentrega.models.jugadores.Jugador;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.PlayerService;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
-import com.prontaentrega.services.exceptions.jugadores.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.jugadores.ProveedorNoDisponibleException;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
@@ -138,8 +138,8 @@ class PlayerServiceRefreshTest extends AbstractIntegrationTest {
             }
             """);
 
-        ProviderUnavailableException exception = assertThrows(
-                ProviderUnavailableException.class,
+        ProveedorNoDisponibleException exception = assertThrows(
+                ProveedorNoDisponibleException.class,
                 () -> playerService.refreshFromWhoScored()
         );
 
@@ -190,8 +190,8 @@ class PlayerServiceRefreshTest extends AbstractIntegrationTest {
             }
             """);
 
-        ProviderUnavailableException exception = assertThrows(
-                ProviderUnavailableException.class,
+        ProveedorNoDisponibleException exception = assertThrows(
+                ProveedorNoDisponibleException.class,
                 () -> playerService.refreshFromWhoScored()
         );
 
@@ -238,8 +238,8 @@ class PlayerServiceRefreshTest extends AbstractIntegrationTest {
         providerStatus.set(500);
         providerBody.set("{\"error\":\"fallo\"}");
 
-        ProviderUnavailableException exception = assertThrows(
-                ProviderUnavailableException.class,
+        ProveedorNoDisponibleException exception = assertThrows(
+                ProveedorNoDisponibleException.class,
                 () -> playerService.refreshFromWhoScored()
         );
 

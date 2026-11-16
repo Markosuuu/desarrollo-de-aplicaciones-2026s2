@@ -6,11 +6,8 @@ import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.CotizacionRepository.ActualizacionCotizacion;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
-import com.prontaentrega.services.exceptions.cotizacion.ConfiguracionIncompletaException;
-import com.prontaentrega.services.exceptions.cotizacion.EstrategiaActivaNoDisponibleException;
-import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
-import com.prontaentrega.services.exceptions.cotizacion.ConfiguracionNoValidaParaEstrategiaException;
-import com.prontaentrega.services.exceptions.cotizacion.EstrategiaNoExistenteException;
+import com.prontaentrega.services.exceptions.cotizacion.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -21,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import com.prontaentrega.services.exceptions.cotizacion.EstrategiaDuplicadaException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +32,7 @@ public class CotizacionService {
 
     public CotizacionService(CotizacionRepository cotizacionRepository,
                              HistorialCotizacionRepository historialRepository,
-                             List<EstrategiaCotizacion> estrategias) {
+                             List<EstrategiaCotizacion> estrategias) throws EstrategiasInconsistentesException {
         this.cotizacionRepository = cotizacionRepository;
         this.historialRepository = historialRepository;
         this.estrategias = new HashMap<>();
@@ -44,7 +40,7 @@ public class CotizacionService {
         validacionesConstructor(cotizacionRepository, estrategias);
     }
 
-    private void validacionesConstructor(CotizacionRepository cotizacionRepository, List<EstrategiaCotizacion> estrategias) {
+    private void validacionesConstructor(CotizacionRepository cotizacionRepository, List<EstrategiaCotizacion> estrategias) throws EstrategiasInconsistentesException {
         for (EstrategiaCotizacion estrategia : estrategias) {
             EstrategiaCotizacion previous = this.estrategias.put(estrategia.estrategiaId(), estrategia);
 
@@ -54,15 +50,13 @@ public class CotizacionService {
 
             if (!estrategia.tipoConfiguracion().equals(
                     cotizacionRepository.tipoConfiguracion(estrategia.estrategiaId()))) {
-                // TODO: Iancho, poneme una excepción linda acá pls y en españolete
-                throw new IllegalStateException(
+                throw new EstrategiasInconsistentesException(
                         "El provider no coincide con la configuración de " + estrategia.estrategiaId());
             }
         }
 
         if (!this.estrategias.keySet().equals(cotizacionRepository.estrategiaIdsConfigurables())) {
-            // TODO: Iancho, poneme una excepción linda acá pls y en españolete
-            throw new IllegalStateException(
+            throw new InconsistenciaDeEstrategiasConfigurablesException(
                     "Los providers de configuración deben corresponder uno a uno con las estrategias");
         }
     }

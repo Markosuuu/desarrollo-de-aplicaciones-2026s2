@@ -4,7 +4,7 @@ import com.prontaentrega.models.exception.CampoInvalidoException;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.models.exception.AnuncioNoPendienteException;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
-import com.prontaentrega.services.exceptions.jugadores.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.jugadores.ProveedorNoDisponibleException;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.services.exceptions.auth.*;
 import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
@@ -93,8 +93,8 @@ public class GlobalExceptionHandler {
     /**
      * Maneja fallas de WhoScored conservando el contrato del endpoint de actualizacion.
      */
-    @ExceptionHandler(ProviderUnavailableException.class)
-    public ResponseEntity<RefreshCatalogResponse> handleProviderUnavailable(ProviderUnavailableException ex) {
+    @ExceptionHandler(ProveedorNoDisponibleException.class)
+    public ResponseEntity<RefreshCatalogResponse> handleProviderUnavailable(ProveedorNoDisponibleException ex) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(RefreshCatalogResponse.failure(ex.getMessage()));
     }
 
