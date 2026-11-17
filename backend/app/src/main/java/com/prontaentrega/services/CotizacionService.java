@@ -18,6 +18,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -277,15 +278,17 @@ public class CotizacionService {
             ConfiguracionEstrategiaCotizacion configuracion) {
     }
 
-
+    @Transactional
     public List<HistorialCotizacion> buscarHistorialById(UUID jugadorId) {
         return historialRepository.buscarHistorialById(jugadorId);
     }
 
+    @Transactional
     public HistorialCotizacion buscarHistorialPorFecha(
             UUID jugadorId,
             LocalDate fecha) {
-        BolsaDeJugador bolsa = jugadorRepository.findById(jugadorId).get();
+        BolsaDeJugador bolsa = jugadorRepository.findById(jugadorId)
+                .orElseThrow(() -> new JugadorNoEncontradoException("No se encontro un jugador con ID: " + jugadorId));
 
         LocalDateTime inicioDia = fecha.atStartOfDay();
 
