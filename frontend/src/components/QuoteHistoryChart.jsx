@@ -26,7 +26,7 @@ export default function QuoteHistoryChart({ data = [] }) {
     }
 
     return (
-        <div style={{ width: '100%' }}>
+        <div>
             <LineChart
                 dataset={points}
                 height={300}

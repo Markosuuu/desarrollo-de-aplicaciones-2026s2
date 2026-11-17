@@ -85,16 +85,20 @@
 }
 
 .playerPage-quote-content {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  width: 100%;
+  margin: 10px;
+  justify-content: space-around;
+  align-items: flex-start;
 }
 
 .playerPage-quote-details {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   align-items: center;
   gap: 1rem;
+  width: 40%;
 }
 
 .playerPage-quote-details span {
@@ -167,4 +171,56 @@ body[data-theme="dark"] {
   .playerPage-quote-chart {
     min-height: 240px;
   }
+} 
+
+.playerPage-quote-search {
+  border-top: #484848 solid 1px;
+  padding-top: 15px;
+}
+
+.playerPage-quote-search-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.playerPage-quote-search form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.playerPage-quote-search input {
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--card-bg);
+  align-self: center;
+  color: var(--text-color);
+}
+
+
+.playerPage-quote-search button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.playerPage-quote-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  padding-left: 10px;
+}
+
+.playerPage-quote-result strong {
+  font-size: 1.1rem;
+}
+
+.playerPage-quote-error {
+  color: #e05252;
+  font-size: 0.85rem;
+  margin-top: 10px;
 }

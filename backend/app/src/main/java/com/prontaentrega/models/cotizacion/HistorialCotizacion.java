@@ -18,4 +18,10 @@ public class HistorialCotizacion {
     private UUID bolsaId;
     private BigDecimal precio;
     private LocalDateTime fecha;
+
+    public HistorialCotizacion(UUID boldaId, BigDecimal precio, LocalDateTime fecha) {
+        this.bolsaId = boldaId;
+        this.precio = precio;
+        this.fecha = fecha;
+    }
 }
