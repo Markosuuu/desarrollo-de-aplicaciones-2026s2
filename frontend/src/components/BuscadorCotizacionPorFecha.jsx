@@ -22,12 +22,6 @@ export default function BuscadorCotizacionPorFecha({playerId, token}) {
 
         if (!quoteDate) return;
 
-        if (quoteDate > fechaActual) {
-            setQuoteError('No se puede consultar una fecha futura.');
-            setHistoricalQuote(null);
-            return;
-        }
-
         setQuoteLoading(true);
         setQuoteError('');
         setHistoricalQuote(null);
