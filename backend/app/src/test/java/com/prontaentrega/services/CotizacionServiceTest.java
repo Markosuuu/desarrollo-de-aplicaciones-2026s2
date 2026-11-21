@@ -24,6 +24,7 @@ import com.prontaentrega.services.dto.ResultadoRecotizacion;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -201,23 +202,6 @@ class CotizacionServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void devuelvePosteriorCuandoNoExisteAnterior() {
-        guardarHistorial(
-                fechaBuscada.plusDays(2).atTime(12, 0)
-        );
-
-        UUID id = jugador.getEstadisticasDeportivas().getJugador().getId();
-
-        HistorialCotizacion resultado =
-                administrationService.buscarHistorialPorFecha(id, fechaBuscada);
-
-        List<HistorialCotizacion> list =
-                administrationService.buscarHistorialById(id);
-
-        assertEquals(list.getFirst().getId(), resultado.getId());
-    }
-
-    @Test
     void devuelveAnteriorCuandoNoExistePosterior() {
         guardarHistorial(
                 fechaBuscada.minusDays(2).atTime(12, 0)
@@ -258,32 +242,6 @@ class CotizacionServiceTest extends AbstractIntegrationTest {
                 .orElseThrow();
 
         assertEquals(anterior.getId(), resultado.getId());
-    }
-
-    @Test
-    void devuelvePosteriorCuandoEsLaMasCercana() {
-        guardarHistorial(
-                fechaBuscada.minusDays(4).atTime(12, 0)
-        );
-
-        guardarHistorial(
-                fechaBuscada.plusDays(1).atTime(12, 0)
-        );
-
-        UUID id = jugador.getEstadisticasDeportivas().getJugador().getId();
-
-        HistorialCotizacion resultado =
-                administrationService.buscarHistorialPorFecha(id, fechaBuscada);
-
-        List<HistorialCotizacion> list =
-                administrationService.buscarHistorialById(id);
-
-        HistorialCotizacion posterior = list.stream()
-                .filter(h -> h.getFecha().toLocalDate().equals(fechaBuscada.plusDays(1)))
-                .findFirst()
-                .orElseThrow();
-
-        assertEquals(posterior.getId(), resultado.getId());
     }
 
     @Test
@@ -336,6 +294,22 @@ class CotizacionServiceTest extends AbstractIntegrationTest {
                 .orElseThrow();
 
         assertEquals(exacta.getId(), resultado.getId());
+    }
+
+    @Test
+    void lanzaExceptionCuandoNoexisteCotizacion() {
+        guardarHistorial(
+                fechaBuscada.minusDays(2).atTime(12, 0)
+        );
+
+        guardarHistorial(
+                fechaBuscada.atTime(14, 30)
+        );
+
+        UUID id = jugador.getEstadisticasDeportivas().getJugador().getId();
+
+        assertThrows(HistorialNoEncontradoException.class,
+                () -> administrationService.buscarHistorialPorFecha(id, LocalDate.of(2026, Month.APRIL, 10)));
     }
 
 

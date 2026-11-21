@@ -9,29 +9,42 @@ export default function BuscadorCotizacionPorFecha({playerId, token}) {
     const [historicalQuote, setHistoricalQuote] = useState(null);
     const [quoteLoading, setQuoteLoading] = useState(false);
     const [quoteError, setQuoteError] = useState('');
+
+    const hoy = new Date();
+    const fechaActual = [
+        hoy.getFullYear(),
+        String(hoy.getMonth() + 1).padStart(2, '0'),
+        String(hoy.getDate()).padStart(2, '0')
+    ].join('-');
     
     const handleQuoteSearch = async (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    if (!quoteDate) return;
+        if (!quoteDate) return;
 
-    setQuoteLoading(true);
-    setQuoteError('');
-    setHistoricalQuote(null);
+        if (quoteDate > fechaActual) {
+            setQuoteError('No se puede consultar una fecha futura.');
+            setHistoricalQuote(null);
+            return;
+        }
 
-    try {
-        const result = await getQuoteByDate({
-        id: playerId,
-        fecha: quoteDate,
-        token,
-        });
+        setQuoteLoading(true);
+        setQuoteError('');
+        setHistoricalQuote(null);
 
-        setHistoricalQuote(result);
-    } catch (error) {
-        setQuoteError(error.message);
-    } finally {
-        setQuoteLoading(false);
-    }
+        try {
+            const result = await getQuoteByDate({
+                id: playerId,
+                fecha: quoteDate,
+                token,
+            });
+
+            setHistoricalQuote(result);
+        } catch (error) {
+            setQuoteError(error.message);
+        } finally {
+            setQuoteLoading(false);
+        }
     };
     
     return(
@@ -44,6 +57,7 @@ export default function BuscadorCotizacionPorFecha({playerId, token}) {
                 <input
                 type="date"
                 value={quoteDate}
+                max={fechaActual}
                 onChange={(e) => setQuoteDate(e.target.value)}
                 required
                 />
@@ -61,12 +75,6 @@ export default function BuscadorCotizacionPorFecha({playerId, token}) {
                 <div className="playerPage-quote-result">
                     <span>Cotización:</span>
                     <strong>{historicalQuote.precio.toFixed(2)}</strong>
-
-                    <span>
-                        Fecha encontrada: {' '}
-                        
-                    </span>
-                    <strong>{new Date(historicalQuote.fecha).toLocaleDateString('es-AR')}</strong>
                 </div>
             )}
             </div>

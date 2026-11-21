@@ -283,57 +283,25 @@ public class CotizacionService {
         return historialRepository.buscarHistorialById(jugadorId);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public HistorialCotizacion buscarHistorialPorFecha(
             UUID jugadorId,
             LocalDate fecha) {
+
         BolsaDeJugador bolsa = jugadorRepository.findById(jugadorId)
-                .orElseThrow(() -> new JugadorNoEncontradoException("No se encontro un jugador con ID: " + jugadorId));
+                .orElseThrow(() -> new JugadorNoEncontradoException(
+                        "No se encontro un jugador con ID: " + jugadorId
+                ));
 
-        LocalDateTime inicioDia = fecha.atStartOfDay();
+        LocalDateTime finDia = fecha.plusDays(1).atStartOfDay();
 
-        Optional<HistorialCotizacion> anterior =
-                historialRepository
-                        .findFirstByBolsaIdAndFechaLessThanOrderByFechaDesc(
-                                bolsa.getId(),
-                                inicioDia
-                        );
-
-        Optional<HistorialCotizacion> posterior =
-                historialRepository
-                        .findFirstByBolsaIdAndFechaGreaterThanEqualOrderByFechaAsc(
-                                bolsa.getId(),
-                                inicioDia
-                        );
-
-        if (anterior.isEmpty() && posterior.isEmpty()) {
-            throw new HistorialNoEncontradoException("El jugador no tiene historial de cotizaciones");
-        }
-
-        if (anterior.isEmpty()) {
-            return posterior.get();
-        }
-
-        if (posterior.isEmpty()) {
-            return anterior.get();
-        }
-
-        long distanciaAnterior = Math.abs(
-                ChronoUnit.DAYS.between(
-                        fecha,
-                        anterior.get().getFecha().toLocalDate()
+        return historialRepository
+                .findFirstByBolsaIdAndFechaLessThanOrderByFechaDesc(
+                        bolsa.getId(),
+                        finDia
                 )
-        );
-
-        long distanciaPosterior = Math.abs(
-                ChronoUnit.DAYS.between(
-                        fecha,
-                        posterior.get().getFecha().toLocalDate()
-                )
-        );
-
-        return distanciaAnterior <= distanciaPosterior
-                ? anterior.get()
-                : posterior.get();
+                .orElseThrow(() -> new HistorialNoEncontradoException(
+                        "No existe historial de cotizaciones para la fecha indicada"
+                ));
     }
 }

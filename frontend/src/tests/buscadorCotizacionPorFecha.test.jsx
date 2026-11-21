@@ -72,12 +72,6 @@ describe('BuscadorCotizacionPorFecha', () => {
         expect(await screen.findByText('125.50')).toBeInTheDocument();
 
         expect(screen.getByText('Cotización:')).toBeInTheDocument();
-        expect(screen.getByText('Fecha encontrada:')).toBeInTheDocument();
-
-        const fechaFormateada = new Date('2026-11-17T12:00:00')
-            .toLocaleDateString('es-AR');
-
-        expect(screen.getByText(fechaFormateada)).toBeInTheDocument();
     });
 
     test('debe mostrar el estado de carga mientras consulta', async () => {
