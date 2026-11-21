@@ -80,7 +80,7 @@ export default function CrearSubastaModal({
             if (response) {
                 onCreated?.();
                 onClose();
-                navigate("/subasta/"+response.id)
+                void navigate("/subasta/"+response.id)
             }
         } catch (err) {
             setError(err.message || 'No se pudo crear la subasta.');
@@ -92,17 +92,17 @@ export default function CrearSubastaModal({
     return (
         <div
             className="user-page-dialog-backdrop"
-            onMouseDown={(e) => {
-                if (e.target === e.currentTarget && !loading) {
-                    onClose();
-                }
-            }}
         >
-            <div
+            <dialog
+                open
                 className="user-page-sell-dialog"
-                role="dialog"
                 aria-modal="true"
                 aria-labelledby="crear-subasta-title"
+                onMouseDown={(e) => {
+                    if (e.target === e.currentTarget && !loading) {
+                        onClose();
+                    }
+                }}
             >
                 <h2 id="crear-subasta-title">Crear subasta</h2>
 
@@ -188,7 +188,7 @@ export default function CrearSubastaModal({
                         </button>
                     </div>
                 </form>
-            </div>
+            </dialog>
         </div>
     );
 }

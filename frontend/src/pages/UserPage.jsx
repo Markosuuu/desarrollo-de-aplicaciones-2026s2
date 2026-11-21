@@ -493,7 +493,7 @@ function UserPage() {
             token={token}
             onClose={() => setAuctionItem(null)}
             onCreated={() => {
-                fetchUserInventory();
+                void fetchUserInventory();
             }}
         />
       )}
