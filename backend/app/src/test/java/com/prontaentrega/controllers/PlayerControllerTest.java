@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -537,16 +538,23 @@ class PlayerControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
-    void getQuotesByDateShouldReturn200WhenQuotesAreFoundAndUserIsAthorized() throws Exception {
+    void getQuotesByDateShouldReturn200WhenQuotesAreFoundAndUserIsAuthorized() throws Exception {
         AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
         BolsaDeJugador bolsa = crearJugadorDePrueba();
-        HistorialCotizacion historial = new HistorialCotizacion(bolsa.getId(), BigDecimal.TEN, LocalDateTime.now());
 
-        historialCotizacionRepository.guardarHistorial(
-                List.of(historial)
+        LocalDate fecha = LocalDate.now();
+
+        HistorialCotizacion historial = new HistorialCotizacion(
+                bolsa.getId(),
+                BigDecimal.TEN,
+                fecha.atTime(12, 0)
         );
 
-        mockMvc.perform(get("/api/players/"+ bolsa.getEstadisticasDeportivas().getJugador().getId() +"/quotes/2026-11-02")
+        historialCotizacionRepository.guardarHistorial(List.of(historial));
+
+        mockMvc.perform(get("/api/players/"
+                + bolsa.getEstadisticasDeportivas().getJugador().getId()
+                + "/quotes/" + fecha)
                 .header("Authorization", "Bearer " + result.token())
         ).andExpect(status().isOk());
     }
