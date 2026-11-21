@@ -231,7 +231,7 @@ function UserPage() {
                   <th scope="col">Cantidad disponible</th>
                   <th scope="col">Cantidad en venta</th>
                   <th scope="col">Valor por token</th>
-                  <th scope="col"></th>
+                  <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody>

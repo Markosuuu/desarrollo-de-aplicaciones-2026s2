@@ -141,7 +141,12 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Crear oferta",
       }),
     );
 
@@ -156,7 +161,13 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
+      }),
+    );
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Crear oferta",
       }),
     );
     fireEvent.change(screen.getByLabelText(/Cantidad de tokens/), {
@@ -206,10 +217,15 @@ describe("UserPage", () => {
 
     expect((await screen.findAllByText("—")).length).toBeGreaterThan(0);
     const unnamedPlayerButtons = screen.getAllByRole("button", {
-      name: "Vender tokens de jugador",
+      name: "Opciones de venta para jugador",
     });
     expect(unnamedPlayerButtons[0]).toBeDisabled();
     fireEvent.click(unnamedPlayerButtons[1]);
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Crear oferta",
+      }),
+    );
     expect(
       await screen.findByText(/Jugador — — créditos por token/),
     ).toBeInTheDocument();
@@ -430,7 +446,13 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
+      }),
+    );
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Crear oferta",
       }),
     );
     const quantity = screen.getByLabelText(/Cantidad de tokens/);
@@ -458,14 +480,22 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
       }),
     );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Crear oferta",
+      }),
+    );
+
     fireEvent.submit(screen.getByRole("dialog").querySelector("form"));
 
     await waitFor(() =>
       expect(mocks.toastError).toHaveBeenCalledWith("Oferta rechazada"),
     );
+
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
@@ -475,9 +505,16 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
       }),
     );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Crear oferta",
+      }),
+    );
+
     fireEvent.submit(screen.getByRole("dialog").querySelector("form"));
 
     await waitFor(() =>

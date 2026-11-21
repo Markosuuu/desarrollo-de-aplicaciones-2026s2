@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { createAuction } from '../../api/playerApi';
 import "../../styles/userPage.css";
 
@@ -36,6 +37,8 @@ export default function CrearSubastaModal({
 
     const fechaMinima = obtenerFechaMinima();
 
+    const navigate = useNavigate();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
@@ -66,7 +69,7 @@ export default function CrearSubastaModal({
         setLoading(true);
 
         try {
-            await createAuction({
+            const response = await createAuction({
                 jugadorId,
                 cantidad: cantidadNumerica,
                 precioInicial: precioNumerico,
@@ -74,8 +77,11 @@ export default function CrearSubastaModal({
                 token,
             });
 
-            onCreated?.();
-            onClose();
+            if (response) {
+                onCreated?.();
+                onClose();
+                navigate("/subasta/"+response.id)
+            }
         } catch (err) {
             setError(err.message || 'No se pudo crear la subasta.');
         } finally {
