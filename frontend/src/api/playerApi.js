@@ -94,32 +94,3 @@ export async function getRanking({
 
   return payload;
 }
-
-export async function createAuction({ 
-  jugadorId, 
-  cantidad, 
-  precioInicial, 
-  vencimiento, 
-  token
-}) {
-    const response = await fetch(`${API_BASE_URL}/subastas`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-            jugadorId,
-            cantidad: Number(cantidad),
-            precioInicial: Number(precioInicial),
-            vencimiento,
-        }),
-    });
-
-    if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'No se pudo crear la subasta');
-    }
-
-    return response.json();
-}

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createAuction } from '../../api/playerApi';
+import { createAuction } from '../../api/subastaApi';
 import "../../styles/userPage.css";
 
 function obtenerFechaMinima() {

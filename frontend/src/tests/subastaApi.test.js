@@ -6,6 +6,7 @@ import {
     fetchSubasta,
     cerrarSubasta,
     ofertarSubasta,
+    createAuction
 } from "../api/subastaApi";
 
 describe("subastaApi", () => {
@@ -428,5 +429,120 @@ describe("subastaApi", () => {
                 })
             ).rejects.toThrow("No se pudo realizar la oferta.");
         });
+    });
+});
+
+
+
+describe('createAuction', () => {
+    beforeEach(() => {
+        vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(() => {
+        vi.unstubAllGlobals();
+    });
+
+    const auctionData = {
+        jugadorId: 'jugador-123',
+        cantidad: '2',
+        precioInicial: '150.50',
+        vencimiento: '2026-12-01T18:00:00',
+        token: 'token-test',
+    };
+
+    test('realiza la petición con los datos y headers correspondientes', async () => {
+        const subasta = { id: 'subasta-123' };
+
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue(subasta),
+        });
+
+        const result = await createAuction(auctionData);
+
+        expect(fetch).toHaveBeenCalledTimes(1);
+
+        const [url, options] = fetch.mock.calls[0];
+
+        expect(url).toContain('/subastas');
+        expect(options.method).toBe('POST');
+
+        expect(options.headers).toEqual({
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer token-test',
+        });
+
+        expect(JSON.parse(options.body)).toEqual({
+            jugadorId: 'jugador-123',
+            cantidad: 2,
+            precioInicial: 150.50,
+            vencimiento: '2026-12-01T18:00:00',
+        });
+
+        expect(result).toEqual(subasta);
+    });
+
+    test('convierte cantidad y precio inicial a números', async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue({ id: 'subasta-123' }),
+        });
+
+        await createAuction({
+            ...auctionData,
+            cantidad: '5',
+            precioInicial: '200.75',
+        });
+
+        const [, options] = fetch.mock.calls[0];
+        const body = JSON.parse(options.body);
+
+        expect(body.cantidad).toBe(5);
+        expect(body.precioInicial).toBe(200.75);
+        expect(typeof body.cantidad).toBe('number');
+        expect(typeof body.precioInicial).toBe('number');
+    });
+
+    test('lanza un error cuando la respuesta HTTP no es exitosa', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({
+                message: 'No tenés suficientes tokens',
+            }),
+        });
+
+        await expect(createAuction(auctionData)).rejects.toThrow(
+            'No tenés suficientes tokens',
+        );
+    });
+
+    test('utiliza el mensaje predeterminado cuando la respuesta no contiene un error', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({}),
+        });
+
+        await expect(createAuction(auctionData)).rejects.toThrow(
+            'No se pudo crear la subasta',
+        );
+    });
+
+    test('devuelve los datos de la subasta creada', async () => {
+        const subasta = {
+            id: 'subasta-123',
+            jugadorId: 'jugador-123',
+            cantidad: 2,
+            precioInicial: 150.50,
+        };
+
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue(subasta),
+        });
+
+        const result = await createAuction(auctionData);
+
+        expect(result).toEqual(subasta);
     });
 });
