@@ -17,6 +17,7 @@ import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
 import com.prontaentrega.services.ApiKeyService;
 import com.prontaentrega.services.AuthService;
+import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import com.sun.net.httpserver.HttpServer;
@@ -24,6 +25,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -74,6 +76,9 @@ class PlayerControllerTest extends AbstractIntegrationTest {
 
     @Autowired
     private ApiKeyDAO apiKeyDao;
+
+    @Autowired
+    private CotizacionService administrationService;
 
     /**
      * Registra la URL del proveedor HTTP local para el contexto de Spring.
@@ -505,6 +510,53 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.jugadores").isArray())
                 .andExpect(jsonPath("$.paginacion.pagina").value(1))
                 .andExpect(jsonPath("$.paginacion.porPagina").value(10));
+    }
+
+    @Test
+    void getQuotesByDateShouldReturnForbiddenWithoutToken() throws Exception {
+        mockMvc.perform(get("/api/players/4488d400-d2f3-49b2-a932-4cad45bdf591/quotes/2026-11-02"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getQuotesByDateShouldReturnNotFoundWhenPlayerIsNotFound() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(get("/api/players/4488d400-d2f3-49b2-a932-4cad45bdf591/quotes/2026-11-02")
+                .header("Authorization", "Bearer " + result.token())
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getQuotesByDateShouldReturnNotFoundWhenPlayerDoesntHaveQuotes() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+        BolsaDeJugador bolsa = crearJugadorDePrueba();
+
+        mockMvc.perform(get("/api/players/"+ bolsa.getEstadisticasDeportivas().getJugador().getId() +"/quotes/2026-11-02")
+                .header("Authorization", "Bearer " + result.token())
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getQuotesByDateShouldReturn200WhenQuotesAreFoundAndUserIsAuthorized() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+        BolsaDeJugador bolsa = crearJugadorDePrueba();
+
+        LocalDate fecha = LocalDate.now();
+
+        HistorialCotizacion historial = new HistorialCotizacion(
+                bolsa.getId(),
+                BigDecimal.TEN,
+                fecha.atTime(12, 0)
+        );
+
+        historialCotizacionRepository.guardarHistorial(List.of(historial));
+
+        mockMvc.perform(get("/api/players/"
+                + bolsa.getEstadisticasDeportivas().getJugador().getId()
+                + "/quotes/" + fecha)
+                .header("Authorization", "Bearer " + result.token())
+        ).andExpect(status().isOk());
     }
 
     private static @NotNull EstadisticasDeportivas getEstadisticas() {

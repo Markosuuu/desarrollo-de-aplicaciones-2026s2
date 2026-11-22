@@ -4,6 +4,7 @@ import com.prontaentrega.models.exception.CampoInvalidoException;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.models.exception.AnuncioNoPendienteException;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
+import com.prontaentrega.services.exceptions.HistorialNoEncontradoException;
 import com.prontaentrega.services.exceptions.jugadores.ProveedorNoDisponibleException;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.services.exceptions.auth.*;
@@ -151,6 +152,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OfertaInvalidaException.class)
     public ResponseEntity<ErrorResponse> handleOfertaInvalida(OfertaInvalidaException ex) {
         return error(HttpStatus.BAD_REQUEST, "OFERTA_INVALIDA", ex.getMessage());
+    }
+
+    @ExceptionHandler(HistorialNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handleHistorialNoEncontrado(HistorialNoEncontradoException ex) {
+        return error(HttpStatus.NOT_FOUND, "HISTORIAL_NO_ENCONTRADO", ex.getMessage());
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)

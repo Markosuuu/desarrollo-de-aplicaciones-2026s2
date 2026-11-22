@@ -94,3 +94,30 @@ export async function getRanking({
 
   return payload;
 }
+
+
+export async function getQuoteByDate({ id, fecha, token } = {}) {
+  const response = await fetch(
+    `${API_BASE_URL}/players/${id}/quotes/${fecha}`,
+    {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: 'Bearer ' + token,
+      },
+    },
+  );
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message ||
+      payload?.message ||
+      'No se pudo consultar la cotización para esa fecha.';
+
+    throw new Error(message);
+  }
+
+  return payload;
+}

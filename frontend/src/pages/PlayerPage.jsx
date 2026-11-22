@@ -10,6 +10,7 @@ import { comprarSuper } from "../api/marketApi";
 import { toast } from "react-toastify";
 
 import QuoteHistoryChart from "../components/QuoteHistoryChart";
+import BuscadorCotizacionPorFecha from "../components/BuscadorCotizacionPorFecha";
 
 export default function PlayerPage() {
   const [player, setPlayer] = useState(null);
@@ -133,17 +134,17 @@ export default function PlayerPage() {
   return (
     <div className="playerPage-container">
       <header className="">
-        <h1 className="eyebrow texto-locura playerPage-titulo">
-          {player.nombre}
-        </h1>
-        <div>
+          <div style={{display: "flex", alignItems:"center", justifyContent: "space-between", margin: "0px 15px 10px 10px"}}>
+          <h1 className="eyebrow texto-locura playerPage-titulo">
+            {player.nombre}
+          </h1>
           <button
             type="button"
             className="market-action-button"
             onClick={openBuyDialog}
             disabled={submitting}
           >
-            Comprar
+            Comprar tokens
           </button>
         </div>
       </header>
@@ -203,31 +204,32 @@ export default function PlayerPage() {
         <div className="playerPage-quote-content">
           <div className="playerPage-quote-content">
             <div className="playerPage-quote-details">
-              <p>
-                <span>Cotización actual:</span>
-                <strong>{player.cotizacion}</strong>
-              </p>
-
-              <p>
-                <span>Tokens restantes:</span>
-                <strong>{player.tokensRestantes}</strong>
-              </p>
-
-              <p>
-                <span>Ultima actualizacion:</span>
-                <strong>
-                  {player.fechaActualizacion
-                    ? new Date(player.fechaActualizacion).toLocaleDateString(
-                        "es-AR",
-                        {
-                          day: "2-digit",
-                          month: "2-digit",
-                          year: "numeric",
-                        },
-                      )
-                    : "Sin datos"}
-                </strong>
-              </p>
+              <div>
+                <p>
+                  <span>Cotización actual:</span>
+                  <strong>{player.cotizacion}</strong>
+                </p>
+                <p>
+                  <span>Tokens restantes:</span>
+                  <strong>{player.tokensRestantes}</strong>
+                </p>
+                <p>
+                  <span>Ultima actualizacion:</span>
+                  <strong>
+                    {player.fechaActualizacion
+                      ? new Date(player.fechaActualizacion).toLocaleDateString(
+                          "es-AR",
+                          {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                          },
+                        )
+                      : "Sin datos"}
+                  </strong>
+                </p>
+                <BuscadorCotizacionPorFecha token={token} playerId={player.id}/>
+              </div>
             </div>
 
             <div className="playerPage-quote-chart">
