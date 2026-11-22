@@ -7,6 +7,7 @@ import { fetchUserInventory, fetchUserTransactions } from "../api/userApi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/userPage.css";
 import { toast } from "react-toastify";
+import CrearSubastaModal from "../components/subasta/CrearSubastaModal";
 
 const numberFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 2,
@@ -87,6 +88,8 @@ function UserPage() {
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
   const [sellQuantity, setSellQuantity] = useState("");
   const [creatingOffer, setCreatingOffer] = useState(false);
+  const [openSellMenu, setOpenSellMenu] = useState(null);
+  const [auctionItem, setAuctionItem] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -228,7 +231,7 @@ function UserPage() {
                   <th scope="col">Cantidad disponible</th>
                   <th scope="col">Cantidad en venta</th>
                   <th scope="col">Valor por token</th>
-                  <th scope="col">Vender</th>
+                  <th scope="col">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -252,16 +255,46 @@ function UserPage() {
                       <td>{formatNumber(item.tokensEnVenta)}</td>
                       <td>{formatNumber(player.cotizacion)}</td>
                       <td>
-                        <button
-                          className="user-page-sell-button"
-                          type="button"
-                          aria-label={`Vender tokens de ${player.nombre || "jugador"}`}
-                          disabled={(Number(item.tokensDisponibles) || 0) <= 0}
-                          onClick={() => openSellDialog(item)}
-                        >
-                          Crear oferta
-                        </button>
-                      </td>
+                        <div className="user-page-sell-dropdown">
+                            <button
+                                className="user-page-sell-button"
+                                type="button"
+                                aria-label={`Opciones de venta para ${player.nombre || "jugador"}`}
+                                disabled={(Number(item.tokensDisponibles) || 0) <= 0}
+                                onClick={() => setOpenSellMenu(
+                                    openSellMenu === item.id ? null : item.id
+                                )}
+                            >
+                                {''}
+                                <span className="dropdown-arrow">▾</span>
+                            </button>
+
+                            {openSellMenu === item.id && (
+                                <div className="user-page-sell-menu">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            openSellDialog(item);
+                                            setOpenSellMenu(null);
+                                        }}
+                                    >
+                                        Crear oferta
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setAuctionItem(item);
+                                            console.log(item)
+                                            setOpenSellMenu(null);
+                                        }}
+                                    >
+                                        Crear subasta
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </td>
                     </tr>
                   );
                 })}
@@ -450,6 +483,19 @@ function UserPage() {
             </form>
           </dialog>
         </div>
+      )}
+      {auctionItem && (
+        <CrearSubastaModal
+            jugadorId={auctionItem.jugador.id}
+            nombreJugador={auctionItem.jugador.nombre}
+            tokensDisponibles={Number(auctionItem.tokensDisponibles) || 0}
+            cotizacion={auctionItem.jugador.cotizacion}
+            token={token}
+            onClose={() => setAuctionItem(null)}
+            onCreated={() => {
+                void fetchUserInventory();
+            }}
+        />
       )}
     </main>
   );
