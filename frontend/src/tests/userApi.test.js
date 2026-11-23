@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { fetchUserInventory, fetchUserTransactions, fetchInventorySummary } from "../api/userApi";
+import { fetchUserInventory, fetchUserTransactions, fetchInventoryTokensSummary } from "../api/userApi";
 
 const userId = "3f2b8c1e-5a47-4d9b-8e6a-1c7f90d2b4a8";
 
@@ -173,7 +173,7 @@ describe("inventarioApi", () => {
             }),
         );
 
-        await fetchInventorySummary(token);
+        await fetchInventoryTokensSummary(token);
 
         expect(fetchMock).toHaveBeenCalledWith(
             "http://localhost:8080/api/resumen/tokens",
@@ -195,7 +195,7 @@ describe("inventarioApi", () => {
         );
 
         await expect(
-            fetchInventorySummary(undefined),
+            fetchInventoryTokensSummary(undefined),
         ).resolves.toEqual(mockSummary);
 
         expect(fetchMock).toHaveBeenCalledWith(
@@ -217,7 +217,7 @@ describe("inventarioApi", () => {
         );
 
         await expect(
-            fetchInventorySummary(token),
+            fetchInventoryTokensSummary(token),
         ).resolves.toEqual(mockSummary);
     });
 
@@ -233,7 +233,7 @@ describe("inventarioApi", () => {
         );
 
         await expect(
-            fetchInventorySummary(token),
+            fetchInventoryTokensSummary(token),
         ).rejects.toThrow("Inventario no encontrado");
     });
 
@@ -249,7 +249,7 @@ describe("inventarioApi", () => {
         );
 
         await expect(
-            fetchInventorySummary(token),
+            fetchInventoryTokensSummary(token),
         ).rejects.toThrow("Acceso denegado");
     });
 
@@ -259,7 +259,7 @@ describe("inventarioApi", () => {
         );
 
         await expect(
-            fetchInventorySummary(token),
+            fetchInventoryTokensSummary(token),
         ).rejects.toThrow(
             "No se pudo cargar el resumen del inventario.",
         );
@@ -287,7 +287,7 @@ describe("inventarioApi", () => {
             );
 
             await expect(
-                fetchInventorySummary(token),
+                fetchInventoryTokensSummary(token),
             ).rejects.toThrow(
                 "La API devolvió un formato de resumen de inventario inválido.",
             );
@@ -300,7 +300,7 @@ describe("inventarioApi", () => {
         );
 
         await expect(
-            fetchInventorySummary(token),
+            fetchInventoryTokensSummary(token),
         ).rejects.toThrow(
             "La API devolvió un formato de resumen de inventario inválido.",
         );
@@ -320,7 +320,7 @@ describe("inventarioApi", () => {
         );
 
         await expect(
-            fetchInventorySummary(token),
+            fetchInventoryTokensSummary(token),
         ).resolves.toEqual(emptySummary);
     });
 });

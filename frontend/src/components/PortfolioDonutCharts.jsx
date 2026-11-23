@@ -2,7 +2,7 @@
 import DonutChart from "./DonutChart";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { fetchInventorySummary } from "../api/userApi";
+import { fetchInventoryTokensSummary } from "../api/userApi";
 
 const currencyFormatter = new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -60,7 +60,7 @@ export default function PortfolioDonutCharts() {
             setError(null);
 
             try {
-                const response = await fetchInventorySummary(token);
+                const response = await fetchInventoryTokensSummary(token);
 
                 if (active) {
                     setSummary(response);

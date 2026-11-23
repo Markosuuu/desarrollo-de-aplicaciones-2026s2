@@ -72,7 +72,7 @@ export function fetchUserTransactions(userId, token, options) {
 }
 
 
-export async function fetchInventorySummary(token) {
+export async function fetchInventoryTokensSummary(token) {
     const response = await fetch(
         `${API_BASE_URL}/resumen/tokens`,
         {

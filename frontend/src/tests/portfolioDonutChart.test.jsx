@@ -4,14 +4,14 @@ import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 
 import PortfolioDonutCharts from "../components/PortfolioDonutCharts";
 import { useAuth } from "../context/AuthContext";
-import { fetchInventorySummary } from "../api/userApi";
+import { fetchInventoryTokensSummary } from "../api/userApi";
 
 vi.mock("../context/AuthContext", () => ({
     useAuth: vi.fn(),
 }));
 
 vi.mock("../api/userApi", () => ({
-    fetchInventorySummary: vi.fn(),
+    fetchInventoryTokensSummary: vi.fn(),
 }));
 
 vi.mock("../components/DonutChart", () => ({
@@ -62,7 +62,7 @@ describe("PortfolioDonutCharts", () => {
     });
 
     test("muestra el estado de carga mientras obtiene el resumen", () => {
-        fetchInventorySummary.mockReturnValue(
+        fetchInventoryTokensSummary.mockReturnValue(
             new Promise(() => {})
         );
 
@@ -75,24 +75,24 @@ describe("PortfolioDonutCharts", () => {
     });
 
     test("obtiene el resumen utilizando el token del usuario", async () => {
-        fetchInventorySummary.mockResolvedValue(mockSummary);
+        fetchInventoryTokensSummary.mockResolvedValue(mockSummary);
 
         render(<PortfolioDonutCharts />);
 
         await waitFor(() => {
-            expect(fetchInventorySummary).toHaveBeenCalledWith(
+            expect(fetchInventoryTokensSummary).toHaveBeenCalledWith(
                 "mock-token"
             );
         });
     });
 
     test("renderiza el gráfico con los datos recibidos", async () => {
-        fetchInventorySummary.mockResolvedValue(mockSummary);
+        fetchInventoryTokensSummary.mockResolvedValue(mockSummary);
 
         render(<PortfolioDonutCharts />);
 
         await waitFor(() => {
-            expect(fetchInventorySummary).toHaveBeenCalledWith(
+            expect(fetchInventoryTokensSummary).toHaveBeenCalledWith(
                 "mock-token"
             );
         });
@@ -102,7 +102,7 @@ describe("PortfolioDonutCharts", () => {
     });
 
     test("muestra un mensaje de error cuando falla la consulta", async () => {
-        fetchInventorySummary.mockRejectedValue(
+        fetchInventoryTokensSummary.mockRejectedValue(
             new Error("Error al obtener el inventario.")
         );
 
@@ -120,7 +120,7 @@ describe("PortfolioDonutCharts", () => {
     });
 
     test("permite reintentar la consulta después de un error", async () => {
-        fetchInventorySummary
+        fetchInventoryTokensSummary
             .mockRejectedValueOnce(
                 new Error("Error al obtener el inventario.")
             )
@@ -134,6 +134,6 @@ describe("PortfolioDonutCharts", () => {
             })
         );
 
-        expect(fetchInventorySummary).toHaveBeenCalledTimes(2);
+        expect(fetchInventoryTokensSummary).toHaveBeenCalledTimes(2);
     });
 });
