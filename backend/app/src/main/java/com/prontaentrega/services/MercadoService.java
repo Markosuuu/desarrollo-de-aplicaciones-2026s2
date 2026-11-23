@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.UUID;
 
 import com.prontaentrega.services.dto.JugadorResumenTokensInventario;
+import com.prontaentrega.services.dto.JugadorResumenValorInventario;
+import com.prontaentrega.services.dto.ResumenInventarioDineroResponse;
 import com.prontaentrega.services.dto.ResumenInventarioTokensResponse;
 import com.prontaentrega.services.exceptions.auth.UsuarioNoEncontradoException;
 import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
@@ -348,5 +350,27 @@ public class MercadoService {
                         .toList();
 
         return new ResumenInventarioTokensResponse(totalTokens, jugadores);
+    }
+
+    @Transactional(readOnly = true)
+    public ResumenInventarioDineroResponse obtenerResumenDinero(UUID usuarioId) {
+
+        BigDecimal totalDinero = inventarioUsuarioRepository.obtenerValorTotal(usuarioId);
+
+        List<JugadorResumenValorInventario> jugadores =
+                inventarioUsuarioRepository.obtenerValorPorJugador(usuarioId)
+                        .stream()
+                        .map(jugador -> new JugadorResumenValorInventario(
+                                jugador.getJugadorId(),
+                                jugador.getJugadorNombre(),
+                                jugador.getCantidad(),
+                                jugador.getValor()
+                        ))
+                        .toList();
+
+        return new ResumenInventarioDineroResponse(
+                totalDinero != null ? totalDinero : BigDecimal.ZERO,
+                jugadores
+        );
     }
 }

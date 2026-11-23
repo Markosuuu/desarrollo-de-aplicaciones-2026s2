@@ -1,53 +1,20 @@
-
 import DonutChart from "./DonutChart";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { fetchInventoryTokensSummary } from "../api/userApi";
+import { fetchInventoryTokensSummary, fetchInventoryMoneySummary } from "../api/userApi";
 
-const currencyFormatter = new Intl.NumberFormat('es-AR', {
-    style: 'currency',
-    currency: 'ARS',
-    maximumFractionDigits: 0,
+const currencyFormatter = new Intl.NumberFormat("es-AR", {
+    style: "currency",
+    currency: "ARS",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
 });
-
-const portfolioMockData = [
-    {
-        jugadorId: '1',
-        jugadorNombre: 'Lionel Messi',
-        cantidadTokens: 10,
-        precioUnitario: 5,
-    },
-    {
-        jugadorId: '2',
-        jugadorNombre: 'Raphinha',
-        cantidadTokens: 8,
-        precioUnitario: 10,
-    },
-    {
-        jugadorId: '3',
-        jugadorNombre: 'Neymar',
-        cantidadTokens: 15,
-        precioUnitario: 10,
-    },
-    {
-        jugadorId: '4',
-        jugadorNombre: 'Mussi',
-        cantidadTokens: 20,
-        precioUnitario: 10,
-    },
-    {
-        jugadorId: '5',
-        jugadorNombre: 'Riquelme',
-        cantidadTokens: 12,
-        precioUnitario: 11,
-    },
-];
-
 
 export default function PortfolioDonutCharts() {
     const { token } = useAuth();
 
-    const [summary, setSummary] = useState(null);
+    const [tokensSummary, setTokensSummary] = useState(null);
+    const [moneySummary, setMoneySummary] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [retryCount, setRetryCount] = useState(0);
@@ -55,21 +22,25 @@ export default function PortfolioDonutCharts() {
     useEffect(() => {
         let active = true;
 
-        const cargarResumen = async () => {
+        const cargarResumenes = async () => {
             setLoading(true);
             setError(null);
 
             try {
-                const response = await fetchInventoryTokensSummary(token);
+                const [tokensResponse, moneyResponse] = await Promise.all([
+                    fetchInventoryTokensSummary(token),
+                    fetchInventoryMoneySummary(token),
+                ]);
 
                 if (active) {
-                    setSummary(response);
+                    setTokensSummary(tokensResponse);
+                    setMoneySummary(moneyResponse);
                 }
             } catch (err) {
                 if (active) {
                     setError(
                         err.message ||
-                        "No se pudo cargar el resumen del inventario."
+                        "No se pudieron cargar los resúmenes del inventario."
                     );
                 }
             } finally {
@@ -79,7 +50,7 @@ export default function PortfolioDonutCharts() {
             }
         };
 
-        void cargarResumen();
+        void cargarResumenes();
 
         return () => {
             active = false;
@@ -105,40 +76,35 @@ export default function PortfolioDonutCharts() {
         );
     }
 
-    const tokensData = summary.jugadores.map((jugador) => ({
+    const tokensData = tokensSummary.jugadores.map((jugador) => ({
         id: jugador.jugadorId,
         label: jugador.jugadorNombre,
         value: jugador.cantidad,
     }));
 
-    const salesData = portfolioMockData.map((jugador) => ({
+    const moneyData = moneySummary.jugadores.map((jugador) => ({
         id: jugador.jugadorId,
         label: jugador.jugadorNombre,
-        value: jugador.cantidadTokens * jugador.precioUnitario,
+        value: Number(jugador.valor),
     }));
-
-    const totalSales = salesData.reduce(
-        (total, jugador) => total + jugador.value,
-        0
-    );
 
     return (
         <div style={{
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '15px', 
-            paddingLeft: '15px', 
-            borderLeft: '1px solid #dedede'
+            display: "flex",
+            flexDirection: "column",
+            gap: "15px",
+            paddingLeft: "15px",
+            borderLeft: "1px solid #dedede",
         }}>
             <DonutChart
                 data={tokensData}
-                centerValue={summary.total}
+                centerValue={tokensSummary.total}
                 centerLabel="Tokens totales"
             />
 
             <DonutChart
-                data={salesData}
-                centerValue={currencyFormatter.format(totalSales)}
+                data={moneyData}
+                centerValue={currencyFormatter.format(moneySummary.total)}
                 centerLabel="Valor total"
                 formatValue={(value) =>
                     currencyFormatter.format(value)

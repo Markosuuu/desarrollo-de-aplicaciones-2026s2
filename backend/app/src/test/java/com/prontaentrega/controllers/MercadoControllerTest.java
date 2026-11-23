@@ -578,7 +578,6 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
     void obtenerResumenDeTokensDeInventarioRetornaValoresSiTieneTokensComprados() throws Exception {
         UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
         BolsaDeJugador b1 = crearBolsa("Messi");
-        BolsaDeJugador b2 = crearBolsa("Neymar");
 
         mercadoService.comprarSuper(usuario.id, jugadorId(b1), 5);
 

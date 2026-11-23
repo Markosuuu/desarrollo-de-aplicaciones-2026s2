@@ -5,6 +5,7 @@ import com.prontaentrega.controllers.dtos.mercado.*;
 import com.prontaentrega.models.mercado.AnuncioVenta;
 import com.prontaentrega.services.MercadoService;
 
+import com.prontaentrega.services.dto.ResumenInventarioDineroResponse;
 import com.prontaentrega.services.dto.ResumenInventarioTokensResponse;
 import jakarta.validation.Valid;
 import java.util.*;
@@ -109,6 +110,15 @@ public class MercadoController {
 
         return ResponseEntity.ok(
                 mercadoService.obtenerResumenTokens(usuarioId)
+        );
+    }
+
+    @GetMapping("/resumen/dinero")
+    public ResponseEntity<ResumenInventarioDineroResponse> obtenerResumenDinero() {
+        UUID usuarioId = currentUserId();
+
+        return ResponseEntity.ok(
+                mercadoService.obtenerResumenDinero(usuarioId)
         );
     }
 }

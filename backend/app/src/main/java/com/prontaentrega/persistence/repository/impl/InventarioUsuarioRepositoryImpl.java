@@ -3,9 +3,11 @@ package com.prontaentrega.persistence.repository.impl;
 import com.prontaentrega.models.mercado.InventarioUsuario;
 import com.prontaentrega.persistence.dto.mercado.InventarioUsuarioDTOSQL;
 import com.prontaentrega.persistence.dto.mercado.JugadorResumenInventarioProjection;
+import com.prontaentrega.persistence.dto.mercado.JugadorResumenValorInventarioProjection;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.dao.InventarioUsuarioDAOSQL;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -61,5 +63,15 @@ public class InventarioUsuarioRepositoryImpl implements InventarioUsuarioReposit
     @Override
     public Long obtenerTotalTokens(UUID usuarioId) {
         return dao.obtenerTotalTokens(usuarioId);
+    }
+
+    public List<JugadorResumenValorInventarioProjection> obtenerValorPorJugador(
+            UUID usuarioId
+    ) {
+        return dao.obtenerValorPorJugador(usuarioId);
+    }
+
+    public BigDecimal obtenerValorTotal(UUID usuarioId) {
+        return dao.obtenerValorTotal(usuarioId);
     }
 }
