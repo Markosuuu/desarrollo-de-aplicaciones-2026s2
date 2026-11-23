@@ -14,7 +14,7 @@ vi.mock("../api/userApi", () => ({
     fetchInventorySummary: vi.fn(),
 }));
 
-vi.mock("../components/charts/DonutChart", () => ({
+vi.mock("../components/DonutChart", () => ({
     default: ({ title, data, centerValue, centerLabel }) => (
         <div data-testid="donut-chart">
             <h3>{title}</h3>

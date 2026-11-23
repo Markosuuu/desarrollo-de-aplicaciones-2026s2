@@ -21,8 +21,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import com.prontaentrega.services.dto.JugadorResumenInventario;
-import com.prontaentrega.services.dto.ResumenInventarioResponse;
+import com.prontaentrega.services.dto.JugadorResumenTokensInventario;
+import com.prontaentrega.services.dto.ResumenInventarioTokensResponse;
 import com.prontaentrega.services.exceptions.auth.UsuarioNoEncontradoException;
 import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import com.prontaentrega.services.exceptions.mercado.*;
@@ -333,20 +333,20 @@ public class MercadoService {
 
 
     @Transactional(readOnly = true)
-    public ResumenInventarioResponse obtenerResumen(UUID usuarioId) {
+    public ResumenInventarioTokensResponse obtenerResumenTokens(UUID usuarioId) {
 
         Long totalTokens = inventarioUsuarioRepository.obtenerTotalTokens(usuarioId);
 
-        List<JugadorResumenInventario> jugadores =
+        List<JugadorResumenTokensInventario> jugadores =
                 inventarioUsuarioRepository.obtenerResumenTokensPorJugador(usuarioId)
                         .stream()
-                        .map(jugador -> new JugadorResumenInventario(
+                        .map(jugador -> new JugadorResumenTokensInventario(
                                 jugador.getJugadorId(),
                                 jugador.getJugadorNombre(),
                                 jugador.getCantidadTokens()
                         ))
                         .toList();
 
-        return new ResumenInventarioResponse(totalTokens, jugadores);
+        return new ResumenInventarioTokensResponse(totalTokens, jugadores);
     }
 }
