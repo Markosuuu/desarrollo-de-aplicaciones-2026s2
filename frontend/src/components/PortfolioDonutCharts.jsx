@@ -89,27 +89,32 @@ export default function PortfolioDonutCharts() {
     }));
 
     return (
-        <div style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "15px",
-            paddingLeft: "15px",
-            borderLeft: "1px solid #dedede",
-        }}>
-            <DonutChart
-                data={tokensData}
-                centerValue={tokensSummary.total}
-                centerLabel="Tokens totales"
-            />
+        moneyData.length === 0 && tokensData.length === 0 ? (
+            <></>
+        ) : (
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "15px",
+                paddingLeft: "15px",
+                borderLeft: "1px solid #dedede",
+            }}>
+                <DonutChart
+                    data={tokensData}
+                    centerValue={tokensSummary.total}
+                    centerLabel="Tokens totales"
+                />
 
-            <DonutChart
-                data={moneyData}
-                centerValue={currencyFormatter.format(moneySummary.total)}
-                centerLabel="Valor total"
-                formatValue={(value) =>
-                    currencyFormatter.format(value)
-                }
-            />
-        </div>
+                <DonutChart
+                    data={moneyData}
+                    centerValue={currencyFormatter.format(moneySummary.total)}
+                    centerLabel="Valor total"
+                    formatValue={(value) =>
+                        currencyFormatter.format(value)
+                    }
+                />
+            </div>
+        )
     );
+
 }
