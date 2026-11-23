@@ -70,3 +70,40 @@ export function fetchUserInventory(userId, token, options) {
 export function fetchUserTransactions(userId, token, options) {
   return fetchUserData(userId, "transactions", token, options);
 }
+
+
+export async function fetchInventorySummary(token) {
+    const response = await fetch(
+        `${API_BASE_URL}/resumen/tokens`,
+        {
+            headers: {
+                Accept: "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+        },
+    );
+
+    const payload = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        const message =
+            payload?.error?.message ||
+            payload?.message ||
+            "No se pudo cargar el resumen del inventario.";
+
+        throw new Error(message);
+    }
+
+    if (
+        !payload ||
+        typeof payload !== "object" ||
+        !Array.isArray(payload.jugadores) ||
+        typeof payload.total !== "number"
+    ) {
+        throw new TypeError(
+            "La API devolvió un formato de resumen de inventario inválido."
+        );
+    }
+
+    return payload;
+}

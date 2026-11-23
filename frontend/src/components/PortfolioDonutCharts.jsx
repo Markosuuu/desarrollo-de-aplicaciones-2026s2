@@ -1,5 +1,8 @@
 
 import DonutChart from "./DonutChart";
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { fetchInventorySummary } from "../api/userApi";
 
 const currencyFormatter = new Intl.NumberFormat('es-AR', {
     style: 'currency',
@@ -42,16 +45,71 @@ const portfolioMockData = [
 
 
 export default function PortfolioDonutCharts() {
-    const tokensData = portfolioMockData.map((jugador) => ({
+    const { token } = useAuth();
+
+    const [summary, setSummary] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [retryCount, setRetryCount] = useState(0);
+
+    useEffect(() => {
+        let active = true;
+
+        const cargarResumen = async () => {
+            setLoading(true);
+            setError(null);
+
+            try {
+                const response = await fetchInventorySummary(token);
+
+                if (active) {
+                    setSummary(response);
+                }
+            } catch (err) {
+                if (active) {
+                    setError(
+                        err.message ||
+                        "No se pudo cargar el resumen del inventario."
+                    );
+                }
+            } finally {
+                if (active) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        void cargarResumen();
+
+        return () => {
+            active = false;
+        };
+    }, [token, retryCount]);
+
+    if (loading) {
+        return <p>Cargando resumen...</p>;
+    }
+
+    if (error) {
+        return (
+            <div className="portfolio-charts-error">
+                <p>{error}</p>
+
+                <button
+                    type="button"
+                    onClick={() => setRetryCount((previous) => previous + 1)}
+                >
+                    Reintentar
+                </button>
+            </div>
+        );
+    }
+
+    const tokensData = summary.jugadores.map((jugador) => ({
         id: jugador.jugadorId,
         label: jugador.jugadorNombre,
-        value: jugador.cantidadTokens,
+        value: jugador.cantidad,
     }));
-
-    const totalTokens = tokensData.reduce(
-        (total, jugador) => total + jugador.value,
-        0
-    );
 
     const salesData = portfolioMockData.map((jugador) => ({
         id: jugador.jugadorId,
@@ -74,7 +132,7 @@ export default function PortfolioDonutCharts() {
         }}>
             <DonutChart
                 data={tokensData}
-                centerValue={totalTokens}
+                centerValue={summary.total}
                 centerLabel="Tokens totales"
             />
 

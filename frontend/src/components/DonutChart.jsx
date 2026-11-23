@@ -64,13 +64,14 @@ export default function DonutChart({
                 <PieChart
                     width={200}
                     height={200}
+                    skipAnimation
                     series={[
                         {
                             data: validData,
-                            innerRadius: 68,
-                            outerRadius: 100,
-                            paddingAngle: 2,
-                            cornerRadius: 7,
+                            innerRadius: 60,
+                            outerRadius: 99,
+                            paddingAngle: 1,
+                            cornerRadius: 5,
                             valueFormatter: ({ value }) =>
                                 formatValue(value),
                         },
