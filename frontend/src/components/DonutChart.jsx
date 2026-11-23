@@ -46,11 +46,12 @@ export default function DonutChart({
     formatValue = (value) =>
         value.toLocaleString('es-AR'),
 }) {
-
-    const { isDark } = useTheme();
     const validData = data.filter(
         (item) => item.value > 0
     );
+
+    const { isDark } = useTheme();
+
 
     return (
         <section className="donut-chart">

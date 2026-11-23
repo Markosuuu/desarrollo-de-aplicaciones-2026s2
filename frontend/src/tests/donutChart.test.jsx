@@ -1,8 +1,18 @@
 
-import { describe, test, expect, vi } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import DonutChart from "../components/DonutChart";
+import { useTheme } from "../context/ThemeContext";
 
+vi.mock("../context/ThemeContext", () => ({
+    useTheme: vi.fn(),
+}));
+
+beforeEach(() => {
+    useTheme.mockReturnValue({
+        isDark: false,
+    });
+});
 vi.mock("@mui/x-charts/PieChart", () => ({
     PieChart: ({ children, skipAnimation, series }) => (
         <div
