@@ -18,8 +18,11 @@ import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
+import com.prontaentrega.services.dto.JugadorResumenInventario;
+import com.prontaentrega.services.dto.ResumenInventarioResponse;
 import com.prontaentrega.services.exceptions.auth.UsuarioNoEncontradoException;
 import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import com.prontaentrega.services.exceptions.mercado.*;
@@ -326,5 +329,24 @@ public class MercadoService {
         if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
             throw new AnuncioNoPendienteException("No se puede cancelar una venta completada");
         }
+    }
+
+
+    @Transactional(readOnly = true)
+    public ResumenInventarioResponse obtenerResumen(UUID usuarioId) {
+
+        Long totalTokens = inventarioUsuarioRepository.obtenerTotalTokens(usuarioId);
+
+        List<JugadorResumenInventario> jugadores =
+                inventarioUsuarioRepository.obtenerResumenTokensPorJugador(usuarioId)
+                        .stream()
+                        .map(jugador -> new JugadorResumenInventario(
+                                jugador.getJugadorId(),
+                                jugador.getJugadorNombre(),
+                                jugador.getCantidadTokens()
+                        ))
+                        .toList();
+
+        return new ResumenInventarioResponse(totalTokens, jugadores);
     }
 }
