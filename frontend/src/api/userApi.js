@@ -140,7 +140,6 @@ export async function fetchInventoryMoneySummary(token) {
             "La API devolvió un formato de resumen de inventario inválido."
         );
     }
-    console.log(payload)
-
+    
     return payload;
 }

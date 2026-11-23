@@ -606,6 +606,67 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.jugadores.length()").value(2));
     }
 
+
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetornaForbiddenSiNoEstaLogueado() throws Exception {
+        mockMvc.perform(get("/api/resumen/dinero"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetornaOKSiSeEstaLogueado() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+
+        mockMvc.perform(get("/api/resumen/dinero")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetorna0SiNoTieneTokensComprados() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+
+        mockMvc.perform(get("/api/resumen/dinero")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(0))
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.jugadores.length()").value(0));
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetornaValoresSiTieneTokensComprados() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+        BolsaDeJugador b1 = crearBolsa("Messi");
+
+        mercadoService.comprarSuper(usuario.id, jugadorId(b1), 5);
+
+        mockMvc.perform(get("/api/resumen/dinero")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(25))
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.jugadores.length()").value(1));
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetornaLaSumaDeTokensSiTieneTokensComprados() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+        BolsaDeJugador b1 = crearBolsa("Messi");
+        BolsaDeJugador b2 = crearBolsa("Neymar");
+
+        mercadoService.comprarSuper(usuario.id, jugadorId(b1), 5);
+        mercadoService.comprarSuper(usuario.id, jugadorId(b2) , 7);
+
+        mockMvc.perform(get("/api/resumen/dinero")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(60))
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.jugadores.length()").value(2));
+    }
+
     private record UsuarioAutenticado(UUID id, String token) {
     }
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { fetchUserInventory, fetchUserTransactions, fetchInventoryTokensSummary } from "../api/userApi";
+import { fetchUserInventory, fetchUserTransactions, fetchInventoryTokensSummary, fetchInventoryMoneySummary } from "../api/userApi";
 
 const userId = "3f2b8c1e-5a47-4d9b-8e6a-1c7f90d2b4a8";
 
@@ -322,5 +322,187 @@ describe("inventarioApi", () => {
         await expect(
             fetchInventoryTokensSummary(token),
         ).resolves.toEqual(emptySummary);
+    });
+});
+
+describe("fetchInventoryMoneySummary", () => {
+    afterEach(() => {
+        vi.restoreAllMocks();
+    });
+
+    test("realiza la consulta utilizando el token del usuario", async () => {
+        const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(
+                JSON.stringify({
+                    total: 25000.5,
+                    jugadores: [],
+                }),
+                { status: 200 }
+            )
+        );
+
+        await fetchInventoryMoneySummary("mock-token");
+
+        expect(fetchSpy).toHaveBeenCalledWith(
+            "http://localhost:8080/api/resumen/dinero",
+            {
+                headers: {
+                    Accept: "application/json",
+                    Authorization: "Bearer mock-token",
+                },
+            }
+        );
+    });
+
+    test("omite el header Authorization cuando no recibe un token", async () => {
+        const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(
+                JSON.stringify({
+                    total: 0,
+                    jugadores: [],
+                }),
+                { status: 200 }
+            )
+        );
+
+        await fetchInventoryMoneySummary();
+
+        expect(fetchSpy).toHaveBeenCalledWith(
+            "http://localhost:8080/api/resumen/dinero",
+            {
+                headers: {
+                    Accept: "application/json",
+                },
+            }
+        );
+    });
+
+    test("devuelve el resumen recibido correctamente", async () => {
+        const mockSummary = {
+            total: 25000.5,
+            jugadores: [
+                {
+                    jugadorId: "1",
+                    jugadorNombre: "Lionel Messi",
+                    cantidad: 10,
+                    valor: 15000.25,
+                },
+                {
+                    jugadorId: "2",
+                    jugadorNombre: "Raphinha",
+                    cantidad: 8,
+                    valor: 10000.25,
+                },
+            ],
+        };
+
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(JSON.stringify(mockSummary), {
+                status: 200,
+            })
+        );
+
+        const result = await fetchInventoryMoneySummary("mock-token");
+
+        expect(result).toEqual(mockSummary);
+    });
+
+    test("propaga el mensaje de error recibido de la API", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(
+                JSON.stringify({
+                    message: "No se pudo obtener el resumen monetario.",
+                }),
+                { status: 500 }
+            )
+        );
+
+        await expect(
+            fetchInventoryMoneySummary("mock-token")
+        ).rejects.toThrow("No se pudo obtener el resumen monetario.");
+    });
+
+    test("prioriza el mensaje de error anidado de la API", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(
+                JSON.stringify({
+                    error: {
+                        message: "Error interno del servidor.",
+                    },
+                    message: "Otro mensaje.",
+                }),
+                { status: 500 }
+            )
+        );
+
+        await expect(
+            fetchInventoryMoneySummary("mock-token")
+        ).rejects.toThrow("Error interno del servidor.");
+    });
+
+    test("utiliza el mensaje predeterminado cuando la API no devuelve un detalle", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response("{}", {
+                status: 500,
+            })
+        );
+
+        await expect(
+            fetchInventoryMoneySummary("mock-token")
+        ).rejects.toThrow("No se pudo cargar el resumen del inventario.");
+    });
+
+    test.each([
+        null,
+        "respuesta inválida",
+        [],
+        {},
+        { total: 100 },
+        { jugadores: [] },
+        { total: "25000", jugadores: [] },
+        { total: 100, jugadores: {} },
+    ])("rechaza una respuesta con formato inválido: %j", async (payload) => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(JSON.stringify(payload), {
+                status: 200,
+            })
+        );
+
+        await expect(
+            fetchInventoryMoneySummary("mock-token")
+        ).rejects.toThrow(
+            "La API devolvió un formato de resumen de inventario inválido."
+        );
+    });
+
+    test("rechaza una respuesta exitosa con JSON inválido", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response("JSON inválido", {
+                status: 200,
+            })
+        );
+
+        await expect(
+            fetchInventoryMoneySummary("mock-token")
+        ).rejects.toThrow(
+            "La API devolvió un formato de resumen de inventario inválido."
+        );
+    });
+
+    test("acepta un resumen vacío", async () => {
+        const mockSummary = {
+            total: 0,
+            jugadores: [],
+        };
+
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(JSON.stringify(mockSummary), {
+                status: 200,
+            })
+        );
+
+        const result = await fetchInventoryMoneySummary("mock-token");
+
+        expect(result).toEqual(mockSummary);
     });
 });
