@@ -2,6 +2,7 @@
 import { PieChart } from '@mui/x-charts/PieChart';
 import { useDrawingArea } from '@mui/x-charts/hooks';
 import { styled } from '@mui/material/styles';
+import { useTheme } from '../context/ThemeContext';
 
 const StyledText = styled('text')(({ theme }) => ({
     fill: theme.palette.text.primary,
@@ -11,7 +12,6 @@ const StyledText = styled('text')(({ theme }) => ({
 
 function PieCenterLabel({ value, label }) {
     const { width, height, left, top } = useDrawingArea();
-
     const centerX = left + width / 2;
     const centerY = top + height / 2;
 
@@ -46,6 +46,8 @@ export default function DonutChart({
     formatValue = (value) =>
         value.toLocaleString('es-AR'),
 }) {
+
+    const { isDark } = useTheme();
     const validData = data.filter(
         (item) => item.value > 0
     );
@@ -77,10 +79,19 @@ export default function DonutChart({
                         },
                     ]}
                     hideLegend
+                    sx={{
+                        '& .MuiPieChart-arc': {
+                            stroke:'#33333300'
+                        },
+                        '& tspan': {
+                            fill: isDark ? '#f5f5f5' : '#000'
+                        },
+                    }}
                 >
                     <PieCenterLabel
                         value={centerValue}
                         label={centerLabel}
+                        
                     />
                 </PieChart>
             )}
