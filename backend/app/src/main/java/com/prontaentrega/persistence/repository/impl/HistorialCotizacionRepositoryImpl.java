@@ -43,17 +43,10 @@ public class HistorialCotizacionRepositoryImpl implements HistorialCotizacionRep
                 ));
 
         List<HistorialCotizacionDTOSQL> entidades = historial.stream()
-                .map(registro -> {
-                    BolsaDeJugadorDTOSQL bolsa = bolsasPorId.get(registro.getBolsaId());
-
-                    if (bolsa == null) {
-                        throw new NoHayEstrategiaActivaConfiguradaException(
-                                "No existe la bolsa asociada al historial de cotización"
-                        );
-                    }
-
-                    return HistorialCotizacionDTOSQL.desdeModelo(registro, bolsa);
-                })
+                .map(registro -> HistorialCotizacionDTOSQL.desdeModelo(
+                        registro,
+                        bolsasPorId.get(registro.getBolsaId())
+                ))
                 .toList();
 
         historialDAO.saveAll(entidades);
