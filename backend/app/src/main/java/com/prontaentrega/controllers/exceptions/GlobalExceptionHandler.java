@@ -43,6 +43,11 @@ public class GlobalExceptionHandler {
                 ex.getMessage());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return error(HttpStatus.BAD_REQUEST, "DATOS_INVALIDOS", ex.getMessage());
+    }
+
     @ExceptionHandler(CampoRequeridoException.class)
     public ResponseEntity<ErrorResponse> handleCampoInvalido(CampoRequeridoException ex) {
         return error(HttpStatus.BAD_REQUEST, "CAMPO_REQUERIDO",

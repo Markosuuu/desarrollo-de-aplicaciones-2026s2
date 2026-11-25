@@ -106,4 +106,18 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
 
         assertEquals(0, apiKeyDAO.count());
     }
+
+    @Test
+    void generarSinNombreNoDeberiaCrearApiKeyYArrojarCodigo400() throws Exception {
+        mockMvc.perform(post("/api/keys")
+                        .header("X-Master-Key", masterSecret)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nombre": ""
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
+    }
 }
