@@ -2,8 +2,11 @@ package com.prontaentrega.controllers;
 
 import com.prontaentrega.services.ApiKeyService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import com.prontaentrega.controllers.exceptions.ErrorResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +35,10 @@ public class ApiKeyController {
             description = "Genera una api-key asociada a un nombre."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "201", description = "Se retorna la api key generada.")
+            @ApiResponse(responseCode = "201", description = "Se retorna la API key generada."),
+            @ApiResponse(responseCode = "400", description = "El nombre de la API key no fue informado o está vacío.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)))
     })
     @PostMapping
     public ResponseEntity<ApiKeyResponse> generar(@RequestBody ApiKeyRequest request) {

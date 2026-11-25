@@ -34,7 +34,7 @@ public class AuthController {
             description = "Registra un usuario y devuelve un JWT."
     )
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Inicio de sesión exitoso"),
+            @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente"),
             @ApiResponse(
                     responseCode = "400", description = "Validacion inválida - Cuando el campo de correo no cumple el formato correcto, o el campo de password no tiene al menos 8 caracteres y un caracter numerico.",
                     content = @Content(

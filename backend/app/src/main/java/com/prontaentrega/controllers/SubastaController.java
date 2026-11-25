@@ -78,6 +78,7 @@ public class SubastaController {
 
     @Operation(summary = "Listar subastas filtradas", description = "Lista las subastas activas " +
             "de manera paginada aplicando filtros en base al nombre del jugador que se oferta en la subasta.")
+    @ApiResponse(responseCode = "200", description = "Retorna las subastas que coinciden con los filtros y la información de paginado.")
     @PostMapping("/buscarPorNombre")
     public ResponseEntity<PageResponse<SubastaResponse>> listarSubastasPorNombre(
             @RequestParam(defaultValue = "1") int page,
@@ -131,6 +132,11 @@ public class SubastaController {
                         schema = @Schema(implementation = ErrorResponse.class)
             )),
             @ApiResponse(responseCode = "400", description = "Retorna error en caso de no realizar una oferta valida",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)
+            )),
+            @ApiResponse(responseCode = "409", description = "La subasta no está activa, la clave de idempotencia entra en conflicto o la oferta ya fue registrada.",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)
