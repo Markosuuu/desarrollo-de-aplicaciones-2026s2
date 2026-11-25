@@ -169,6 +169,15 @@ class SubastaControllerTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void shouldReturnNotFoundWhenAuctionDoesNotExist() throws Exception {
+        AuthenticatedUser buyer = register("Buyer", "buyer-detail@test.com");
+
+        mockMvc.perform(get("/api/subastas/{id}", UUID.randomUUID())
+                        .header("Authorization", bearer(buyer)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     void shouldCloseAuctionWithWinner() throws Exception {
         AuthenticatedUser seller = register("Seller", "seller-close@test.com");
         AuthenticatedUser buyer = register("Buyer", "buyer-close@test.com");
@@ -208,6 +217,31 @@ class SubastaControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isConflict());
     }
 
+    @Test
+    void shouldReturnNotFoundWhenColsingAuctionThatDoesNotExist() throws Exception {
+        AuthenticatedUser buyer = register("Buyer", "buyer-detail@test.com");
+
+        mockMvc.perform(patch("/api/subastas/{id}/cerrar", UUID.randomUUID())
+                        .header("Authorization", bearer(buyer)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void shouldRejectClosingTwiceTheSameAuction() throws Exception {
+        AuthenticatedUser seller = register("Seller", "seller-closed@test.com");
+
+        UUID auctionId = createAuction(seller);
+
+        mockMvc.perform(patch("/api/subastas/{id}/cerrar", auctionId)
+                        .header("Authorization", bearer(seller))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(patch("/api/subastas/{id}/cerrar", auctionId)
+                        .header("Authorization", bearer(seller))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isConflict());
+    }
 
     @Test
     void shouldReturnEmptyOffersWhenAuctionHasNoBids() throws Exception {
