@@ -176,7 +176,7 @@ public class SubastaController {
     }
 
 
-    @Operation(summary = "Retornar ofertas de una subasta por ID", description = "Retorna las ofertas de una subasta que tenga el id" +
+    @Operation(summary = "Retornar ofertas de una subasta por ID", description = "Retorna las ofertas de una subasta que tenga el id " +
             "correspondiente. En caso de no existir subasta, arroja un codigo 404")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Retorna las ofertas de subasta que correspondan con " +
