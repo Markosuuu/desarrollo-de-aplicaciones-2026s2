@@ -106,7 +106,7 @@ public class SubastaController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Retorna la subasta que corresponde con el id " +
                     "dado por parametro."),
-            @ApiResponse(responseCode = "404", description = "Retorna error en caso de no encontrar una" +
+            @ApiResponse(responseCode = "404", description = "Retorna error en caso de no encontrar una " +
                     "subasta con el id dado por parametro.", content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = ErrorResponse.class)
@@ -126,12 +126,12 @@ public class SubastaController {
     @PostMapping("/ofertar")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Retorna la informacion de la oferta creada."),
-            @ApiResponse(responseCode = "404", description = "Retorna error en caso de no encontrar una subasta",
+            @ApiResponse(responseCode = "404", description = "Retorna error en caso de no encontrar una subasta.",
                     content = @Content(
                         mediaType = "application/json",
                         schema = @Schema(implementation = ErrorResponse.class)
             )),
-            @ApiResponse(responseCode = "400", description = "Retorna error en caso de no realizar una oferta valida",
+            @ApiResponse(responseCode = "400", description = "Retorna error en caso de no realizar una oferta valida.",
                     content = @Content(
                             mediaType = "application/json",
                             schema = @Schema(implementation = ErrorResponse.class)
@@ -155,12 +155,12 @@ public class SubastaController {
             @ApiResponse(responseCode = "200", description = "Retorna la subasta que corresponde con el id " +
                     "dado por parametro, cerrada y con el id del usuario ganador si es que existe, y la " +
                     "puja mas alta."),
-            @ApiResponse(responseCode = "404", description = "Retorna error en caso de no encontrar una" +
+            @ApiResponse(responseCode = "404", description = "Retorna error en caso de no encontrar una " +
                     "subasta con el id dado por parametro.", content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = ErrorResponse.class)
             )),
-            @ApiResponse(responseCode = "409", description = "Retorna error en caso de volver a cerrar una" +
+            @ApiResponse(responseCode = "409", description = "Retorna error en caso de volver a cerrar una " +
                     "subasta ya cerrada", content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = ErrorResponse.class)
