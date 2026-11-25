@@ -311,3 +311,9 @@ body[data-theme="dark"] .user-page-sell-menu {
 .user-page-sell-menu button:hover {
   transform: scale(110%);
 }
+
+.user-page-portfolio-container {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 15px;
+}

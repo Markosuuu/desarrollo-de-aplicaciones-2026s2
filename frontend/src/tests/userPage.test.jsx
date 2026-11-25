@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   createSellOrder: vi.fn(),
   fetchUserInventory: vi.fn(),
   fetchUserTransactions: vi.fn(),
+  fetchInventorySummary: vi.fn(),
   useAuth: vi.fn(),
   toastError: vi.fn(),
   toastSuccess: vi.fn(),
@@ -26,6 +27,7 @@ vi.mock("../api/marketApi", () => ({
 vi.mock("../api/userApi", () => ({
   fetchUserInventory: mocks.fetchUserInventory,
   fetchUserTransactions: mocks.fetchUserTransactions,
+  fetchInventorySummary: mocks.fetchInventorySummary,
 }));
 
 vi.mock("../context/AuthContext", () => ({
@@ -42,6 +44,12 @@ vi.mock("react-toastify", () => ({
 
 vi.mock("../api/subastaApi", () => ({
   createAuction: mocks.createAuction,
+}));
+
+vi.mock("../components/PortfolioDonutCharts", () => ({
+    default: () => (
+        <div data-testid="donut-charts"/>
+    ),
 }));
 
 const inventory = [

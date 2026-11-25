@@ -14,6 +14,8 @@ import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
+import com.prontaentrega.services.dto.ResumenInventarioDineroResponse;
+import com.prontaentrega.services.dto.ResumenInventarioTokensResponse;
 import com.prontaentrega.services.exceptions.auth.UsuarioNoEncontradoException;
 import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import com.prontaentrega.services.exceptions.mercado.*;
@@ -604,5 +606,75 @@ class MercadoServiceTest extends AbstractIntegrationTest {
     private String uniqueEmail(String base) {
         long suffix = EMAIL_SEQUENCE.getAndIncrement();
         return base.replace("@", "+" + suffix + "@");
+    }
+
+    // TEST DE OBTENER RESUMEN DE TOKENS
+
+    @Test
+    void obtenerResumenDeTokensDeUnUsuarioSinTokensNOArrojaExcepcionYRetorna0YListaVacia() {
+        Usuario usuario = saveUser("Usuario", uniqueEmail("inventario-empty@test.com"));
+
+        ResumenInventarioTokensResponse response = assertDoesNotThrow( () ->
+                mercadoService.obtenerResumenTokens(usuario.getId())
+        );
+
+        assertEquals(0, response.total());
+        assertTrue(response.jugadores().isEmpty());
+    }
+
+    @Test
+    void obtenerResumenDeTokensDeUnUsuarioConTokensComprados() {
+        Usuario usuario = saveUser("Usuario", uniqueEmail("inventario-empty@test.com"));
+        BolsaDeJugador b1 = saveJugador("Messi");
+        BolsaDeJugador b2 = saveJugador("DiCaprio");
+
+        mercadoService.comprarSuper(usuario.getId(),
+                b1.getEstadisticasDeportivas().getJugador().getId(),
+                5
+        );
+        mercadoService.comprarSuper(usuario.getId(),
+                b2.getEstadisticasDeportivas().getJugador().getId(),
+                7
+        );
+
+        ResumenInventarioTokensResponse response = mercadoService.obtenerResumenTokens(usuario.getId());
+
+        assertEquals(12, response.total());
+        assertFalse(response.jugadores().isEmpty());
+        assertEquals(2, response.jugadores().size());
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeUnUsuarioSinTokensNOArrojaExcepcionYRetorna0YListaVacia() {
+        Usuario usuario = saveUser("Usuario", uniqueEmail("inventario-empty@test.com"));
+
+        ResumenInventarioDineroResponse response = assertDoesNotThrow( () ->
+                mercadoService.obtenerResumenDinero(usuario.getId())
+        );
+
+        assertEquals(BigDecimal.ZERO, response.total());
+        assertTrue(response.jugadores().isEmpty());
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeUnUsuarioConTokensComprados() {
+        Usuario usuario = saveUser("Usuario", uniqueEmail("inventario-empty@test.com"));
+        BolsaDeJugador b1 = saveJugador("Messi");
+        BolsaDeJugador b2 = saveJugador("DiCaprio");
+
+        mercadoService.comprarSuper(usuario.getId(),
+                b1.getEstadisticasDeportivas().getJugador().getId(),
+                5
+        );
+        mercadoService.comprarSuper(usuario.getId(),
+                b2.getEstadisticasDeportivas().getJugador().getId(),
+                10
+        );
+
+        ResumenInventarioDineroResponse response = mercadoService.obtenerResumenDinero(usuario.getId());
+
+        assertEquals(75.00, response.total().doubleValue());
+        assertFalse(response.jugadores().isEmpty());
+        assertEquals(2, response.jugadores().size());
     }
 }
