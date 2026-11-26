@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -51,10 +49,8 @@ public class AuthController {
     })
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        log.info("⌛ Registrando usuario: nombre={}, correo={}", request.nombre(), request.correo());
         var authResult = authService.register(request.nombre(), request.correo(), request.password());
 
-        log.info("✅ Usuario registrado");
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(AuthResponse.from(authResult));
@@ -82,10 +78,8 @@ public class AuthController {
     })
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        log.info("⌛ Iniciando sesión para usuario: correo={}", request.correo());
         var result = authService.login(request.correo(), request.password());
 
-        log.info("✅ Inicio de sesión exitoso para usuario: correo={}", request.correo());
         return ResponseEntity.ok(AuthResponse.from(result));
     }
 }

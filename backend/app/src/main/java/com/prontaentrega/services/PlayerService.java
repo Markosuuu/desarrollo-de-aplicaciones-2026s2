@@ -1,5 +1,6 @@
 package com.prontaentrega.services;
 
+import com.prontaentrega.auditoria.Auditable;
 import com.prontaentrega.models.jugadores.BolsaDeJugador;
 import com.prontaentrega.models.jugadores.Liga;
 import com.prontaentrega.persistence.PersistenceManager;
@@ -54,6 +55,7 @@ public class PlayerService {
      * @return Page<BolsaDeJugador> Página de jugadores encontrados con sus estadísticas y cotización
      */
     @Transactional(readOnly = true)
+    @Auditable("search")
     public Page<BolsaDeJugador> search(Liga liga, String equipo, String nombre, int page, int perPage) {
         int safePage = Math.max(page, 1);
         int safePerPage = Math.clamp(perPage, 1, 50);
@@ -67,6 +69,7 @@ public class PlayerService {
      * ante fallos del proveedor.
      */
     @Transactional
+    @Auditable("refreshFromWhoScored")
     public RefreshCatalogResponse refreshFromWhoScored() {
         LocalDateTime updatedAt = LocalDateTime.now(ZoneId.systemDefault());
         final int pageSize = 200;
@@ -121,12 +124,14 @@ public class PlayerService {
     }
 
     @Transactional
+    @Auditable("searchById")
     public BolsaDeJugador searchById(UUID id) {
         return jugadorRepository.findById(id)
                 .orElseThrow(() -> new JugadorNoEncontradoException("Jugador no encontrado: " + id));
     }
 
     @Transactional
+    @Auditable("getRanking")
     public Page<BolsaDeJugador> getRanking(int page, int perPage) {
         int safePage = Math.max(page, 1);
         int safePerPage = Math.clamp(perPage, 1, 50);
@@ -195,6 +200,7 @@ public class PlayerService {
     }
 
     @Transactional
+    @Auditable("getRankingByNombre")
     public Page<BolsaDeJugador> getRankingByNombre(int page, int perPage, String nombre) {
         int safePage = Math.max(page, 1);
         int safePerPage = Math.clamp(perPage, 1, 50);

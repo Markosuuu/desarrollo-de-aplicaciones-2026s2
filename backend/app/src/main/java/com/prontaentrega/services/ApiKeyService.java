@@ -1,4 +1,5 @@
 package com.prontaentrega.services;
+import com.prontaentrega.auditoria.Auditable;
 import com.prontaentrega.persistence.dto.ApiKey;
 import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class ApiKeyService {
     }
 
     @Transactional
+    @Auditable("generar")
     public String generar(String nombre) {
         if (nombre == null || nombre.isBlank()) {
             throw new IllegalArgumentException("El nombre no puede estar vacío");
