@@ -69,7 +69,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/players/update")
                         .authenticated()
 
-                        // Todo lo demás requiere autenticación
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
