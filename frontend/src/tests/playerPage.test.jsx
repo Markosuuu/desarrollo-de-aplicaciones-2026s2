@@ -261,7 +261,7 @@ describe('PlayerPage - compra de tokens', () => {
 
         renderPlayerPage();
 
-        fireEvent.click(await screen.findByRole('button', { name: 'Comprar' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Comprar tokens' }));
 
         const quantity = screen.getByLabelText('Cantidad (máximo 5)');
         const total = () =>
@@ -282,7 +282,7 @@ describe('PlayerPage - compra de tokens', () => {
         );
 
         fireEvent.click(screen.getByRole('button', { name: 'Volver' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Comprar' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Comprar tokens' }));
 
         expect(screen.getByLabelText('Cantidad (máximo 5)')).toHaveValue(1);
     });
@@ -294,7 +294,7 @@ describe('PlayerPage - compra de tokens', () => {
         });
 
         renderPlayerPage();
-        fireEvent.click(await screen.findByRole('button', { name: 'Comprar' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Comprar tokens' }));
 
         const quantity = screen.getByLabelText('Cantidad (máximo 100)');
         const form = quantity.closest('form');
@@ -319,7 +319,7 @@ describe('PlayerPage - compra de tokens', () => {
         });
 
         renderPlayerPage();
-        fireEvent.click(await screen.findByRole('button', { name: 'Comprar' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Comprar tokens' }));
         fireEvent.submit(
             screen.getByLabelText('Cantidad (máximo 100)').closest('form')
         );
@@ -337,7 +337,7 @@ describe('PlayerPage - compra de tokens', () => {
         });
 
         renderPlayerPage();
-        fireEvent.click(await screen.findByRole('button', { name: 'Comprar' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Comprar tokens' }));
         fireEvent.submit(
             screen.getByLabelText('Cantidad (máximo 100)').closest('form')
         );
@@ -361,7 +361,7 @@ describe('PlayerPage - compra de tokens', () => {
         });
 
         renderPlayerPage();
-        fireEvent.click(await screen.findByRole('button', { name: 'Comprar' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Comprar tokens' }));
         fireEvent.submit(
             screen.getByLabelText('Cantidad (máximo 100)').closest('form')
         );

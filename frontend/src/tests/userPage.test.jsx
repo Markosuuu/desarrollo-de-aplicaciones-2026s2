@@ -13,9 +13,11 @@ const mocks = vi.hoisted(() => ({
   createSellOrder: vi.fn(),
   fetchUserInventory: vi.fn(),
   fetchUserTransactions: vi.fn(),
+  fetchInventorySummary: vi.fn(),
   useAuth: vi.fn(),
   toastError: vi.fn(),
   toastSuccess: vi.fn(),
+  createAuction: vi.fn()
 }));
 
 vi.mock("../api/marketApi", () => ({
@@ -25,6 +27,7 @@ vi.mock("../api/marketApi", () => ({
 vi.mock("../api/userApi", () => ({
   fetchUserInventory: mocks.fetchUserInventory,
   fetchUserTransactions: mocks.fetchUserTransactions,
+  fetchInventorySummary: mocks.fetchInventorySummary,
 }));
 
 vi.mock("../context/AuthContext", () => ({
@@ -37,6 +40,16 @@ vi.mock("@blobatar/react", () => ({
 
 vi.mock("react-toastify", () => ({
   toast: { error: mocks.toastError, success: mocks.toastSuccess },
+}));
+
+vi.mock("../api/subastaApi", () => ({
+  createAuction: mocks.createAuction,
+}));
+
+vi.mock("../components/PortfolioDonutCharts", () => ({
+    default: () => (
+        <div data-testid="donut-charts"/>
+    ),
 }));
 
 const inventory = [
@@ -90,6 +103,10 @@ function renderUserPage() {
           path="/mercado/:id"
           element={<div data-testid="offer-route">Oferta creada</div>}
         />
+        <Route
+          path="/subasta/:id"
+          element={<div data-testid="auction-route">Subasta creada</div>}
+        />
       </Routes>
     </MemoryRouter>,
   );
@@ -108,6 +125,7 @@ beforeEach(() => {
   mocks.fetchUserInventory.mockResolvedValue(inventory);
   mocks.fetchUserTransactions.mockResolvedValue(transactions);
   mocks.createSellOrder.mockResolvedValue({ id: "listing-1" });
+  mocks.createAuction.mockResolvedValue({ id: "auction-1" });
 });
 
 describe("UserPage", () => {
@@ -141,7 +159,12 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
+      }),
+    );
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Crear oferta",
       }),
     );
 
@@ -156,7 +179,13 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
+      }),
+    );
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Crear oferta",
       }),
     );
     fireEvent.change(screen.getByLabelText(/Cantidad de tokens/), {
@@ -206,10 +235,15 @@ describe("UserPage", () => {
 
     expect((await screen.findAllByText("—")).length).toBeGreaterThan(0);
     const unnamedPlayerButtons = screen.getAllByRole("button", {
-      name: "Vender tokens de jugador",
+      name: "Opciones de venta para jugador",
     });
     expect(unnamedPlayerButtons[0]).toBeDisabled();
     fireEvent.click(unnamedPlayerButtons[1]);
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Crear oferta",
+      }),
+    );
     expect(
       await screen.findByText(/Jugador — — créditos por token/),
     ).toBeInTheDocument();
@@ -430,7 +464,13 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
+      }),
+    );
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Crear oferta",
       }),
     );
     const quantity = screen.getByLabelText(/Cantidad de tokens/);
@@ -458,14 +498,22 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
       }),
     );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Crear oferta",
+      }),
+    );
+
     fireEvent.submit(screen.getByRole("dialog").querySelector("form"));
 
     await waitFor(() =>
       expect(mocks.toastError).toHaveBeenCalledWith("Oferta rechazada"),
     );
+
     expect(screen.getByRole("dialog")).toBeInTheDocument();
   });
 
@@ -475,9 +523,16 @@ describe("UserPage", () => {
 
     fireEvent.click(
       await screen.findByRole("button", {
-        name: "Vender tokens de Lionel Messi",
+        name: "Opciones de venta para Lionel Messi",
       }),
     );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Crear oferta",
+      }),
+    );
+
     fireEvent.submit(screen.getByRole("dialog").querySelector("form"));
 
     await waitFor(() =>
@@ -485,5 +540,102 @@ describe("UserPage", () => {
         "Error al crear el anuncio de venta",
       ),
     );
+  });
+
+  // Tests de crear subasta
+
+  test("abre el formulario de creación de subasta con los datos del jugador", async () => {
+    renderUserPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Opciones de venta para Lionel Messi",
+      }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Crear subasta",
+      }),
+    );
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", {
+      name: "Crear subasta",
+    })).toBeInTheDocument();
+
+    expect(
+      screen.getByText((_, element) =>
+        element.tagName === "P" &&
+        element.textContent.includes("Estás creando una subasta para") &&
+        element.textContent.includes("Lionel Messi")
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText("Disponibles: 7")).toBeInTheDocument();
+
+    expect(mocks.createAuction).not.toHaveBeenCalled();
+    expect(mocks.createSellOrder).not.toHaveBeenCalled();
+  });
+
+  test("crea una subasta y navega a su detalle", async () => {
+    mocks.createAuction.mockResolvedValue({
+      id: "auction-1",
+    });
+
+    renderUserPage();
+
+    fireEvent.click(
+      await screen.findByRole("button", {
+        name: "Opciones de venta para Lionel Messi",
+      }),
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Crear subasta",
+      }),
+    );
+
+    await screen.findByRole("dialog");
+
+    fireEvent.change(screen.getByLabelText("Cantidad de tokens"), {
+      target: { value: "2" },
+    });
+
+    fireEvent.change(screen.getByLabelText("Precio inicial"), {
+      target: { value: "150" },
+    });
+
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() + 1);
+
+    const vencimiento = [
+      fecha.getFullYear(),
+      String(fecha.getMonth() + 1).padStart(2, "0"),
+      String(fecha.getDate()).padStart(2, "0"),
+    ].join("-") + "T12:00";
+
+    fireEvent.change(
+      screen.getByLabelText("Fecha y hora de vencimiento"),
+      { target: { value: vencimiento } },
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Crear subasta",
+      }),
+    );
+
+    expect(await screen.findByTestId("auction-route")).toBeInTheDocument();
+
+    expect(mocks.createAuction).toHaveBeenCalledWith({
+      jugadorId: "player-1",
+      cantidad: 2,
+      precioInicial: 150,
+      vencimiento: `${vencimiento}:00`,
+      token: "token-prueba",
+    });
+
+    expect(mocks.createSellOrder).not.toHaveBeenCalled();
   });
 });

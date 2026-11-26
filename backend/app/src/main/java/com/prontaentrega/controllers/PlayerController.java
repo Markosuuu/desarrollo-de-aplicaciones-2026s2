@@ -11,6 +11,11 @@ import com.prontaentrega.services.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import com.prontaentrega.controllers.exceptions.ErrorResponse;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,7 +44,7 @@ public class PlayerController {
      */
     @Operation(
             summary = "Listar jugadores",
-            description = "Lista los jugadores de manera paginada con filtros opcionales de nomrbe, equipo y liga."
+            description = "Lista los jugadores de manera paginada con filtros opcionales de nombre, equipo y liga."
     )
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Retorna una pagina, con sus jugadores segun el filtro aplicado, e información referente al paginado.")
@@ -86,6 +91,13 @@ public class PlayerController {
                 .body(playerService.refreshFromWhoScored());
     }
 
+    @Operation(summary = "Buscar jugador por ID", description = "Retorna el jugador correspondiente al identificador indicado.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Jugador encontrado."),
+            @ApiResponse(responseCode = "404", description = "No existe un jugador con el identificador indicado.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @GetMapping("/players/{id}")
     public ResponseEntity<PlayerResponse> searchById(@PathVariable UUID id) {
         return ResponseEntity
@@ -93,6 +105,13 @@ public class PlayerController {
                 .body(PlayerResponse.from(playerService.searchById(id)));
     }
 
+    @Operation(summary = "Consultar historial de cotizaciones", description = "Retorna el historial completo de cotizaciones de un jugador.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Historial de cotizaciones encontrado."),
+            @ApiResponse(responseCode = "404", description = "El jugador o su historial no fueron encontrados.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @GetMapping("/players/{id}/quotes")
     public ResponseEntity<List<HistorialCotizacionResponse>> buscarHistorial(
             @PathVariable UUID id
@@ -106,6 +125,29 @@ public class PlayerController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Consultar cotización por fecha", description = "Retorna la cotización de un jugador registrada en la fecha indicada.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Cotización encontrada para la fecha solicitada."),
+            @ApiResponse(responseCode = "404", description = "No existe cotización para el jugador y la fecha indicados.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    @GetMapping("/players/{id}/quotes/{fecha}")
+    public ResponseEntity<HistorialCotizacionResponse> buscarHistorialPorFecha(
+            @PathVariable UUID id,
+            @PathVariable LocalDate fecha
+            ) {
+        HistorialCotizacionResponse response = HistorialCotizacionResponse.from(
+                cotizacionService.buscarHistorialPorFecha(id, fecha)
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Listar ranking de jugadores", description = "Retorna los jugadores ordenados por ranking de manera paginada.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ranking consultado correctamente.")
+    })
     @GetMapping("/players/ranking")
     public ResponseEntity<CatalogResponse> getRanking(@RequestParam(defaultValue = "1") int page,
                                                       @RequestParam(defaultValue = "20") int perPage) {
@@ -125,6 +167,10 @@ public class PlayerController {
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
+    @Operation(summary = "Buscar ranking por nombre", description = "Filtra el ranking de jugadores por nombre y devuelve los resultados de manera paginada.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Ranking filtrado consultado correctamente.")
+    })
     @PostMapping("/players/ranking")
     public ResponseEntity<CatalogResponse> getRankingByNombre(@RequestParam(defaultValue = "1") int page,
                                                             @RequestParam(defaultValue = "20") int perPage,

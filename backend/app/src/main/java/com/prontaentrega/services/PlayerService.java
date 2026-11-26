@@ -8,7 +8,7 @@ import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
 import com.prontaentrega.services.dto.external.PlayerStat;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
-import com.prontaentrega.services.exceptions.jugadores.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.jugadores.ProveedorNoDisponibleException;
 import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import com.prontaentrega.services.scraping.PlayerScrapper;
 import com.prontaentrega.services.scraping.whoscoredscrapper.ScrappedPlayerMapper;
@@ -84,7 +84,7 @@ public class PlayerService {
                 : 0;
 
         if (totalPages <= 0) {
-            throw new ProviderUnavailableException(
+            throw new ProveedorNoDisponibleException(
                     "PAGINACION_INVALIDA",
                     "No se pudo completar la actualizacion. El proveedor no informo correctamente la cantidad de paginas."
             );
@@ -109,7 +109,7 @@ public class PlayerService {
         }
 
         if (created + updated == 0) {
-            throw new ProviderUnavailableException(
+            throw new ProveedorNoDisponibleException(
                     "SIN_DATOS_UTILES",
                     "No se pudo completar la actualizacion. El proveedor no produjo registros utiles."
             );

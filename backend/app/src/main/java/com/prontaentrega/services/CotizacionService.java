@@ -3,26 +3,23 @@ package com.prontaentrega.services;
 import com.prontaentrega.auditoria.Auditable;
 import com.prontaentrega.models.cotizacion.*;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.CotizacionRepository.ActualizacionCotizacion;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
+import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
-import com.prontaentrega.services.exceptions.cotizacion.ConfiguracionIncompletaException;
-import com.prontaentrega.services.exceptions.cotizacion.EstrategiaActivaNoDisponibleException;
-import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
-import com.prontaentrega.services.exceptions.cotizacion.ConfiguracionNoValidaParaEstrategiaException;
-import com.prontaentrega.services.exceptions.cotizacion.EstrategiaNoExistenteException;
+import com.prontaentrega.services.exceptions.HistorialNoEncontradoException;
+import com.prontaentrega.services.exceptions.cotizacion.*;
+
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
 
-import com.prontaentrega.services.exceptions.cotizacion.EstrategiaDuplicadaException;
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,19 +30,22 @@ public class CotizacionService {
 
     private final CotizacionRepository cotizacionRepository;
     private final HistorialCotizacionRepository historialRepository;
+    private final JugadorRepository jugadorRepository;
     private final Map<String, EstrategiaCotizacion> estrategias;
 
     public CotizacionService(CotizacionRepository cotizacionRepository,
                              HistorialCotizacionRepository historialRepository,
-                             List<EstrategiaCotizacion> estrategias) {
+                             JugadorRepository jugadorRepository,
+                             List<EstrategiaCotizacion> estrategias) throws EstrategiasInconsistentesException {
         this.cotizacionRepository = cotizacionRepository;
         this.historialRepository = historialRepository;
+        this.jugadorRepository = jugadorRepository;
         this.estrategias = new HashMap<>();
 
         validacionesConstructor(cotizacionRepository, estrategias);
     }
 
-    private void validacionesConstructor(CotizacionRepository cotizacionRepository, List<EstrategiaCotizacion> estrategias) {
+    private void validacionesConstructor(CotizacionRepository cotizacionRepository, List<EstrategiaCotizacion> estrategias) throws EstrategiasInconsistentesException {
         for (EstrategiaCotizacion estrategia : estrategias) {
             EstrategiaCotizacion previous = this.estrategias.put(estrategia.estrategiaId(), estrategia);
 
@@ -55,15 +55,13 @@ public class CotizacionService {
 
             if (!estrategia.tipoConfiguracion().equals(
                     cotizacionRepository.tipoConfiguracion(estrategia.estrategiaId()))) {
-                // TODO: Iancho, poneme una excepción linda acá pls y en españolete
-                throw new IllegalStateException(
+                throw new EstrategiasInconsistentesException(
                         "El provider no coincide con la configuración de " + estrategia.estrategiaId());
             }
         }
 
         if (!this.estrategias.keySet().equals(cotizacionRepository.estrategiaIdsConfigurables())) {
-            // TODO: Iancho, poneme una excepción linda acá pls y en españolete
-            throw new IllegalStateException(
+            throw new InconsistenciaDeEstrategiasConfigurablesException(
                     "Los providers de configuración deben corresponder uno a uno con las estrategias");
         }
     }
@@ -286,8 +284,31 @@ public class CotizacionService {
             ConfiguracionEstrategiaCotizacion configuracion) {
     }
 
+    @Transactional
     @Auditable("buscarHistorialById")
     public List<HistorialCotizacion> buscarHistorialById(UUID jugadorId) {
         return historialRepository.buscarHistorialById(jugadorId);
+    }
+
+    @Transactional(readOnly = true)
+    public HistorialCotizacion buscarHistorialPorFecha(
+            UUID jugadorId,
+            LocalDate fecha) {
+
+        BolsaDeJugador bolsa = jugadorRepository.findById(jugadorId)
+                .orElseThrow(() -> new JugadorNoEncontradoException(
+                        "No se encontro un jugador con ID: " + jugadorId
+                ));
+
+        LocalDateTime finDia = fecha.plusDays(1).atStartOfDay();
+
+        return historialRepository
+                .findFirstByBolsaIdAndFechaLessThanOrderByFechaDesc(
+                        bolsa.getId(),
+                        finDia
+                )
+                .orElseThrow(() -> new HistorialNoEncontradoException(
+                        "No existe historial de cotizaciones para la fecha indicada"
+                ));
     }
 }

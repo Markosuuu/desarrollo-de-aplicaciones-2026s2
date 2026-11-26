@@ -4,7 +4,8 @@ import com.prontaentrega.models.exception.CampoInvalidoException;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.models.exception.AnuncioNoPendienteException;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
-import com.prontaentrega.services.exceptions.jugadores.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.HistorialNoEncontradoException;
+import com.prontaentrega.services.exceptions.jugadores.ProveedorNoDisponibleException;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.services.exceptions.auth.*;
 import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
@@ -40,6 +41,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCampoInvalido(CampoInvalidoException ex) {
         return error(HttpStatus.BAD_REQUEST, "DATOS_INVALIDOS",
                 ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return error(HttpStatus.BAD_REQUEST, "DATOS_INVALIDOS", ex.getMessage());
     }
 
     @ExceptionHandler(CampoRequeridoException.class)
@@ -93,8 +99,8 @@ public class GlobalExceptionHandler {
     /**
      * Maneja fallas de WhoScored conservando el contrato del endpoint de actualizacion.
      */
-    @ExceptionHandler(ProviderUnavailableException.class)
-    public ResponseEntity<RefreshCatalogResponse> handleProviderUnavailable(ProviderUnavailableException ex) {
+    @ExceptionHandler(ProveedorNoDisponibleException.class)
+    public ResponseEntity<RefreshCatalogResponse> handleProviderUnavailable(ProveedorNoDisponibleException ex) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(RefreshCatalogResponse.failure(ex.getMessage()));
     }
 
@@ -151,6 +157,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OfertaInvalidaException.class)
     public ResponseEntity<ErrorResponse> handleOfertaInvalida(OfertaInvalidaException ex) {
         return error(HttpStatus.BAD_REQUEST, "OFERTA_INVALIDA", ex.getMessage());
+    }
+
+    @ExceptionHandler(HistorialNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handleHistorialNoEncontrado(HistorialNoEncontradoException ex) {
+        return error(HttpStatus.NOT_FOUND, "HISTORIAL_NO_ENCONTRADO", ex.getMessage());
     }
 
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)

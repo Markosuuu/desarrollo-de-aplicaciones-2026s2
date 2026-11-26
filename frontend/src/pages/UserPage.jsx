@@ -7,6 +7,8 @@ import { fetchUserInventory, fetchUserTransactions } from "../api/userApi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/userPage.css";
 import { toast } from "react-toastify";
+import CrearSubastaModal from "../components/subasta/CrearSubastaModal";
+import PortfolioDonutCharts from "../components/PortfolioDonutCharts";
 
 const numberFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 2,
@@ -87,6 +89,8 @@ function UserPage() {
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
   const [sellQuantity, setSellQuantity] = useState("");
   const [creatingOffer, setCreatingOffer] = useState(false);
+  const [openSellMenu, setOpenSellMenu] = useState(null);
+  const [auctionItem, setAuctionItem] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -216,98 +220,131 @@ function UserPage() {
         {loading ? (
           <output className="user-page-message">Cargando inventario...</output>
         ) : (
-          <div className="user-page-table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Avatar</th>
-                  <th scope="col">Jugador</th>
-                  <th scope="col">Liga</th>
-                  <th scope="col">Equipo</th>
-                  <th scope="col">Posición</th>
-                  <th scope="col">Cantidad disponible</th>
-                  <th scope="col">Cantidad en venta</th>
-                  <th scope="col">Valor por token</th>
-                  <th scope="col">Vender</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inventory.map((item) => {
-                  const player = item.jugador || {};
+          <div className="user-page-portfolio-container">
+            <PortfolioDonutCharts />
+            <div className="user-page-table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Avatar</th>
+                    <th scope="col">Jugador</th>
+                    <th scope="col">Liga</th>
+                    <th scope="col">Equipo</th>
+                    <th scope="col">Posición</th>
+                    <th scope="col">Cantidad disponible</th>
+                    <th scope="col">Cantidad en venta</th>
+                    <th scope="col">Valor por token</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inventory.map((item) => {
+                    const player = item.jugador || {};
 
-                  return (
-                    <tr key={item.id}>
-                      <td>
-                        <Blobatar
-                          name={player.nombre || "Jugador"}
-                          animate="hover"
-                          width={40}
-                        />
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <Blobatar
+                            name={player.nombre || "Jugador"}
+                            animate="hover"
+                            width={40}
+                          />
+                        </td>
+                        <td>{player.nombre || "—"}</td>
+                        <td>{player.liga || "—"}</td>
+                        <td>{player.equipo || "—"}</td>
+                        <td>{player.posicion || "—"}</td>
+                        <td>{formatNumber(item.tokensDisponibles)}</td>
+                        <td>{formatNumber(item.tokensEnVenta)}</td>
+                        <td>{formatNumber(player.cotizacion)}</td>
+                        <td>
+                          <div className="user-page-sell-dropdown">
+                              <button
+                                  className="user-page-sell-button"
+                                  type="button"
+                                  aria-label={`Opciones de venta para ${player.nombre || "jugador"}`}
+                                  disabled={(Number(item.tokensDisponibles) || 0) <= 0}
+                                  onClick={() => setOpenSellMenu(
+                                      openSellMenu === item.id ? null : item.id
+                                  )}
+                              >
+                                  {''}
+                                  <span className="dropdown-arrow">▾</span>
+                              </button>
+
+                              {openSellMenu === item.id && (
+                                  <div className="user-page-sell-menu">
+                                      <button
+                                          type="button"
+                                          onClick={() => {
+                                              openSellDialog(item);
+                                              setOpenSellMenu(null);
+                                          }}
+                                      >
+                                          Crear oferta
+                                      </button>
+
+                                      <button
+                                          type="button"
+                                          onClick={() => {
+                                              setAuctionItem(item);
+                                              console.log(item)
+                                              setOpenSellMenu(null);
+                                          }}
+                                      >
+                                          Crear subasta
+                                      </button>
+                                  </div>
+                              )}
+                          </div>
                       </td>
-                      <td>{player.nombre || "—"}</td>
-                      <td>{player.liga || "—"}</td>
-                      <td>{player.equipo || "—"}</td>
-                      <td>{player.posicion || "—"}</td>
-                      <td>{formatNumber(item.tokensDisponibles)}</td>
-                      <td>{formatNumber(item.tokensEnVenta)}</td>
-                      <td>{formatNumber(player.cotizacion)}</td>
-                      <td>
-                        <button
-                          className="user-page-sell-button"
-                          type="button"
-                          aria-label={`Vender tokens de ${player.nombre || "jugador"}`}
-                          disabled={(Number(item.tokensDisponibles) || 0) <= 0}
-                          onClick={() => openSellDialog(item)}
-                        >
-                          Crear oferta
-                        </button>
+                      </tr>
+                    );
+                  })}
+                  {!error && inventory.length === 0 && (
+                    <tr>
+                      <td colSpan="9" className="user-page-message">
+                        Inventario vacío
                       </td>
                     </tr>
-                  );
-                })}
-                {!error && inventory.length === 0 && (
-                  <tr>
-                    <td colSpan="9" className="user-page-message">
-                      Inventario vacío
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-            {inventoryPageData.totalPages > 1 && (
-              <div className="user-page-pager">
-                <button
-                  type="button"
-                  className="pager-button"
-                  disabled={
-                    !inventoryPageData.hasPrevious || inventoryPage <= 1
-                  }
-                  onClick={() =>
-                    setInventoryPage((value) => Math.max(1, value - 1))
-                  }
-                >
-                  Anterior
-                </button>
-                <span className="pager-status">
-                  {inventoryPageData.page} / {inventoryPageData.totalPages}
-                </span>
-                <button
-                  type="button"
-                  className="pager-button"
-                  disabled={
-                    !inventoryPageData.hasNext ||
-                    inventoryPage >= inventoryPageData.totalPages
-                  }
-                  onClick={() =>
-                    setInventoryPage((value) =>
-                      Math.min(inventoryPageData.totalPages, value + 1),
-                    )
-                  }
-                >
-                  Siguiente
-                </button>
-              </div>
-            )}
+                  )}
+                </tbody>
+              </table>
+              {inventoryPageData.totalPages > 1 && (
+                <div className="user-page-pager">
+                  <button
+                    type="button"
+                    className="pager-button"
+                    disabled={
+                      !inventoryPageData.hasPrevious || inventoryPage <= 1
+                    }
+                    onClick={() =>
+                      setInventoryPage((value) => Math.max(1, value - 1))
+                    }
+                  >
+                    Anterior
+                  </button>
+                  <span className="pager-status">
+                    {inventoryPageData.page} / {inventoryPageData.totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="pager-button"
+                    disabled={
+                      !inventoryPageData.hasNext ||
+                      inventoryPage >= inventoryPageData.totalPages
+                    }
+                    onClick={() =>
+                      setInventoryPage((value) =>
+                        Math.min(inventoryPageData.totalPages, value + 1),
+                      )
+                    }
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </article>
@@ -450,6 +487,19 @@ function UserPage() {
             </form>
           </dialog>
         </div>
+      )}
+      {auctionItem && (
+        <CrearSubastaModal
+            jugadorId={auctionItem.jugador.id}
+            nombreJugador={auctionItem.jugador.nombre}
+            tokensDisponibles={Number(auctionItem.tokensDisponibles) || 0}
+            cotizacion={auctionItem.jugador.cotizacion}
+            token={token}
+            onClose={() => setAuctionItem(null)}
+            onCreated={() => {
+                void fetchUserInventory();
+            }}
+        />
       )}
     </main>
   );

@@ -30,9 +30,9 @@
 }
 
 .market-action-button {
-  width: 100%;
+  width: auto;
   margin-top: auto;
-  padding: 0.75rem 1rem;
+  padding: 0.59rem 1rem;
   border: 0;
   border-radius: 10px;
   background: #9333ea;

@@ -9,7 +9,6 @@ const formatPrice = (price) =>
 
 export default function QuoteHistoryChart({ data = [] }) {
     const { isDark } = useTheme();
-    console.log(data)
     const points = data
         .filter((item) => item.fecha && Number.isFinite(Number(item.precio)))
         .map((item) => ({
@@ -26,7 +25,7 @@ export default function QuoteHistoryChart({ data = [] }) {
     }
 
     return (
-        <div style={{ width: '100%' }}>
+        <div>
             <LineChart
                 dataset={points}
                 height={300}

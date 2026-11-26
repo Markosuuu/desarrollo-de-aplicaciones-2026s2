@@ -1,6 +1,6 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
-import { fetchPlayers, fetchPlayer, fetchPlayerQuotesHistory, getRanking } from '../api/playerApi.js';
+import { fetchPlayers, fetchPlayer, fetchPlayerQuotesHistory, getRanking, getQuoteByDate } from '../api/playerApi.js';
 
 describe('fetchPlayers', () => {
     beforeEach(() => {
@@ -331,5 +331,134 @@ describe('getRanking', () => {
         await expect(
             getRanking({ token: 'token-test' })
         ).rejects.toThrow('No se pudo cargar el catálogo de jugadores.');
+    });
+});
+
+describe('getQuoteByDate', () => {
+
+    beforeEach(() => {
+        vi.stubGlobal('fetch', vi.fn());
+    });
+
+    afterEach(() => {
+        vi.restoreAllMocks();
+        vi.unstubAllGlobals();
+    });
+
+    test('debe obtener la cotización de un jugador para una fecha determinada', async () => {
+        const payload = {
+            jugadorId: 1,
+            cotizacion: 125.50,
+            fecha: '2026-11-17',
+        };
+
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockResolvedValue(payload),
+        });
+
+        const result = await getQuoteByDate({
+            id: 1,
+            fecha: '2026-11-17',
+            token: 'token-test',
+        });
+
+        expect(fetch).toHaveBeenCalledWith(
+            expect.stringContaining('/players/1/quotes/2026-11-17'),
+            {
+                method: 'GET',
+                headers: {
+                    Accept: 'application/json',
+                    Authorization: 'Bearer token-test',
+                },
+            }
+        );
+
+        expect(result).toEqual(payload);
+    });
+
+    test('debe devolver un objeto vacío si falla el parseo del JSON', async () => {
+        fetch.mockResolvedValue({
+            ok: true,
+            json: vi.fn().mockRejectedValue(new Error('JSON inválido')),
+        });
+
+        const result = await getQuoteByDate({
+            id: 1,
+            fecha: '2026-11-17',
+            token: 'token-test',
+        });
+
+        expect(result).toEqual({});
+    });
+
+    test('debe lanzar el error recibido en error.message', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({
+                error: {
+                    message: 'No se encontró la cotización',
+                },
+            }),
+        });
+
+        await expect(
+            getQuoteByDate({
+                id: 1,
+                fecha: '2026-11-17',
+                token: 'token-test',
+            })
+        ).rejects.toThrow('No se encontró la cotización');
+    });
+
+    test('debe lanzar el error recibido en message si no existe error.message', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({
+                message: 'Acceso denegado',
+            }),
+        });
+
+        await expect(
+            getQuoteByDate({
+                id: 1,
+                fecha: '2026-11-17',
+                token: 'token-test',
+            })
+        ).rejects.toThrow('Acceso denegado');
+    });
+
+    test('debe lanzar el mensaje por defecto si no existe un mensaje de error', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockResolvedValue({}),
+        });
+
+        await expect(
+            getQuoteByDate({
+                id: 1,
+                fecha: '2026-11-17',
+                token: 'token-test',
+            })
+        ).rejects.toThrow(
+            'No se pudo consultar la cotización para esa fecha.'
+        );
+    });
+
+    test('debe lanzar el mensaje por defecto si falla el parseo del JSON y la respuesta no es exitosa', async () => {
+        fetch.mockResolvedValue({
+            ok: false,
+            json: vi.fn().mockRejectedValue(new Error('JSON inválido')),
+        });
+
+        await expect(
+            getQuoteByDate({
+                id: 1,
+                fecha: '2026-11-17',
+                token: 'token-test',
+            })
+        ).rejects.toThrow(
+            'No se pudo consultar la cotización para esa fecha.'
+        );
     });
 });

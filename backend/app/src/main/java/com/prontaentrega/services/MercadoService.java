@@ -19,8 +19,13 @@ import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
+import com.prontaentrega.services.dto.JugadorResumenTokensInventario;
+import com.prontaentrega.services.dto.JugadorResumenValorInventario;
+import com.prontaentrega.services.dto.ResumenInventarioDineroResponse;
+import com.prontaentrega.services.dto.ResumenInventarioTokensResponse;
 import com.prontaentrega.services.exceptions.auth.UsuarioNoEncontradoException;
 import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
 import com.prontaentrega.services.exceptions.mercado.*;
@@ -334,5 +339,46 @@ public class MercadoService {
         if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
             throw new AnuncioNoPendienteException("No se puede cancelar una venta completada");
         }
+    }
+
+
+    @Transactional(readOnly = true)
+    public ResumenInventarioTokensResponse obtenerResumenTokens(UUID usuarioId) {
+
+        Long totalTokens = inventarioUsuarioRepository.obtenerTotalTokens(usuarioId);
+
+        List<JugadorResumenTokensInventario> jugadores =
+                inventarioUsuarioRepository.obtenerResumenTokensPorJugador(usuarioId)
+                        .stream()
+                        .map(jugador -> new JugadorResumenTokensInventario(
+                                jugador.getJugadorId(),
+                                jugador.getJugadorNombre(),
+                                jugador.getCantidadTokens()
+                        ))
+                        .toList();
+
+        return new ResumenInventarioTokensResponse(totalTokens, jugadores);
+    }
+
+    @Transactional(readOnly = true)
+    public ResumenInventarioDineroResponse obtenerResumenDinero(UUID usuarioId) {
+
+        BigDecimal totalDinero = inventarioUsuarioRepository.obtenerValorTotal(usuarioId);
+
+        List<JugadorResumenValorInventario> jugadores =
+                inventarioUsuarioRepository.obtenerValorPorJugador(usuarioId)
+                        .stream()
+                        .map(jugador -> new JugadorResumenValorInventario(
+                                jugador.getJugadorId(),
+                                jugador.getJugadorNombre(),
+                                jugador.getCantidad(),
+                                jugador.getValor()
+                        ))
+                        .toList();
+
+        return new ResumenInventarioDineroResponse(
+                totalDinero != null ? totalDinero : BigDecimal.ZERO,
+                jugadores
+        );
     }
 }
