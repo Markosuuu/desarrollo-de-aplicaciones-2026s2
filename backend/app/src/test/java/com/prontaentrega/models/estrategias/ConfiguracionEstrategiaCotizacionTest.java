@@ -3,11 +3,14 @@ package com.prontaentrega.models.estrategias;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.controllers.dtos.cotizacion.CotizacionStrategyConfigRequest;
+import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderadaConPenalizacion;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -47,79 +50,6 @@ class ConfiguracionEstrategiaCotizacionTest {
                 BigDecimal.ZERO, BigDecimal.ONE).umbralRegatesGanadosPorPartido())
                 .isEqualByComparingTo(BigDecimal.ZERO);
     }
-
-        /** Valida la forma exacta del request ponderado y su suma unitaria de coeficientes. */
-        @Test
-        void validaRequestDeEstrategiaPonderada() {
-                CotizacionStrategyConfigRequest request = new CotizacionStrategyConfigRequest();
-                request.setPesoGoles(BigDecimal.ONE);
-                request.setPesoAsistencias(BigDecimal.ZERO);
-                request.setPesoDisparosPorPartido(BigDecimal.ZERO);
-                request.setPesoPasesClavePorPartido(BigDecimal.ZERO);
-                request.setPesoRegatesGanadosPorPartido(BigDecimal.ZERO);
-                request.setPesoFaltasCometidasPorPartido(BigDecimal.ZERO);
-                request.setPesoRating(BigDecimal.ZERO);
-                request.setFactorEscala(BigDecimal.ONE.negate());
-
-                assertThat(request.isConfiguracionValida()).isTrue();
-                assertThat(request.aConfiguracion()).isInstanceOf(ConfiguracionEstrategiaPonderada.class);
-
-                request.setPesoGoles(new BigDecimal("0.5"));
-                assertThat(request.isConfiguracionValida()).isFalse();
-        }
-
-        /** Valida que el umbral penalizado no se confunda con un coeficiente de la suma. */
-        @Test
-        void validaRequestPenalizadoConUmbralSeparado() {
-                CotizacionStrategyConfigRequest request = new CotizacionStrategyConfigRequest();
-                request.setPesoGoles(BigDecimal.ONE);
-                request.setPesoAsistencias(BigDecimal.ZERO);
-                request.setPesoDisparosPorPartido(BigDecimal.ZERO);
-                request.setPesoRating(BigDecimal.ZERO);
-                request.setPesoFaltasCometidasPorPartido(BigDecimal.ZERO);
-                request.setUmbralRegatesGanadosPorPartido(BigDecimal.ZERO);
-                request.setFactorEscala(BigDecimal.ZERO);
-
-                assertThat(request.isConfiguracionValida()).isTrue();
-                assertThat(request.aConfiguracion())
-                                .isInstanceOf(ConfiguracionEstrategiaPonderadaPenalizacion.class);
-
-                request.setPesoRegatesGanadosPorPartido(BigDecimal.ZERO);
-                assertThat(request.isConfiguracionValida()).isFalse();
-        }
-
-        /** Rechaza pesos negativos, sumas incorrectas y cualquier campo JSON no reconocido. */
-        @Test
-        void rechazaPesosInvalidosYCamposDesconocidosEnRequest() {
-                CotizacionStrategyConfigRequest request = new CotizacionStrategyConfigRequest();
-                request.setPesoGoles(new BigDecimal("0.5"));
-                request.setPesoAsistencias(new BigDecimal("0.5"));
-                request.setPesoDisparosPorPartido(BigDecimal.ZERO);
-                request.setPesoPasesClavePorPartido(BigDecimal.ZERO);
-                request.setPesoRegatesGanadosPorPartido(BigDecimal.ZERO);
-                request.setPesoFaltasCometidasPorPartido(BigDecimal.ZERO);
-                request.setPesoRating(BigDecimal.ZERO);
-                request.setFactorEscala(BigDecimal.ONE);
-                request.agregarCampoDesconocido("pesoExtra", BigDecimal.ONE);
-
-                assertThat(request.isConfiguracionValida()).isFalse();
-        }
-
-        /** Rechaza precisión que la columna NUMERIC(18,8) alteraría al persistir. */
-        @Test
-        void rechazaFactorEscalaQueRequiereRedondeoDeBaseDeDatos() {
-                CotizacionStrategyConfigRequest request = new CotizacionStrategyConfigRequest();
-                request.setPesoGoles(BigDecimal.ONE);
-                request.setPesoAsistencias(BigDecimal.ZERO);
-                request.setPesoDisparosPorPartido(BigDecimal.ZERO);
-                request.setPesoPasesClavePorPartido(BigDecimal.ZERO);
-                request.setPesoRegatesGanadosPorPartido(BigDecimal.ZERO);
-                request.setPesoFaltasCometidasPorPartido(BigDecimal.ZERO);
-                request.setPesoRating(BigDecimal.ZERO);
-                request.setFactorEscala(new BigDecimal("0.123456789"));
-
-                assertThat(request.isConfiguracionValida()).isFalse();
-        }
 
     /** Rechaza coeficientes negativos o cuya suma difiere de uno. */
     @Test

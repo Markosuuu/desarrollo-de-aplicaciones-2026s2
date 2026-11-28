@@ -17,8 +17,8 @@ export async function fetchPlayers({ page = 1, perPage = 20, nombre, equipo, lig
   const safeNombre = toSafeTerm(nombre);
   const safeEquipo = toSafeTerm(equipo);
   
-  if (safeNombre) params.set('nombre', encodeURIComponent(safeNombre));
-  if (safeEquipo) params.set('equipo', encodeURIComponent(safeEquipo));
+  if (safeNombre) params.set('nombre', safeNombre);
+  if (safeEquipo) params.set('equipo', safeEquipo);
   if (liga) params.set('liga', liga);
 
   const queryString = params.toString();
@@ -63,25 +63,59 @@ export async function fetchPlayer(id, token) {
   return payload;
 }
 
-export async function getRanking({ page = 1, perPage = 50, token } = {}) {
+export async function getRanking({
+  page = 1,
+  perPage = 50,
+  nombre = '',
+  token,
+} = {}) {
   const params = new URLSearchParams();
 
   params.set('page', String(page));
   params.set('perPage', String(perPage));
 
-
   const queryString = params.toString();
   const response = await fetch(`${API_BASE_URL}/players/ranking?${queryString}`, {
+    method: 'POST',
     headers: {
       Accept: 'application/json',
+      'Content-Type': 'application/json',
       Authorization: 'Bearer '+token
     },
+    body: JSON.stringify({ nombre }),
   });
 
   const payload = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     const message = payload?.error?.message || payload?.message || 'No se pudo cargar el catálogo de jugadores.';
+    throw new Error(message);
+  }
+
+  return payload;
+}
+
+
+export async function getQuoteByDate({ id, fecha, token } = {}) {
+  const response = await fetch(
+    `${API_BASE_URL}/players/${id}/quotes/${fecha}`,
+    {
+      method: 'GET',
+      headers: {
+        Accept: 'application/json',
+        Authorization: 'Bearer ' + token,
+      },
+    },
+  );
+
+  const payload = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message =
+      payload?.error?.message ||
+      payload?.message ||
+      'No se pudo consultar la cotización para esa fecha.';
+
     throw new Error(message);
   }
 

@@ -1,8 +1,8 @@
 package com.prontaentrega.controllers.dtos.jugadores;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.models.jugadores.Posicion;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;

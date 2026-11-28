@@ -1,17 +1,23 @@
 package com.prontaentrega.controllers.exceptions;
 
+import com.prontaentrega.models.exception.CampoInvalidoException;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
-import com.prontaentrega.services.exceptions.*;
+import com.prontaentrega.models.exception.AnuncioNoPendienteException;
 import com.prontaentrega.services.dto.RefreshCatalogResponse;
-import com.prontaentrega.services.exceptions.ProviderUnavailableException;
-import com.prontaentrega.services.exceptions.ValidationException;
+import com.prontaentrega.services.exceptions.HistorialNoEncontradoException;
+import com.prontaentrega.services.exceptions.jugadores.ProveedorNoDisponibleException;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
-import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
+import com.prontaentrega.services.exceptions.auth.*;
+import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
+import com.prontaentrega.services.exceptions.mercado.*;
+import com.prontaentrega.models.exception.OfertaInvalidaException;
+import com.prontaentrega.models.exception.SubastaNoActivaException;
+import com.prontaentrega.services.exceptions.subastas.SubastaNoEncontradaException;
 import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,28 +36,42 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, code, "Datos invalidos");
     }
 
-    /**
-     * Maneja errores de validacion generados por servicios.
-     */
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex) {
-        return error(HttpStatus.BAD_REQUEST, ex.getCode(), ex.getMessage());
+
+    @ExceptionHandler(CampoInvalidoException.class)
+    public ResponseEntity<ErrorResponse> handleCampoInvalido(CampoInvalidoException ex) {
+        return error(HttpStatus.BAD_REQUEST, "DATOS_INVALIDOS",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return error(HttpStatus.BAD_REQUEST, "DATOS_INVALIDOS", ex.getMessage());
+    }
+
+    @ExceptionHandler(CampoRequeridoException.class)
+    public ResponseEntity<ErrorResponse> handleCampoInvalido(CampoRequeridoException ex) {
+        return error(HttpStatus.BAD_REQUEST, "CAMPO_REQUERIDO",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(ContraseniaEquivocadaException.class)
+    public ResponseEntity<ErrorResponse> handleCampoInvalido(ContraseniaEquivocadaException ex) {
+        return error(HttpStatus.UNAUTHORIZED, "CREDENCIALES_INVALIDAS",
+                ex.getMessage());
+    }
+
+    @ExceptionHandler(CorreoNoExistenteException.class)
+    public ResponseEntity<ErrorResponse> handleCampoInvalido(CorreoNoExistenteException ex) {
+        return error(HttpStatus.UNAUTHORIZED, "CORREO_NO_EXISTENTE",
+                ex.getMessage());
     }
 
     /**
      * Maneja intentos de registrar usuarios duplicados.
      */
-    @ExceptionHandler(DuplicateUserException.class)
-    public ResponseEntity<ErrorResponse> handleDuplicate(DuplicateUserException ex) {
+    @ExceptionHandler(UsuarioRepetidoException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicate(UsuarioRepetidoException ex) {
         return error(HttpStatus.CONFLICT, "CORREO_DUPLICADO", ex.getMessage());
-    }
-
-    /**
-     * Maneja credenciales invalidas de autenticacion.
-     */
-    @ExceptionHandler(BadCredentialsException.class)
-    public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex) {
-        return error(HttpStatus.UNAUTHORIZED, "CREDENCIALES_INVALIDAS", "Credenciales invalidas");
     }
 
     /**
@@ -63,8 +83,8 @@ public class GlobalExceptionHandler {
     }
 
     /** Maneja conflictos funcionales de estado/configuración de cotizaciones. */
-    @ExceptionHandler(QuoteOperationConflictException.class)
-    public ResponseEntity<CotizacionErrorResponse> handleQuoteConflict(QuoteOperationConflictException ex) {
+    @ExceptionHandler(NoHayEstrategiaActivaConfiguradaException.class)
+    public ResponseEntity<CotizacionErrorResponse> handleQuoteConflict(NoHayEstrategiaActivaConfiguradaException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new CotizacionErrorResponse("RECOTIZACION_NO_DISPONIBLE", ex.getMessage()));
     }
@@ -77,25 +97,11 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Maneja la ausencia de catalogo local disponible.
-     */
-    @ExceptionHandler(CatalogUnavailableException.class)
-    public ResponseEntity<ErrorResponse> handleCatalogUnavailable(CatalogUnavailableException ex) {
-        return error(HttpStatus.SERVICE_UNAVAILABLE, "CATALOGO_NO_DISPONIBLE", ex.getMessage());
-    }
-
-    /**
      * Maneja fallas de WhoScored conservando el contrato del endpoint de actualizacion.
      */
-    @ExceptionHandler(ProviderUnavailableException.class)
-    public ResponseEntity<RefreshCatalogResponse> handleProviderUnavailable(ProviderUnavailableException ex) {
+    @ExceptionHandler(ProveedorNoDisponibleException.class)
+    public ResponseEntity<RefreshCatalogResponse> handleProviderUnavailable(ProveedorNoDisponibleException ex) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(RefreshCatalogResponse.failure(ex.getMessage()));
-    }
-
-    // t_odo: hay que volar este
-    @ExceptionHandler(PlayerNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handlePlayerNotFound(PlayerNotFoundException ex) {
-        return error(HttpStatus.NOT_FOUND, "JUGADOR NO ENCONTRADO", ex.getMessage());
     }
 
     @ExceptionHandler(CantidadDeTokensException.class)
@@ -153,11 +159,18 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, "OFERTA_INVALIDA", ex.getMessage());
     }
 
+    @ExceptionHandler(HistorialNoEncontradoException.class)
+    public ResponseEntity<ErrorResponse> handleHistorialNoEncontrado(HistorialNoEncontradoException ex) {
+        return error(HttpStatus.NOT_FOUND, "HISTORIAL_NO_ENCONTRADO", ex.getMessage());
+    }
+
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ErrorResponse> handleAuctionConflict(RuntimeException ex) {
         return error(HttpStatus.CONFLICT, "SUBASTA_MODIFICADA_CONCURRENTEMENTE",
                 "La subasta cambió mientras se procesaba la solicitud; vuelve a intentarlo");
     }
+
+
 
     private ResponseEntity<ErrorResponse> error(HttpStatus status, String code, String message) {
         ErrorResponse response = new ErrorResponse(

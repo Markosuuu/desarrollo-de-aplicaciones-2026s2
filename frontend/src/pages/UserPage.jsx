@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
 import { useNavigate } from "react-router-dom";
@@ -6,10 +6,41 @@ import { createSellOrder } from "../api/marketApi";
 import { fetchUserInventory, fetchUserTransactions } from "../api/userApi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/userPage.css";
+import { toast } from "react-toastify";
+import CrearSubastaModal from "../components/subasta/CrearSubastaModal";
+import PortfolioDonutCharts from "../components/PortfolioDonutCharts";
 
 const numberFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 2,
 });
+
+const PAGE_SIZE = 10;
+
+function normalizePageResponse(response) {
+  if (Array.isArray(response)) {
+    return {
+      content: response,
+      page: 1,
+      size: PAGE_SIZE,
+      totalElements: response.length,
+      totalPages: 1,
+      hasNext: false,
+      hasPrevious: false,
+    };
+  }
+
+  const content = Array.isArray(response?.content) ? response.content : [];
+
+  return {
+    content,
+    page: Number(response?.page ?? 1),
+    size: Number(response?.size ?? PAGE_SIZE),
+    totalElements: Number(response?.totalElements ?? content.length),
+    totalPages: Number(response?.totalPages ?? 1),
+    hasNext: Boolean(response?.hasNext),
+    hasPrevious: Boolean(response?.hasPrevious),
+  };
+}
 
 function formatNumber(value) {
   if (value === null || value === undefined || value === "") return "—";
@@ -32,15 +63,34 @@ function formatDate(value) {
 function UserPage() {
   const { token, user } = useAuth();
   const navigate = useNavigate();
-  const [inventory, setInventory] = useState([]);
-  const [transactions, setTransactions] = useState([]);
+  const [inventoryPageData, setInventoryPageData] = useState({
+    content: [],
+    page: 1,
+    size: PAGE_SIZE,
+    totalElements: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrevious: false,
+  });
+  const [transactionsPageData, setTransactionsPageData] = useState({
+    content: [],
+    page: 1,
+    size: PAGE_SIZE,
+    totalElements: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrevious: false,
+  });
+  const [inventoryPage, setInventoryPage] = useState(1);
+  const [transactionsPage, setTransactionsPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [retry, setRetry] = useState(0);
   const [selectedInventoryItem, setSelectedInventoryItem] = useState(null);
   const [sellQuantity, setSellQuantity] = useState("");
-  const [sellError, setSellError] = useState("");
   const [creatingOffer, setCreatingOffer] = useState(false);
+  const [openSellMenu, setOpenSellMenu] = useState(null);
+  const [auctionItem, setAuctionItem] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -57,14 +107,20 @@ function UserPage() {
 
       try {
         const [inventoryResponse, transactionsResponse] = await Promise.all([
-          fetchUserInventory(user.id, token),
-          fetchUserTransactions(user.id, token),
+          fetchUserInventory(user.id, token, {
+            page: inventoryPage,
+            size: PAGE_SIZE,
+          }),
+          fetchUserTransactions(user.id, token, {
+            page: transactionsPage,
+            size: PAGE_SIZE,
+          }),
         ]);
 
-        if (active) {
-          setInventory(inventoryResponse);
-          setTransactions(transactionsResponse);
-        }
+        if (!active) return;
+
+        setInventoryPageData(normalizePageResponse(inventoryResponse));
+        setTransactionsPageData(normalizePageResponse(transactionsResponse));
       } catch (loadError) {
         console.error("Error al cargar los datos del usuario:", loadError);
 
@@ -86,7 +142,10 @@ function UserPage() {
     return () => {
       active = false;
     };
-  }, [retry, token, user?.id]);
+  }, [retry, token, user?.id, inventoryPage, transactionsPage]);
+
+  const inventory = inventoryPageData.content;
+  const transactions = transactionsPageData.content;
 
   const currentUser = inventory.find(
     (item) => item.usuario?.id === user?.id,
@@ -97,13 +156,11 @@ function UserPage() {
   const openSellDialog = (item) => {
     setSelectedInventoryItem(item);
     setSellQuantity(String(item.tokensDisponibles));
-    setSellError("");
   };
 
   const closeSellDialog = () => {
     if (creatingOffer) return;
     setSelectedInventoryItem(null);
-    setSellError("");
   };
 
   const handleCreateOffer = async (event) => {
@@ -115,12 +172,11 @@ function UserPage() {
       quantity <= 0 ||
       quantity > availableTokens
     ) {
-      setSellError(`Ingresa una cantidad entre 1 y ${availableTokens}.`);
+      toast.error(`Ingresa una cantidad entre 1 y ${availableTokens}`);
       return;
     }
 
     setCreatingOffer(true);
-    setSellError("");
     try {
       const listing = await createSellOrder(
         {
@@ -129,12 +185,13 @@ function UserPage() {
         },
         token,
       );
+      toast.success("Anuncio creado correctamente");
       void navigate(`/mercado/${listing.id}`, {
         state: { listing },
       });
     } catch (createError) {
       console.error("Error al crear el anuncio de venta:", createError);
-      setSellError(createError.message || "No se pudo crear la oferta.");
+      toast.error(createError.message || "Error al crear el anuncio de venta");
     } finally {
       setCreatingOffer(false);
     }
@@ -163,64 +220,131 @@ function UserPage() {
         {loading ? (
           <output className="user-page-message">Cargando inventario...</output>
         ) : (
-          <div className="user-page-table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th scope="col">Avatar</th>
-                  <th scope="col">Jugador</th>
-                  <th scope="col">Liga</th>
-                  <th scope="col">Equipo</th>
-                  <th scope="col">Posición</th>
-                  <th scope="col">Cantidad disponible</th>
-                  <th scope="col">Cantidad en venta</th>
-                  <th scope="col">Valor por token</th>
-                  <th scope="col">Vender</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inventory.map((item) => {
-                  const player = item.jugador || {};
+          <div className="user-page-portfolio-container">
+            <PortfolioDonutCharts />
+            <div className="user-page-table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Avatar</th>
+                    <th scope="col">Jugador</th>
+                    <th scope="col">Liga</th>
+                    <th scope="col">Equipo</th>
+                    <th scope="col">Posición</th>
+                    <th scope="col">Cantidad disponible</th>
+                    <th scope="col">Cantidad en venta</th>
+                    <th scope="col">Valor por token</th>
+                    <th scope="col">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {inventory.map((item) => {
+                    const player = item.jugador || {};
 
-                  return (
-                    <tr key={item.id}>
-                      <td>
-                        <Blobatar
-                          name={player.nombre || "Jugador"}
-                          animate="hover"
-                          width={40}
-                        />
+                    return (
+                      <tr key={item.id}>
+                        <td>
+                          <Blobatar
+                            name={player.nombre || "Jugador"}
+                            animate="hover"
+                            width={40}
+                          />
+                        </td>
+                        <td>{player.nombre || "—"}</td>
+                        <td>{player.liga || "—"}</td>
+                        <td>{player.equipo || "—"}</td>
+                        <td>{player.posicion || "—"}</td>
+                        <td>{formatNumber(item.tokensDisponibles)}</td>
+                        <td>{formatNumber(item.tokensEnVenta)}</td>
+                        <td>{formatNumber(player.cotizacion)}</td>
+                        <td>
+                          <div className="user-page-sell-dropdown">
+                              <button
+                                  className="user-page-sell-button"
+                                  type="button"
+                                  aria-label={`Opciones de venta para ${player.nombre || "jugador"}`}
+                                  disabled={(Number(item.tokensDisponibles) || 0) <= 0}
+                                  onClick={() => setOpenSellMenu(
+                                      openSellMenu === item.id ? null : item.id
+                                  )}
+                              >
+                                  {''}
+                                  <span className="dropdown-arrow">▾</span>
+                              </button>
+
+                              {openSellMenu === item.id && (
+                                  <div className="user-page-sell-menu">
+                                      <button
+                                          type="button"
+                                          onClick={() => {
+                                              openSellDialog(item);
+                                              setOpenSellMenu(null);
+                                          }}
+                                      >
+                                          Crear oferta
+                                      </button>
+
+                                      <button
+                                          type="button"
+                                          onClick={() => {
+                                              setAuctionItem(item);
+                                              console.log(item)
+                                              setOpenSellMenu(null);
+                                          }}
+                                      >
+                                          Crear subasta
+                                      </button>
+                                  </div>
+                              )}
+                          </div>
                       </td>
-                      <td>{player.nombre || "—"}</td>
-                      <td>{player.liga || "—"}</td>
-                      <td>{player.equipo || "—"}</td>
-                      <td>{player.posicion || "—"}</td>
-                      <td>{formatNumber(item.tokensDisponibles)}</td>
-                      <td>{formatNumber(item.tokensEnVenta)}</td>
-                      <td>{formatNumber(player.cotizacion)}</td>
-                      <td>
-                        <button
-                          className="user-page-sell-button"
-                          type="button"
-                          aria-label={`Vender tokens de ${player.nombre || "jugador"}`}
-                          disabled={(Number(item.tokensDisponibles) || 0) <= 0}
-                          onClick={() => openSellDialog(item)}
-                        >
-                          Crear oferta
-                        </button>
+                      </tr>
+                    );
+                  })}
+                  {!error && inventory.length === 0 && (
+                    <tr>
+                      <td colSpan="9" className="user-page-message">
+                        Inventario vacío
                       </td>
                     </tr>
-                  );
-                })}
-                {!error && inventory.length === 0 && (
-                  <tr>
-                    <td colSpan="8" className="user-page-message">
-                      Todavía no tienes jugadores en tu inventario.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+              {inventoryPageData.totalPages > 1 && (
+                <div className="user-page-pager">
+                  <button
+                    type="button"
+                    className="pager-button"
+                    disabled={
+                      !inventoryPageData.hasPrevious || inventoryPage <= 1
+                    }
+                    onClick={() =>
+                      setInventoryPage((value) => Math.max(1, value - 1))
+                    }
+                  >
+                    Anterior
+                  </button>
+                  <span className="pager-status">
+                    {inventoryPageData.page} / {inventoryPageData.totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="pager-button"
+                    disabled={
+                      !inventoryPageData.hasNext ||
+                      inventoryPage >= inventoryPageData.totalPages
+                    }
+                    onClick={() =>
+                      setInventoryPage((value) =>
+                        Math.min(inventoryPageData.totalPages, value + 1),
+                      )
+                    }
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </article>
@@ -273,12 +397,47 @@ function UserPage() {
                 {!error && transactions.length === 0 && (
                   <tr>
                     <td colSpan="8" className="user-page-message">
-                      Todavía no tienes operaciones en tu historial.
+                      No hay operaciones registradas
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
+            {transactionsPageData.totalPages > 1 && (
+              <div className="user-page-pager">
+                <button
+                  type="button"
+                  className="pager-button"
+                  disabled={
+                    !transactionsPageData.hasPrevious || transactionsPage <= 1
+                  }
+                  onClick={() =>
+                    setTransactionsPage((value) => Math.max(1, value - 1))
+                  }
+                >
+                  Anterior
+                </button>
+                <span className="pager-status">
+                  {transactionsPageData.page} /{" "}
+                  {transactionsPageData.totalPages}
+                </span>
+                <button
+                  type="button"
+                  className="pager-button"
+                  disabled={
+                    !transactionsPageData.hasNext ||
+                    transactionsPage >= transactionsPageData.totalPages
+                  }
+                  onClick={() =>
+                    setTransactionsPage((value) =>
+                      Math.min(transactionsPageData.totalPages, value + 1),
+                    )
+                  }
+                >
+                  Siguiente
+                </button>
+              </div>
+            )}
           </div>
         )}
       </article>
@@ -293,7 +452,7 @@ function UserPage() {
           >
             <h2 id="user-page-sell-title">Crear oferta</h2>
             <p>
-              {selectedInventoryItem.jugador?.nombre || "Jugador"} ·{" "}
+              {selectedInventoryItem.jugador?.nombre || "Jugador"} —{" "}
               {formatNumber(selectedInventoryItem.jugador?.cotizacion)} créditos
               por token
             </p>
@@ -312,11 +471,6 @@ function UserPage() {
                 onChange={(event) => setSellQuantity(event.target.value)}
                 required
               />
-              {sellError && (
-                <p className="user-page-sell-error" role="alert">
-                  {sellError}
-                </p>
-              )}
               <div className="user-page-dialog-actions">
                 <button
                   type="button"
@@ -333,6 +487,19 @@ function UserPage() {
             </form>
           </dialog>
         </div>
+      )}
+      {auctionItem && (
+        <CrearSubastaModal
+            jugadorId={auctionItem.jugador.id}
+            nombreJugador={auctionItem.jugador.nombre}
+            tokensDisponibles={Number(auctionItem.tokensDisponibles) || 0}
+            cotizacion={auctionItem.jugador.cotizacion}
+            token={token}
+            onClose={() => setAuctionItem(null)}
+            onCreated={() => {
+                void fetchUserInventory();
+            }}
+        />
       )}
     </main>
   );

@@ -1,31 +1,38 @@
 package com.prontaentrega.services;
 
-import com.prontaentrega.models.AnuncioVenta;
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.Jugador;
-import com.prontaentrega.models.enums.EstadoAnuncioVenta;
-import com.prontaentrega.models.enums.EstadoOperacion;
-import com.prontaentrega.models.Operacion;
-import com.prontaentrega.models.enums.TipoOperacion;
-import com.prontaentrega.models.Usuario;
-import com.prontaentrega.models.InventarioUsuario;
+import com.prontaentrega.auditoria.Auditable;
+import com.prontaentrega.models.exception.AnuncioNoPendienteException;
+import com.prontaentrega.models.mercado.AnuncioVenta;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.Jugador;
+import com.prontaentrega.models.mercado.EstadoAnuncioVenta;
+import com.prontaentrega.models.mercado.EstadoOperacion;
+import com.prontaentrega.models.mercado.Operacion;
+import com.prontaentrega.models.mercado.TipoOperacion;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.mercado.InventarioUsuario;
 import com.prontaentrega.models.exception.CantidadDeTokensException;
 import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.OperacionRepository;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
-import com.prontaentrega.services.exceptions.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
+
+import com.prontaentrega.services.dto.JugadorResumenTokensInventario;
+import com.prontaentrega.services.dto.JugadorResumenValorInventario;
+import com.prontaentrega.services.dto.ResumenInventarioDineroResponse;
+import com.prontaentrega.services.dto.ResumenInventarioTokensResponse;
+import com.prontaentrega.services.exceptions.auth.UsuarioNoEncontradoException;
+import com.prontaentrega.services.exceptions.jugadores.JugadorNoEncontradoException;
+import com.prontaentrega.services.exceptions.mercado.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,13 +67,12 @@ public class MercadoService {
      * @param size Cantidad de anuncios por página
      * @return Lista de anuncios de venta
      */
+    @Auditable("getAnuncios")
     public Page<AnuncioVenta> getAnuncios(int page, int size) {
-        int normalizedPage = Math.max(page, 1) - 1;
-        int normalizedSize = Math.max(size, 1);
-        Pageable pageable = PageRequest.of(normalizedPage, normalizedSize);
-
+        Pageable pageable = toPageable(page, size);
         return anuncioVentaRepository.findByEstado(EstadoAnuncioVenta.PENDIENTE, pageable);
     }
+
 
     /**
      * Metodo para vender tokens en el mercado.
@@ -79,34 +85,23 @@ public class MercadoService {
      * @throws CantidadDeTokensException Si la cantidad de tokens es inválida o insuficiente para vender
      * @return El anuncio de venta creado
      */
+    @Auditable("vender")
     public AnuncioVenta vender(UUID usuarioId, UUID jugadorId, Integer cantidad) {
-        Usuario vendedor = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id" + usuarioId.toString()));
-
-        BolsaDeJugador bolsa = Optional.ofNullable(jugadorRepository.findById(jugadorId))
-                .orElseThrow(() -> new JugadorNoEncontradoException(JUGADOR_NO_ENCONTRADO + jugadorId.toString()));
-
         if (cantidad == null || cantidad <= 0) {
             throw new CantidadDeTokensException("La cantidad debe ser mayor a cero");
         }
 
-        InventarioUsuario saldo = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(usuarioId, jugadorId)
-                .orElse(new InventarioUsuario(vendedor, bolsa, 0, 0));
+        Usuario vendedor = buscarUsuario(usuarioId);
 
-        int disponibles = saldo.getTokensDisponibles() == null ? 0 : saldo.getTokensDisponibles();
+        BolsaDeJugador bolsa = buscarJugador(jugadorId);
 
-        if (cantidad > disponibles) {
-            throw new CantidadDeTokensException("No posees suficientes tokens para vender");
-        }
+        InventarioUsuario inventario = buscarInventario(usuarioId, jugadorId, vendedor, bolsa);
+
+        inventario.ponerTokensEnVenta(cantidad);
+        inventarioUsuarioRepository.save(inventario);
 
         AnuncioVenta anuncio = new AnuncioVenta(vendedor, bolsa, cantidad);
         anuncioVentaRepository.save(anuncio);
-
-        // Estos setters son medio raretes, quizás se podría pasar a service?
-        saldo.setTokensDisponibles(disponibles - cantidad);
-        saldo.setTokensEnVenta((saldo.getTokensEnVenta() == null ? 0 : saldo.getTokensEnVenta()) + cantidad);
-        saldo.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
-        inventarioUsuarioRepository.save(saldo);
 
         return anuncio;
     }
@@ -123,87 +118,46 @@ public class MercadoService {
      * @throws CantidadDeTokensException Si la cantidad de tokens en el anuncio es mayor a la cantidad de tokens en venta del vendedor
      */
     @Transactional
-    public void comprar(UUID compradorId, UUID anuncioId) {
-        comprar(compradorId, anuncioId, null);
-    }
-
-    @Transactional
+    @Auditable("comprar")
     public void comprar(UUID compradorId, UUID anuncioId, Integer cantidadSolicitada) {
-        AnuncioVenta anuncio = anuncioVentaRepository.findByIdForUpdate(anuncioId)
-                .orElseThrow(() -> new AnuncioNoEncontradoException("El anuncio no existe"));
+        AnuncioVenta anuncio = buscarAnuncio(anuncioId);
 
-        if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
-            throw new AnuncioNoPendienteException("La venta ya no está disponible");
-        }
+        validarCompra(compradorId, cantidadSolicitada, anuncio);
 
-        int cantidadCompra = cantidadSolicitada == null
-                ? anuncio.getCantidadTokens()
-                : cantidadSolicitada;
-        if (cantidadCompra <= 0 || cantidadCompra > anuncio.getCantidadTokens()) {
-            throw new CantidadDeTokensException(
-                    "La cantidad debe ser mayor a cero y no superar los tokens disponibles en la oferta");
-        }
+        Usuario comprador = buscarUsuario(compradorId);
 
-        if (anuncio.getVendedor().getId().equals(compradorId)) {
-            throw new VendedorComprandoTokensPropiosException("No puedes comprar tus propios tokens");
-        }
-
-        Usuario comprador = usuarioRepository.findById(compradorId)
-                .orElseThrow(() -> new UsuarioNoEncontradoException("Comprador no encontrado con el id: " + compradorId.toString()));
-
-        Usuario vendedor = usuarioRepository.findById(anuncio.getVendedor().getId())
-                .orElseThrow(() -> new UsuarioNoEncontradoException("Vendedor no encontrado con el id: " + anuncio.getVendedor().getId().toString()));
+        Usuario vendedor = buscarUsuario(anuncio.getVendedor().getId());
 
         UUID jugadorId = anuncio.getBolsaDeJugador()
                 .getEstadisticasDeportivas()
                 .getJugador()
                 .getId();
 
-        BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(jugadorId))
-                .orElseThrow(() -> new JugadorNoEncontradoException(
-                        JUGADOR_NO_ENCONTRADO + jugadorId));
+        BolsaDeJugador bolsaJugador = buscarJugador(jugadorId);
 
         BigDecimal precioCompra = anuncio.getPrecioPorToken()
-                .multiply(BigDecimal.valueOf(cantidadCompra));
-        if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(precioCompra) < 0) {
-            throw new CreditosInsuficientesException("No tienes suficientes créditos");
-        }
+                .multiply(BigDecimal.valueOf(cantidadSolicitada));
 
-        InventarioUsuario inventarioVendedor = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(
-                vendedor.getId(), jugadorId)
-                .orElse(new InventarioUsuario(vendedor, bolsaJugador, 0, 0));
+        validarCreditos(comprador, precioCompra);
 
-        int tokensEnVentaDeJugador = inventarioVendedor.getTokensEnVenta() == null ? 0 : inventarioVendedor.getTokensEnVenta();
+        // Actualización del inventario del vendedor
+        InventarioUsuario inventarioVendedor = buscarInventario(vendedor.getId(), jugadorId, vendedor, bolsaJugador);
+        inventarioVendedor.actualizarPorVenta(cantidadSolicitada, anuncio.getCantidadTokens());
+        inventarioUsuarioRepository.save(inventarioVendedor);
 
-        if (anuncio.getCantidadTokens() > tokensEnVentaDeJugador) {
-            throw new CantidadDeTokensException("La publicación ya no tiene tokens disponibles");
-        }
+        // Actualización del inventario del comprador
+        InventarioUsuario inventarioComprador = buscarInventario(compradorId, jugadorId, comprador, bolsaJugador);
+        inventarioComprador.actualizarPorCompra(cantidadSolicitada);
+        inventarioUsuarioRepository.save(inventarioComprador);
 
-        // Actualización de los usuarios
+        // Actualización de créditos de usuarios
         comprador.restarCreditos(precioCompra);
         vendedor.sumarCreditos(precioCompra);
         usuarioRepository.save(comprador);
         usuarioRepository.save(vendedor);
 
-        // Actualización de los tokens
-        InventarioUsuario tokenComprador = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(compradorId, jugadorId)
-                .orElse(new InventarioUsuario(comprador, bolsaJugador, 0, 0));
-        tokenComprador.agregarTokens(cantidadCompra);
-        tokenComprador.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
-        inventarioUsuarioRepository.save(tokenComprador);
 
-        inventarioVendedor.quitarTokens(cantidadCompra);
-        inventarioVendedor.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
-        inventarioUsuarioRepository.save(inventarioVendedor);
-
-        int cantidadRestante = anuncio.getCantidadTokens() - cantidadCompra;
-        anuncio.setCantidadTokens(cantidadRestante);
-        anuncio.setPrecioTotal(
-                anuncio.getPrecioPorToken().multiply(BigDecimal.valueOf(cantidadRestante)));
-        if (cantidadRestante == 0) {
-            anuncio.setEstado(EstadoAnuncioVenta.COMPLETADA);
-        }
-        anuncio.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+        anuncio.actualizarTokensEnVenta(cantidadSolicitada);
         anuncioVentaRepository.save(anuncio);
 
         Jugador jugador = bolsaJugador.getEstadisticasDeportivas().getJugador();
@@ -213,11 +167,11 @@ public class MercadoService {
         // En cualquier caso se puede suprimir a una Operacion como "transaccion" y quitar el TipoOperaicon
 
         Operacion compra = new Operacion(comprador, vendedor, jugador,
-                cantidadCompra, anuncio.getPrecioPorToken(), precioCompra,
+                cantidadSolicitada, anuncio.getPrecioPorToken(), precioCompra,
                 TipoOperacion.COMPRA, EstadoOperacion.COMPLETADA);
 
         Operacion venta = new Operacion(vendedor, comprador, jugador,
-                cantidadCompra, anuncio.getPrecioPorToken(), precioCompra,
+                cantidadSolicitada, anuncio.getPrecioPorToken(), precioCompra,
                 TipoOperacion.VENTA, EstadoOperacion.COMPLETADA);
 
         operacionRepository.save(compra);
@@ -232,41 +186,23 @@ public class MercadoService {
      * @throws SinAutorizacionExpcetion Si el usuario no es el vendedor
      * @throws AnuncioNoPendienteException Si el anuncio no está pendiente
      */
+    @Transactional
+    @Auditable("cancelarVenta")
     public void cancelarVenta(UUID vendedorId, UUID anuncioId) {
-        AnuncioVenta anuncio = anuncioVentaRepository.findById(anuncioId)
-                .orElseThrow(() -> new AnuncioNoEncontradoException("El anuncio no existe"));
+        AnuncioVenta anuncio = buscarAnuncio(anuncioId);
 
-        if (!anuncio.getVendedor().getId().equals(vendedorId)) {
-            throw new SinAutorizacionExpcetion("No puedes cancelar una venta ajena");
-        }
+        verificarCancelacion(vendedorId, anuncio);
 
-        if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
-            throw new AnuncioNoPendienteException("No se puede cancelar una venta completada");
-        }
+        Usuario vendedor = buscarUsuario(vendedorId);
 
-        Usuario vendedor = usuarioRepository.findById(vendedorId)
-                .orElseThrow(() -> new UsuarioNoEncontradoException(
-                        "Usuario no encontrado con el id" + vendedorId));
+        BolsaDeJugador bolsaJugador = anuncio.getBolsaDeJugador();
+        UUID jugadorId = bolsaJugador.getEstadisticasDeportivas().getJugador().getId();
 
-        UUID jugadorId = anuncio.getBolsaDeJugador()
-                .getEstadisticasDeportivas()
-                .getJugador()
-                .getId();
+        InventarioUsuario inventario = buscarInventario(vendedorId, jugadorId, vendedor, bolsaJugador);
+        inventario.cancelarVenta(anuncio.getCantidadTokens());
+        inventarioUsuarioRepository.save(inventario);
 
-        BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(jugadorId))
-                .orElseThrow(() -> new JugadorNoEncontradoException(
-                        JUGADOR_NO_ENCONTRADO + jugadorId));
-
-        InventarioUsuario saldo = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(vendedorId, jugadorId)
-                .orElse(new InventarioUsuario(vendedor, bolsaJugador, 0, 0));
-
-        saldo.setTokensDisponibles(saldo.getTokensDisponibles() + anuncio.getCantidadTokens());
-        saldo.setTokensEnVenta(saldo.getTokensEnVenta() - anuncio.getCantidadTokens());
-        saldo.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
-        inventarioUsuarioRepository.save(saldo);
-
-        anuncio.setEstado(EstadoAnuncioVenta.CANCELADA);
-        anuncio.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
+        anuncio.cancelarAnuncio();
         anuncioVentaRepository.save(anuncio);
     }
 
@@ -275,8 +211,10 @@ public class MercadoService {
      * @param usuarioId El ID del usuario
      * @return Una lista de las transacciones del usuario
      */
-    public List<Operacion> getTransaccionesById(UUID usuarioId) {
-        return operacionRepository.findByUsuarioId(usuarioId);
+    @Auditable("getTransaccionesById")
+    public Page<Operacion> getTransaccionesById(UUID usuarioId, int page, int size) {
+        Pageable pageable = toPageable(page, size);
+        return operacionRepository.findByUsuarioId(usuarioId, pageable);
     }
 
     /**
@@ -292,38 +230,28 @@ public class MercadoService {
      * @throws CreditosInsuficientesException Si el comprador no tiene suficientes créditos
      * @throws CantidadDeTokensException Si la cantidad de tokens en el anuncio es mayor a la cantidad de tokens en venta del vendedor o si la cantidad pedida es menor a 1
      */
+    @Auditable("comprarSuper")
     public void comprarSuper(UUID compradorId, UUID jugadorId, Integer cantidad) {
         if (cantidad == null || cantidad <= 0) {
             throw new CantidadDeTokensException("La cantidad debe ser mayor a cero");
         }
 
-        Usuario comprador = usuarioRepository.findById(compradorId)
-                .orElseThrow(() -> new UsuarioNoEncontradoException("Comprador no encontrado con el id: " + compradorId.toString()));
+        Usuario comprador = buscarUsuario(compradorId);
 
-        BolsaDeJugador bolsaJugador = Optional.ofNullable(jugadorRepository.findById(jugadorId))
-                .orElseThrow(() -> new JugadorNoEncontradoException(
-                        JUGADOR_NO_ENCONTRADO + jugadorId));
-
-        if (bolsaJugador.getTokensRestantes() < cantidad) {
-            throw new CantidadDeTokensException("El jugador ya no tiene suficientes tokens disponibles");
-        }
+        BolsaDeJugador bolsaJugador = buscarJugador(jugadorId);
 
         BigDecimal precioFinal = bolsaJugador.getCotizacionActual().multiply(BigDecimal.valueOf(cantidad));
 
-        if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(precioFinal) < 0) {
-            throw new CreditosInsuficientesException("No tienes suficientes créditos");
-        }
+        validarCreditos(comprador, precioFinal);
 
         comprador.restarCreditos(precioFinal);
         usuarioRepository.save(comprador);
 
-        InventarioUsuario tokenComprador = inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(compradorId, jugadorId)
-                .orElse(new InventarioUsuario(comprador, bolsaJugador, 0, 0));
+        InventarioUsuario tokenComprador = buscarInventario(compradorId, jugadorId, comprador, bolsaJugador);
         tokenComprador.agregarTokens(cantidad);
-        tokenComprador.setActualizadoEn(LocalDateTime.now(ZoneId.systemDefault()));
         inventarioUsuarioRepository.save(tokenComprador);
 
-        bolsaJugador.setTokensRestantes(bolsaJugador.getTokensRestantes() - cantidad);
+        bolsaJugador.restarTokens(cantidad);
         jugadorRepository.save(bolsaJugador);
 
         Jugador jugador = bolsaJugador.getEstadisticasDeportivas().getJugador();
@@ -343,11 +271,114 @@ public class MercadoService {
      * @return Una lista con el inventario del usuario dado.
      * @throws UsuarioNoEncontradoException Si el usuario dado no existe.
      */
-    public List<InventarioUsuario> getInventarioById(UUID usuarioId) {
+    @Auditable("getInventarioById")
+    public Page<InventarioUsuario> getInventarioById(UUID usuarioId, int page, int size) {
         if (!usuarioRepository.existsById(usuarioId)) {
-            throw new UsuarioNoEncontradoException("Uusario no encontrado con el id: " + usuarioId.toString());
+            throw new UsuarioNoEncontradoException("Usuario no encontrado con el id: " + usuarioId.toString());
         }
 
-        return inventarioUsuarioRepository.findAllByUsuarioId(usuarioId);
+        return inventarioUsuarioRepository.findAllByUsuarioId(usuarioId, toPageable(page, size));
+    }
+
+    private Pageable toPageable(int page, int size) {
+        int normalizedPage = Math.max(page, 1) - 1;
+        int normalizedSize = Math.max(size, 1);
+        return PageRequest.of(normalizedPage, normalizedSize);
+    }
+
+    @NonNull
+    private InventarioUsuario buscarInventario(UUID usuarioId, UUID jugadorId, Usuario vendedor, BolsaDeJugador bolsa) {
+        return inventarioUsuarioRepository.findByUsuarioIdAndJugadorId(usuarioId, jugadorId)
+                .orElse(new InventarioUsuario(vendedor, bolsa, 0, 0));
+    }
+
+    @NonNull
+    private BolsaDeJugador buscarJugador(UUID jugadorId) {
+        return jugadorRepository.findById(jugadorId)
+                .orElseThrow(() -> new JugadorNoEncontradoException(JUGADOR_NO_ENCONTRADO + jugadorId.toString()));
+    }
+
+    @NonNull
+    private Usuario buscarUsuario(UUID usuarioId) {
+        return usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new UsuarioNoEncontradoException("Usuario no encontrado con el id" + usuarioId.toString()));
+    }
+
+    @NonNull
+    private AnuncioVenta buscarAnuncio(UUID anuncioId) {
+        return anuncioVentaRepository.findByIdForUpdate(anuncioId)
+                .orElseThrow(() -> new AnuncioNoEncontradoException("El anuncio no existe"));
+    }
+
+    private static void validarCompra(UUID compradorId, Integer cantidadSolicitada, AnuncioVenta anuncio) {
+        if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
+            throw new AnuncioNoPendienteException("La venta ya no está disponible");
+        }
+
+        if (cantidadSolicitada == null || cantidadSolicitada <= 0 || cantidadSolicitada > anuncio.getCantidadTokens()) {
+            throw new CantidadDeTokensException(
+                    "La cantidad debe ser mayor a cero y no superar los tokens disponibles en la oferta");
+        }
+
+        if (anuncio.getVendedor().getId().equals(compradorId)) {
+            throw new VendedorComprandoTokensPropiosException("No puedes comprar tus propios tokens");
+        }
+    }
+
+    private static void validarCreditos(Usuario comprador, BigDecimal precioCompra) {
+        if (comprador.getCreditosDisponibles() == null || comprador.getCreditosDisponibles().compareTo(precioCompra) < 0) {
+            throw new CreditosInsuficientesException("No tienes suficientes créditos");
+        }
+    }
+
+    private static void verificarCancelacion(UUID vendedorId, AnuncioVenta anuncio) {
+        if (!anuncio.getVendedor().getId().equals(vendedorId)) {
+            throw new SinAutorizacionExpcetion("No puedes cancelar una venta ajena");
+        }
+
+        if (anuncio.getEstado() != EstadoAnuncioVenta.PENDIENTE) {
+            throw new AnuncioNoPendienteException("No se puede cancelar una venta completada");
+        }
+    }
+
+
+    @Transactional(readOnly = true)
+    public ResumenInventarioTokensResponse obtenerResumenTokens(UUID usuarioId) {
+
+        Long totalTokens = inventarioUsuarioRepository.obtenerTotalTokens(usuarioId);
+
+        List<JugadorResumenTokensInventario> jugadores =
+                inventarioUsuarioRepository.obtenerResumenTokensPorJugador(usuarioId)
+                        .stream()
+                        .map(jugador -> new JugadorResumenTokensInventario(
+                                jugador.getJugadorId(),
+                                jugador.getJugadorNombre(),
+                                jugador.getCantidadTokens()
+                        ))
+                        .toList();
+
+        return new ResumenInventarioTokensResponse(totalTokens, jugadores);
+    }
+
+    @Transactional(readOnly = true)
+    public ResumenInventarioDineroResponse obtenerResumenDinero(UUID usuarioId) {
+
+        BigDecimal totalDinero = inventarioUsuarioRepository.obtenerValorTotal(usuarioId);
+
+        List<JugadorResumenValorInventario> jugadores =
+                inventarioUsuarioRepository.obtenerValorPorJugador(usuarioId)
+                        .stream()
+                        .map(jugador -> new JugadorResumenValorInventario(
+                                jugador.getJugadorId(),
+                                jugador.getJugadorNombre(),
+                                jugador.getCantidad(),
+                                jugador.getValor()
+                        ))
+                        .toList();
+
+        return new ResumenInventarioDineroResponse(
+                totalDinero != null ? totalDinero : BigDecimal.ZERO,
+                jugadores
+        );
     }
 }

@@ -1,0 +1,101 @@
+package com.prontaentrega.persistence.dto.subastas;
+
+import com.prontaentrega.models.subastas.Subasta;
+import com.prontaentrega.persistence.dto.auth.UsuarioDTOSQL;
+import com.prontaentrega.persistence.dto.jugadores.BolsaDeJugadorDTOSQL;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Version;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.UUID;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity(name = "Subasta")
+@Table(name = "subastas")
+@Getter
+@Setter
+@NoArgsConstructor
+public class SubastaDTOSQL {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "propietario_id", nullable = false)
+    private UsuarioDTOSQL propietario;
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "bolsa_de_jugador_id", nullable = false)
+    private BolsaDeJugadorDTOSQL bolsaDeJugador;
+
+    @Column(name = "cantidad_ofrecida", nullable = false)
+    private Integer cantidadOfrecida;
+
+    @Column(name = "precio_inicial", nullable = false)
+    private BigDecimal precioInicial;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "oferta_actual_id")
+    private OfertaDTOSQL ofertaActual;
+
+    @Column(nullable = false)
+    private Boolean activa;
+
+    @Column(nullable = false)
+    private LocalDateTime vencimiento;
+
+    @Column(name = "creado_en", nullable = false)
+    private LocalDateTime creadoEn;
+
+    @Column(name = "actualizado_en", nullable = false)
+    private LocalDateTime actualizadoEn;
+
+    @Version
+    private Long version;
+
+    public static SubastaDTOSQL desdeModelo(
+            Subasta subasta,
+            UsuarioDTOSQL propietario,
+            BolsaDeJugadorDTOSQL bolsaDeJugador,
+            OfertaDTOSQL ofertaActual) {
+        SubastaDTOSQL dto = new SubastaDTOSQL();
+        dto.id = subasta.getId();
+        dto.propietario = propietario;
+        dto.bolsaDeJugador = bolsaDeJugador;
+        dto.cantidadOfrecida = subasta.getCantidadOfrecida();
+        dto.precioInicial = subasta.getPrecioInicial();
+        dto.ofertaActual = ofertaActual;
+        dto.activa = subasta.getActiva();
+        dto.vencimiento = subasta.getVencimiento();
+        dto.creadoEn = subasta.getCreadoEn();
+        dto.actualizadoEn = subasta.getActualizadoEn();
+        return dto;
+    }
+
+    public Subasta aModelo() {
+        Subasta subasta = new Subasta(
+                UsuarioDTOSQL.aUsuario(propietario),
+                bolsaDeJugador.aModelo(),
+                cantidadOfrecida,
+                precioInicial,
+                vencimiento,
+                creadoEn);
+        subasta.setId(id);
+        if (ofertaActual != null) {
+            subasta.setOfertaActual(ofertaActual.aModelo(subasta));
+        }
+        subasta.setActiva(activa);
+        subasta.setActualizadoEn(actualizadoEn);
+        return subasta;
+    }
+}

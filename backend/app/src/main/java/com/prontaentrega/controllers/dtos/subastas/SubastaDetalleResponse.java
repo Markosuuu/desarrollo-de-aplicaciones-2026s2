@@ -2,7 +2,7 @@ package com.prontaentrega.controllers.dtos.subastas;
 
 import com.prontaentrega.controllers.dtos.auth.UsuarioResponse;
 import com.prontaentrega.controllers.dtos.jugadores.PlayerResponse;
-import com.prontaentrega.models.Subasta;
+import com.prontaentrega.models.subastas.Subasta;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;

@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   cerrarSubasta: vi.fn(),
   ofertarSubasta: vi.fn(),
   useAuth: vi.fn(),
+  toastError: vi.fn(),
+  toastSuccess: vi.fn(),
 }));
 
 vi.mock("../api/subastaApi", () => ({
@@ -18,6 +20,10 @@ vi.mock("../api/subastaApi", () => ({
 
 vi.mock("../context/AuthContext", () => ({
   useAuth: mocks.useAuth,
+}));
+
+vi.mock("react-toastify", () => ({
+  toast: { error: mocks.toastError, success: mocks.toastSuccess },
 }));
 
 const subasta = {
@@ -72,17 +78,17 @@ const subasta = {
 };
 
 function renderAuction() {
-    return render(
-        <MemoryRouter initialEntries={["/subasta/auction-1"]}>
-            <Routes>
-                <Route path="/subasta/:id" element={<SubastaPage />} />
-                <Route
-                    path="/profile"
-                    element={<div data-testid="profile-route">Perfil</div>}
-                />
-            </Routes>
-        </MemoryRouter>
-    );
+  return render(
+    <MemoryRouter initialEntries={["/subasta/auction-1"]}>
+      <Routes>
+        <Route path="/subasta/:id" element={<SubastaPage />} />
+        <Route
+          path="/profile"
+          element={<div data-testid="profile-route">Perfil</div>}
+        />
+      </Routes>
+    </MemoryRouter>,
+  );
 }
 
 beforeEach(() => {
@@ -159,13 +165,9 @@ describe("SubastaPage", () => {
       await screen.findByRole("button", { name: "Cerrar subasta" }),
     );
 
-    expect(
-      screen.getByText("¿Deseas cerrar la subasta?"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("¿Deseas cerrar la subasta?")).toBeInTheDocument();
 
-    expect(
-      screen.getByRole("button", { name: "Aceptar" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Aceptar" })).toBeInTheDocument();
 
     expect(
       screen.getByRole("button", { name: "Cancelar" }),
@@ -235,9 +237,11 @@ describe("SubastaPage", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
 
-    expect(
-      await screen.findByText("No se pudo cerrar la subasta"),
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(mocks.toastError).toHaveBeenCalledWith(
+        "No se pudo cerrar la subasta",
+      ),
+    );
   });
 
   test("no permite al propietario realizar ofertas", async () => {
@@ -284,9 +288,7 @@ describe("SubastaPage", () => {
       target: { value: "2.51" },
     });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Confirmar oferta" }),
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar oferta" }));
 
     await waitFor(() => {
       expect(mocks.ofertarSubasta).toHaveBeenCalledWith({
@@ -300,12 +302,14 @@ describe("SubastaPage", () => {
       expect(mocks.fetchSubasta).toHaveBeenCalledTimes(2);
     });
 
-    expect(
-      await screen.findByText("¡Tu oferta se realizó correctamente!"),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mocks.toastSuccess).toHaveBeenCalledWith(
+        "Tu oferta se realizó correctamente!",
+      );
+    });
   });
 
-  test("muestra un error si falla la realización de una oferta", async () => {
+  test("muestra un toast de error si falla la realización de una oferta", async () => {
     mocks.ofertarSubasta.mockRejectedValue(
       new Error("No tenés créditos suficientes"),
     );
@@ -315,18 +319,16 @@ describe("SubastaPage", () => {
     fireEvent.click(
       await screen.findByRole("button", { name: "Realizar una oferta" }),
     );
-
     fireEvent.change(screen.getByLabelText("Tu oferta"), {
       target: { value: "3" },
     });
+    fireEvent.click(screen.getByRole("button", { name: "Confirmar oferta" }));
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Confirmar oferta" }),
+    await waitFor(() =>
+      expect(mocks.toastError).toHaveBeenCalledWith(
+        "No tenés créditos suficientes",
+      ),
     );
-
-    expect(
-      await screen.findByText("No tenés créditos suficientes"),
-    ).toBeInTheDocument();
   });
 
   test("oculta las acciones cuando la subasta está finalizada", async () => {

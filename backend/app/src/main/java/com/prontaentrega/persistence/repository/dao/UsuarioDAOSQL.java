@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.UsuarioDTOSQL;
+import com.prontaentrega.persistence.dto.auth.UsuarioDTOSQL;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

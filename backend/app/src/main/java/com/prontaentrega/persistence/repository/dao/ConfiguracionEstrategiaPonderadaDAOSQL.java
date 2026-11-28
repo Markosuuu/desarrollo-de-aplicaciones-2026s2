@@ -1,6 +1,6 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.ConfiguracionEstrategiaPonderadaDTOSQL;
+import com.prontaentrega.persistence.dto.cotizacion.ConfiguracionEstrategiaPonderadaDTOSQL;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /** Acceso relacional a la configuración ponderada. */

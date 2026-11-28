@@ -75,7 +75,10 @@ describe("HistorialOfertas", () => {
 
   test("acepta la propiedad ofertas y reemplaza una lista no válida por una vacía", () => {
     const { rerender } = render(
-      <HistorialOfertas ofertasPrevias={[{ id: "ignored" }]} ofertas="inválidas" />,
+      <HistorialOfertas
+        ofertasPrevias={[{ id: "ignored" }]}
+        ofertas="inválidas"
+      />,
     );
 
     expect(
@@ -173,14 +176,15 @@ describe("RealizarOferta", () => {
   test("abre el formulario y permite cancelar la oferta", () => {
     const { rerender } = render(<RealizarOferta {...props} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Realizar una oferta" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Realizar una oferta" }),
+    );
     expect(props.setShowOfferForm).toHaveBeenCalledWith(true);
 
     rerender(<RealizarOferta {...props} showOfferForm />);
     fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
 
     expect(props.setShowOfferForm).toHaveBeenCalledWith(false);
-    expect(props.setActionError).toHaveBeenCalledWith(null);
     rerender(<RealizarOferta {...props} showOfferForm={false} />);
   });
 
@@ -197,7 +201,9 @@ describe("RealizarOferta", () => {
     );
 
     expect(screen.getByText("Sin ofertas")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Enviando oferta..." })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Enviando oferta..." }),
+    ).toBeDisabled();
     expect(screen.getByRole("button", { name: "Cancelar" })).toBeDisabled();
     expect(screen.getByLabelText("Tu oferta")).toBeDisabled();
 

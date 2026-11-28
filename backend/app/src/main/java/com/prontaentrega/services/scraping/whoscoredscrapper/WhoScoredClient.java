@@ -3,7 +3,7 @@ package com.prontaentrega.services.scraping.whoscoredscrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prontaentrega.services.dto.external.PlayerScrapperResponse;
-import com.prontaentrega.services.exceptions.ProviderUnavailableException;
+import com.prontaentrega.services.exceptions.jugadores.ProveedorNoDisponibleException;
 import java.net.http.HttpClient;
 import java.time.Duration;
 
@@ -44,7 +44,7 @@ public class WhoScoredClient implements PlayerScrapper {
      */
     public PlayerScrapperResponse fetchPlayerStatsPage(int page, int pageSize) {
         if (properties.url() == null || properties.url().isBlank()) {
-            throw new ProviderUnavailableException(
+            throw new ProveedorNoDisponibleException(
                     "WHOSCORED_URL_INVALIDA",
                     "No se pudo completar la actualizacion. La URL de WhoScored no esta configurada."
             );
@@ -76,7 +76,7 @@ public class WhoScoredClient implements PlayerScrapper {
                     .body(String.class);
 
             if (body == null || body.isBlank()) {
-                throw new ProviderUnavailableException(
+                throw new ProveedorNoDisponibleException(
                         "WHOSCORED_RESPUESTA_INVALIDA",
                         "No se pudo completar la actualizacion. WhoScored no entrego datos utilizables."
                 );
@@ -86,7 +86,7 @@ public class WhoScoredClient implements PlayerScrapper {
                     objectMapper.readValue(body, PlayerScrapperResponse.class);
 
             if (response == null) {
-                throw new ProviderUnavailableException(
+                throw new ProveedorNoDisponibleException(
                         "WHOSCORED_RESPUESTA_INVALIDA",
                         "No se pudo completar la actualizacion. WhoScored no entrego datos utilizables."
                 );
@@ -94,15 +94,15 @@ public class WhoScoredClient implements PlayerScrapper {
 
             return response;
 
-        } catch (ProviderUnavailableException ex) {
+        } catch (ProveedorNoDisponibleException ex) {
             throw ex;
         } catch (JsonProcessingException ex) {
-            throw new ProviderUnavailableException(
+            throw new ProveedorNoDisponibleException(
                     "WHOSCORED_RESPUESTA_INVALIDA",
                     "No se pudo completar la actualizacion. WhoScored devolvio una respuesta no utilizable."
             );
         } catch (RestClientException ex) {
-            throw new ProviderUnavailableException(
+            throw new ProveedorNoDisponibleException(
                     "WHOSCORED_NO_DISPONIBLE",
                     "No se pudo completar la actualizacion. Se conserva la informacion local vigente."
             );

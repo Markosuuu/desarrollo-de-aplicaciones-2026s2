@@ -1,9 +1,9 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.ConfiguracionEstrategiaCotizacion;
-import com.prontaentrega.models.DatosValoracion;
-import com.prontaentrega.models.EstadoEstrategiaCotizacion;
-import com.prontaentrega.persistence.dto.EstadoEstrategiaCotizacionDTOSQL;
+import com.prontaentrega.models.cotizacion.ConfiguracionEstrategiaCotizacion;
+import com.prontaentrega.models.cotizacion.DatosValoracion;
+import com.prontaentrega.models.cotizacion.EstadoEstrategiaCotizacion;
+import com.prontaentrega.persistence.dto.cotizacion.EstadoEstrategiaCotizacionDTOSQL;
 import com.prontaentrega.persistence.repository.ConfiguracionEstrategiaProvider;
 import com.prontaentrega.persistence.repository.CotizacionRepository;
 import com.prontaentrega.persistence.repository.dao.QuoteRecalculationDAOSQL;

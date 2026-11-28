@@ -5,15 +5,19 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.prontaentrega.models.*;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.models.cotizacion.HistorialCotizacion;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.models.jugadores.Posicion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
+import com.prontaentrega.models.jugadores.Jugador;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.UsuarioRepository;
 import com.prontaentrega.persistence.repository.dao.ApiKeyDAO;
 import com.prontaentrega.services.ApiKeyService;
 import com.prontaentrega.services.AuthService;
+import com.prontaentrega.services.CotizacionService;
 import com.prontaentrega.services.dto.AuthResult;
 import com.prontaentrega.utils.AbstractIntegrationTest;
 import com.sun.net.httpserver.HttpServer;
@@ -21,6 +25,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -45,7 +50,7 @@ import org.springframework.test.web.servlet.MockMvc;
  */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("integracion")
+@Tag("e2e")
 class PlayerControllerTest extends AbstractIntegrationTest {
     private static final AtomicInteger providerStatus = new AtomicInteger(200);
     private static final AtomicReference<String> providerBody = new AtomicReference<>(payload());
@@ -71,6 +76,9 @@ class PlayerControllerTest extends AbstractIntegrationTest {
 
     @Autowired
     private ApiKeyDAO apiKeyDao;
+
+    @Autowired
+    private CotizacionService administrationService;
 
     /**
      * Registra la URL del proveedor HTTP local para el contexto de Spring.
@@ -459,6 +467,96 @@ class PlayerControllerTest extends AbstractIntegrationTest {
                 // Contenido de jugadores
                 .andExpect(jsonPath("$.jugadores").isNotEmpty())
                 .andExpect(jsonPath("$.jugadores[0].nombre").value("Riquelme"));
+    }
+
+    @Test
+    void getRankingShouldReturnPaginatedRankingWhenNameIsEmpty() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(post("/api/players/ranking")
+                        .param("page", "1")
+                        .param("perPage", "20")
+                        .header("Authorization", "Bearer " + result.token())
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                            {
+                                "nombre": ""
+                            }
+                            """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.paginacion").exists())
+                .andExpect(jsonPath("$.paginacion.pagina").value(1))
+                .andExpect(jsonPath("$.paginacion.porPagina").value(20))
+                .andExpect(jsonPath("$.paginacion.total").isNumber())
+                .andExpect(jsonPath("$.paginacion.totalPaginas").isNumber());
+    }
+
+    @Test
+    void getRankingShouldReturnFilteredRankingWhenNameIsProvided() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(post("/api/players/ranking")
+                        .param("page", "1")
+                        .param("perPage", "10")
+                        .header("Authorization", "Bearer " + result.token())
+                        .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nombre": ""
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.paginacion.pagina").value(1))
+                .andExpect(jsonPath("$.paginacion.porPagina").value(10));
+    }
+
+    @Test
+    void getQuotesByDateShouldReturnForbiddenWithoutToken() throws Exception {
+        mockMvc.perform(get("/api/players/4488d400-d2f3-49b2-a932-4cad45bdf591/quotes/2026-11-02"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void getQuotesByDateShouldReturnNotFoundWhenPlayerIsNotFound() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+
+        mockMvc.perform(get("/api/players/4488d400-d2f3-49b2-a932-4cad45bdf591/quotes/2026-11-02")
+                .header("Authorization", "Bearer " + result.token())
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getQuotesByDateShouldReturnNotFoundWhenPlayerDoesntHaveQuotes() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+        BolsaDeJugador bolsa = crearJugadorDePrueba();
+
+        mockMvc.perform(get("/api/players/"+ bolsa.getEstadisticasDeportivas().getJugador().getId() +"/quotes/2026-11-02")
+                .header("Authorization", "Bearer " + result.token())
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getQuotesByDateShouldReturn200WhenQuotesAreFoundAndUserIsAuthorized() throws Exception {
+        AuthResult result = authService.register("Iancho", "ian@gmail.com", "abcd1234");
+        BolsaDeJugador bolsa = crearJugadorDePrueba();
+
+        LocalDate fecha = LocalDate.now();
+
+        HistorialCotizacion historial = new HistorialCotizacion(
+                bolsa.getId(),
+                BigDecimal.TEN,
+                fecha.atTime(12, 0)
+        );
+
+        historialCotizacionRepository.guardarHistorial(List.of(historial));
+
+        mockMvc.perform(get("/api/players/"
+                + bolsa.getEstadisticasDeportivas().getJugador().getId()
+                + "/quotes/" + fecha)
+                .header("Authorization", "Bearer " + result.token())
+        ).andExpect(status().isOk());
     }
 
     private static @NotNull EstadisticasDeportivas getEstadisticas() {

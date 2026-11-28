@@ -10,11 +10,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.prontaentrega.services.CotizacionService;
-import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
-import com.prontaentrega.services.exceptions.QuoteStrategyNotFoundException;
+import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
+import com.prontaentrega.services.exceptions.cotizacion.EstrategiaNoExistenteException;
 import com.prontaentrega.services.dto.ResultadoRecotizacion;
-import com.prontaentrega.models.estrategias.ConfiguracionEstrategiaPonderada;
-import com.prontaentrega.services.CotizacionService.QuoteStrategyView;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.services.CotizacionService.EstrategiaEstado;
 import java.math.BigDecimal;
 import java.util.List;
 import com.prontaentrega.utils.AbstractIntegrationTest;
@@ -31,7 +31,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 /** Verifica el contrato y la clave maestra del endpoint manual de recotización. */
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("integracion")
+@Tag("e2e")
 class CotizacionControllerTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
@@ -76,10 +76,10 @@ class CotizacionControllerTest extends AbstractIntegrationTest {
     void consultaEstrategiaActivaYCatalogo() throws Exception {
         ConfiguracionEstrategiaPonderada config = configuracionPonderada();
         when(administrationService.consultarActiva()).thenReturn(
-                new QuoteStrategyView("ponderada", "Métricas ponderadas", true, config));
+                new EstrategiaEstado("ponderada", "Métricas ponderadas", true, config));
         when(administrationService.listarEstrategias()).thenReturn(List.of(
-                new QuoteStrategyView("ponderada", "Métricas ponderadas", true, config),
-                new QuoteStrategyView("ponderada-con-penalizacion",
+                new EstrategiaEstado("ponderada", "Métricas ponderadas", true, config),
+                new EstrategiaEstado("ponderada-con-penalizacion",
                         "Métricas ponderadas con penalización", false, null)));
 
         mockMvc.perform(get("/api/quotes/strategy"))
@@ -139,14 +139,14 @@ class CotizacionControllerTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.code").value("CONFIGURACION_INVALIDA"));
 
         when(administrationService.activarEstrategia("missing"))
-                .thenThrow(new QuoteStrategyNotFoundException("La estrategia solicitada no existe"));
+                .thenThrow(new EstrategiaNoExistenteException("La estrategia solicitada no existe"));
         mockMvc.perform(put("/api/quotes/strategy").header("X-Master-Key", masterSecret)
                         .contentType("application/json").content("{\"strategyId\":\"missing\"}"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("ESTRATEGIA_NO_ENCONTRADA"));
 
         when(administrationService.consultarActiva())
-                .thenThrow(new QuoteOperationConflictException("No hay una estrategia activa configurada"));
+                .thenThrow(new NoHayEstrategiaActivaConfiguradaException("No hay una estrategia activa configurada"));
         mockMvc.perform(get("/api/quotes/strategy").with(
                         org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("tester")))
                 .andExpect(status().isConflict())

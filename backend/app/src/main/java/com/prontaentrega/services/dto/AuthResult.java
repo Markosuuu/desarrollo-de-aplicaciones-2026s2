@@ -1,6 +1,6 @@
 package com.prontaentrega.services.dto;
 
-import com.prontaentrega.models.Usuario;
+import com.prontaentrega.models.auth.Usuario;
 
 /**
  * Resultado de operaciones de autenticación en la capa de servicios.

@@ -1,18 +1,19 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.HistorialCotizacion;
-import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
-import com.prontaentrega.persistence.dto.HistorialCotizacionDTOSQL;
-import com.prontaentrega.persistence.repository.CotizacionRepository;
+import com.prontaentrega.models.cotizacion.HistorialCotizacion;
+import com.prontaentrega.persistence.dto.jugadores.BolsaDeJugadorDTOSQL;
+import com.prontaentrega.persistence.dto.cotizacion.HistorialCotizacionDTOSQL;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.persistence.repository.dao.HistorialCotizacionDAOSQL;
 import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;
-import com.prontaentrega.services.exceptions.QuoteOperationConflictException;
+import com.prontaentrega.services.exceptions.cotizacion.NoHayEstrategiaActivaConfiguradaException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -42,26 +43,18 @@ public class HistorialCotizacionRepositoryImpl implements HistorialCotizacionRep
                 ));
 
         List<HistorialCotizacionDTOSQL> entidades = historial.stream()
-                .map(registro -> {
-                    BolsaDeJugadorDTOSQL bolsa = bolsasPorId.get(registro.getBolsaId());
-
-                    if (bolsa == null) {
-                        throw new QuoteOperationConflictException(
-                                "No existe la bolsa asociada al historial de cotización"
-                        );
-                    }
-
-                    return HistorialCotizacionDTOSQL.desdeModelo(registro, bolsa);
-                })
+                .map(registro -> HistorialCotizacionDTOSQL.desdeModelo(
+                        registro,
+                        bolsasPorId.get(registro.getBolsaId())
+                ))
                 .toList();
 
         historialDAO.saveAll(entidades);
     }
 
     @Override
-    public List<HistorialCotizacion> buscarPorBolsaId(UUID bolsaId) {
-        return historialDAO
-                .findByBolsaDeJugador_IdOrderByFechaAsc(bolsaId)
+    public List<HistorialCotizacion> buscarHistorialById(UUID jugadorId) {
+        return historialDAO.buscarHistorialById(jugadorId)
                 .stream()
                 .map(HistorialCotizacionDTOSQL::aModelo)
                 .toList();
@@ -70,5 +63,17 @@ public class HistorialCotizacionRepositoryImpl implements HistorialCotizacionRep
     @Override
     public void deleteAll() {
         historialDAO.deleteAll();
+    }
+
+    @Override
+    public Optional<HistorialCotizacion> findFirstByBolsaIdAndFechaLessThanOrderByFechaDesc(UUID id, LocalDateTime inicioDia) {
+        Optional<HistorialCotizacionDTOSQL> res = historialDAO.findFirstByBolsaDeJugador_IdAndFechaIsLessThanOrderByFechaDesc(id, inicioDia);
+        return res.map(HistorialCotizacionDTOSQL::aModelo);
+    }
+
+    @Override
+    public Optional<HistorialCotizacion> findFirstByBolsaIdAndFechaGreaterThanEqualOrderByFechaAsc(UUID id, LocalDateTime inicioDia) {
+        Optional<HistorialCotizacionDTOSQL> res = historialDAO.findFirstByBolsaDeJugador_IdAndFechaIsGreaterThanEqualOrderByFechaAsc(id, inicioDia);
+        return res.map(HistorialCotizacionDTOSQL::aModelo);
     }
 }

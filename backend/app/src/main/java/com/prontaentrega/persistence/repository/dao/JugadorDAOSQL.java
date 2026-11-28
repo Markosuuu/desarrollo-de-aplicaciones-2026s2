@@ -1,7 +1,7 @@
 package com.prontaentrega.persistence.repository.dao;
 
-import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
-import com.prontaentrega.models.enums.Liga;
+import com.prontaentrega.persistence.dto.jugadores.BolsaDeJugadorDTOSQL;
+import com.prontaentrega.models.jugadores.Liga;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -38,4 +38,12 @@ public interface JugadorDAOSQL extends JpaRepository<BolsaDeJugadorDTOSQL, UUID>
             ORDER BY b.cotizacionActual DESC
     """)
     Page<BolsaDeJugadorDTOSQL> getRanking(Pageable pageable);
+
+    @Query("""
+        SELECT b
+        FROM BolsaDeJugador b
+        WHERE LOWER(b.estadisticasDeportivas.jugador.nombre) LIKE LOWER(CONCAT('%', :nombre, '%'))
+        ORDER BY b.cotizacionActual DESC
+    """)
+    Page<BolsaDeJugadorDTOSQL> findJugadorByNombre(String nombre, Pageable pageable);
 }

@@ -28,17 +28,27 @@ public class SecurityConfig {
     /**
      * Configura seguridad stateless y deja publico el catalogo y su actualizacion.
      */
+
     @Bean
-    public SecurityFilterChain securityFilterChain( HttpSecurity http,
-                                                    JwtAuthenticationFilter jwtAuthenticationFilter,
-                                                    ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
-                                                    MasterKeyAuthenticationFilter masterKeyAuthenticationFilter
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
+            MasterKeyAuthenticationFilter masterKeyAuthenticationFilter
     ) throws Exception {
+
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Actuator: health checks públicos
+                        .requestMatchers(
+                                "/actuator/health",
+                                "/actuator/health/**"
+                        ).permitAll()
+                        // Rutas públicas existentes
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/keys",
@@ -47,15 +57,20 @@ public class SecurityConfig {
                                 "/swagger-ui.html"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST,
-                                "/quotes/recalculate", "/api/quotes/recalculate")
+                                "/quotes/recalculate",
+                                "/api/quotes/recalculate")
                         .authenticated()
                         .requestMatchers(HttpMethod.PUT,
-                                "/quotes/strategy", "/api/quotes/strategy",
-                                "/quotes/strategies/*/config", "/api/quotes/strategies/*/config")
+                                "/quotes/strategy",
+                                "/api/quotes/strategy",
+                                "/quotes/strategies/*/config",
+                                "/api/quotes/strategies/*/config")
                         .authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/players/update")
                         .authenticated()
-                        .anyRequest().authenticated())
+
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(
                         masterKeyAuthenticationFilter,
                         UsernamePasswordAuthenticationFilter.class

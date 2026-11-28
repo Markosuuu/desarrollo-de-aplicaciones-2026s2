@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import SubastaPage from "../pages/SubastaPage";
@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   cerrarSubasta: vi.fn(),
   ofertarSubasta: vi.fn(),
   useAuth: vi.fn(),
+  toastError: vi.fn(),
+  toastSuccess: vi.fn(),
 }));
 
 vi.mock("../api/subastaApi", () => ({
@@ -32,6 +34,10 @@ vi.mock("../components/subasta/RealizarOferta", () => ({
       <button type="submit">Enviar puja de prueba</button>
     </form>
   ),
+}));
+
+vi.mock("react-toastify", () => ({
+  toast: { error: mocks.toastError, success: mocks.toastSuccess },
 }));
 
 const auction = {
@@ -105,7 +111,9 @@ describe("SubastaPage - ramas alternativas", () => {
 
     renderAuction();
 
-    expect(await screen.findByRole("heading", { name: "Subasta" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Subasta" }),
+    ).toBeInTheDocument();
     expect(screen.getByText("Subasta finalizada")).toBeInTheDocument();
   });
 
@@ -118,12 +126,16 @@ describe("SubastaPage - ramas alternativas", () => {
 
     renderAuction();
 
-    fireEvent.click(await screen.findByRole("button", { name: "Cerrar subasta" }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Cerrar subasta" }),
+    );
     fireEvent.click(screen.getByRole("button", { name: "Aceptar" }));
 
-    expect(
-      await screen.findByText("No se pudo cerrar la subasta."),
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(mocks.toastError).toHaveBeenCalledWith(
+        "No se pudo cerrar la subasta",
+      ),
+    );
   });
 
   test("rechaza pujas no numéricas y menores al mínimo", async () => {
@@ -133,15 +145,22 @@ describe("SubastaPage - ramas alternativas", () => {
     const bidInput = screen.getByLabelText("Puja de prueba");
 
     fireEvent.change(bidInput, { target: { value: "no-es-numérico" } });
-    fireEvent.click(screen.getByRole("button", { name: "Enviar puja de prueba" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Enviar puja de prueba" }),
+    );
 
-    expect(
-      await screen.findByRole("alert"),
-    ).toHaveTextContent("La puja mínima debe ser 2,51.");
+    await waitFor(() =>
+      expect(mocks.toastError).toHaveBeenCalledWith(
+        "La puja mínima debe ser 2,51",
+      ),
+    );
+
     expect(mocks.ofertarSubasta).not.toHaveBeenCalled();
 
     fireEvent.change(bidInput, { target: { value: "1" } });
-    fireEvent.click(screen.getByRole("button", { name: "Enviar puja de prueba" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Enviar puja de prueba" }),
+    );
 
     expect(mocks.ofertarSubasta).not.toHaveBeenCalled();
   });
@@ -154,30 +173,14 @@ describe("SubastaPage - ramas alternativas", () => {
     fireEvent.change(screen.getByLabelText("Puja de prueba"), {
       target: { value: "3" },
     });
-    fireEvent.click(screen.getByRole("button", { name: "Enviar puja de prueba" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Enviar puja de prueba" }),
+    );
 
-    expect(
-      await screen.findByText("No se pudo realizar la oferta."),
-    ).toBeInTheDocument();
-  });
-
-  test("oculta los mensajes de acción luego de cinco segundos", async () => {
-    renderAuction();
-    await screen.findByText("Jugador de prueba");
-    vi.useFakeTimers();
-
-    fireEvent.change(screen.getByLabelText("Puja de prueba"), {
-      target: { value: "1" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: "Enviar puja de prueba" }));
-
-    expect(screen.getByRole("alert")).toBeInTheDocument();
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(5000);
-    });
-
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    vi.useRealTimers();
+    await waitFor(() =>
+      expect(mocks.toastError).toHaveBeenCalledWith(
+        "No se pudo realizar la oferta",
+      ),
+    );
   });
 });

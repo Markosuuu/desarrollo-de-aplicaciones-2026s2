@@ -1,8 +1,8 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.BolsaDeJugador;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.persistence.dto.BolsaDeJugadorDTOSQL;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.persistence.dto.jugadores.BolsaDeJugadorDTOSQL;
 import com.prontaentrega.persistence.repository.JugadorRepository;
 import com.prontaentrega.persistence.repository.dao.JugadorDAOSQL;
 import org.springframework.data.domain.Page;
@@ -38,9 +38,9 @@ public class JugadorRepositoryImpl implements JugadorRepository {
     }
 
     @Override
-    public BolsaDeJugador findById(UUID id) {
-        Optional<BolsaDeJugadorDTOSQL> response = daosql.findBolsaByPlayerId(id);
-        return response.map(BolsaDeJugadorDTOSQL::aModelo).orElse(null);
+    public Optional<BolsaDeJugador> findById(UUID id) {
+        return daosql.findBolsaByPlayerId(id)
+                .map(BolsaDeJugadorDTOSQL::aModelo);
     }
 
     /**
@@ -82,6 +82,13 @@ public class JugadorRepositoryImpl implements JugadorRepository {
     @Override
     public Page<BolsaDeJugador> getRanking(Pageable page) {
         Page<BolsaDeJugadorDTOSQL> pageDTO = daosql.getRanking(page);
+        return pageDTO.map(BolsaDeJugadorDTOSQL::aModelo);
+    }
+
+    @Override
+    public Page<BolsaDeJugador> getRankingByNombre(Pageable pageable, String nombre) {
+        Page<BolsaDeJugadorDTOSQL> pageDTO = daosql.findJugadorByNombre(nombre, pageable);
+
         return pageDTO.map(BolsaDeJugadorDTOSQL::aModelo);
     }
 }

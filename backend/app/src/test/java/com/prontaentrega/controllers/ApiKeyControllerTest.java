@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("integracion")
+@Tag("e2e")
 class ApiKeyControllerTest extends AbstractIntegrationTest {
 
     @Autowired
@@ -105,5 +105,19 @@ class ApiKeyControllerTest extends AbstractIntegrationTest {
                 .andExpect(status().isUnauthorized());
 
         assertEquals(0, apiKeyDAO.count());
+    }
+
+    @Test
+    void generarSinNombreNoDeberiaCrearApiKeyYArrojarCodigo400() throws Exception {
+        mockMvc.perform(post("/api/keys")
+                        .header("X-Master-Key", masterSecret)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "nombre": ""
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+
     }
 }

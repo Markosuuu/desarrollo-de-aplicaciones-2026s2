@@ -1,9 +1,9 @@
 package com.prontaentrega.persistence.repository.impl;
 
-import com.prontaentrega.models.Oferta;
-import com.prontaentrega.persistence.dto.OfertaDTOSQL;
-import com.prontaentrega.persistence.dto.SubastaDTOSQL;
-import com.prontaentrega.persistence.dto.UsuarioDTOSQL;
+import com.prontaentrega.models.subastas.Oferta;
+import com.prontaentrega.persistence.dto.subastas.OfertaDTOSQL;
+import com.prontaentrega.persistence.dto.subastas.SubastaDTOSQL;
+import com.prontaentrega.persistence.dto.auth.UsuarioDTOSQL;
 import com.prontaentrega.persistence.repository.OfertaRepository;
 import com.prontaentrega.persistence.repository.dao.OfertaDAOSQL;
 import com.prontaentrega.persistence.repository.dao.SubastaDAOSQL;
@@ -74,5 +74,10 @@ public class OfertaRepositoryImpl implements OfertaRepository {
     @Override
     public void actualizarSuperior(UUID subastaId) {
         dao.actualizarSuperior(subastaId);
+    }
+
+    @Override
+    public Optional<Oferta> findOfertaGanadora(UUID subastaId) {
+        return dao.findOfertaGanadora(subastaId).map(OfertaDTOSQL::aModelo);
     }
 }

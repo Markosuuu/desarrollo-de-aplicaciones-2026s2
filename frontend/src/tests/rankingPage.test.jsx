@@ -113,6 +113,7 @@ describe('RankingPage', () => {
         expect(mocks.getRanking).toHaveBeenCalledWith({
             page: 1,
             perPage: 50,
+            nombre: '',
             token: 'token-test',
         });
     });
@@ -261,6 +262,7 @@ describe('RankingPage', () => {
         expect(mocks.getRanking).toHaveBeenLastCalledWith({
             page: 1,
             perPage: 50,
+            nombre: '',
             token: 'token-test',
         });
     });
@@ -319,6 +321,7 @@ describe('RankingPage', () => {
         expect(mocks.getRanking).toHaveBeenLastCalledWith({
             page: 2,
             perPage: 50,
+            nombre: '',
             token: 'token-test',
         });
 
@@ -351,6 +354,31 @@ describe('RankingPage', () => {
         });
 
         expect(mocks.getRanking).toHaveBeenCalledTimes(1);
+    });
+
+    test('debe buscar por nombre y reiniciar la paginación', async () => {
+        mocks.getRanking.mockResolvedValue(
+            crearRespuesta([crearJugador(1, { nombre: 'Lionel Messi' })])
+        );
+
+        render(<RankingPage />);
+
+        await screen.findByText('Lionel Messi');
+
+        fireEvent.change(screen.getByRole('searchbox'), {
+            target: { value: 'Messi' },
+        });
+
+        await waitFor(() => {
+            expect(mocks.getRanking).toHaveBeenLastCalledWith({
+                page: 1,
+                perPage: 50,
+                nombre: 'Messi',
+                token: 'token-test',
+            });
+        });
+
+        expect(mocks.getRanking).toHaveBeenCalledTimes(2);
     });
 
     test('debe desconectar el observer cuando se desmonta el componente', async () => {

@@ -26,6 +26,8 @@ dependencies {
     implementation 'io.github.cdimascio:dotenv-java:3.2.0'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-aop'
 
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
@@ -41,6 +43,7 @@ dependencies {
     testImplementation "org.testcontainers:testcontainers:2.0.5"
     testImplementation "org.testcontainers:testcontainers-junit-jupiter:2.0.5"
     testImplementation 'org.testcontainers:postgresql'
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.4.1'
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
@@ -74,8 +77,23 @@ tasks.register('e2eTest', Test) {
     }
     shouldRunAfter tasks.named('integrationTest')
 }
+
+tasks.register('architectureTest', Test) {
+    group = 'verification'
+    description = 'Runs architecture tests.'
+
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+
+    useJUnitPlatform {
+        includeTags 'arquitectura'
+    }
+
+    shouldRunAfter tasks.named('test')
+}
+
 jacocoTestReport {
-    dependsOn test, integrationTest
+    dependsOn test, integrationTest, e2eTest
 
     executionData.from(
             fileTree(layout.buildDirectory.dir('jacoco')) {

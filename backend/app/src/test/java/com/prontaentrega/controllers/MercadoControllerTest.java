@@ -9,10 +9,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prontaentrega.models.*;
-import com.prontaentrega.models.enums.EstadoAnuncioVenta;
-import com.prontaentrega.models.enums.Liga;
-import com.prontaentrega.models.enums.Posicion;
+import com.prontaentrega.models.auth.Usuario;
+import com.prontaentrega.models.mercado.EstadoAnuncioVenta;
+import com.prontaentrega.models.jugadores.Liga;
+import com.prontaentrega.models.jugadores.Posicion;
+import com.prontaentrega.models.jugadores.BolsaDeJugador;
+import com.prontaentrega.models.jugadores.EstadisticasDeportivas;
+import com.prontaentrega.models.jugadores.Jugador;
+import com.prontaentrega.models.mercado.AnuncioVenta;
+import com.prontaentrega.models.mercado.InventarioUsuario;
 import com.prontaentrega.persistence.repository.AnuncioVentaRepository;
 import com.prontaentrega.persistence.repository.HistorialCotizacionRepository;
 import com.prontaentrega.persistence.repository.InventarioUsuarioRepository;
@@ -39,7 +44,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Tag("integracion")
+@Tag("e2e")
 public class MercadoControllerTest extends AbstractIntegrationTest {
     private static final AtomicInteger JUGADOR_SEQUENCE = new AtomicInteger(1000);
 
@@ -94,8 +99,10 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/marketplace/listings")
                         .header("Authorization", bearer(vendedor)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.page").value(1));
     }
 
     @Test
@@ -111,13 +118,13 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
                         .param("page", "1").param("size", "2")
                         .header("Authorization", bearer(vendedor)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content.length()").value(2));
 
         mockMvc.perform(get("/api/marketplace/listings")
                         .param("page", "2").param("size", "2")
                         .header("Authorization", bearer(vendedor)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content.length()").value(1));
     }
 
     @Test
@@ -127,7 +134,7 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/marketplace/listings")
                         .header("Authorization", bearer(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content.length()").value(0));
     }
 
     @Test
@@ -306,7 +313,7 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         BolsaDeJugador bolsa = crearBolsa("Jugador buy cerrado");
         darInventario(vendedor.id(), bolsa, 10);
         UUID anuncioId = publicar(vendedor.id(), bolsa, 3);
-        mercadoService.comprar(comprador1.id(), anuncioId);
+        mercadoService.comprar(comprador1.id(), anuncioId, 3);
 
         mockMvc.perform(post("/api/orders/buy")
                         .header("Authorization", bearer(comprador2))
@@ -399,13 +406,15 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         BolsaDeJugador bolsa = crearBolsa("Jugador transacciones");
         darInventario(vendedor.id(), bolsa, 10);
         UUID anuncioId = publicar(vendedor.id(), bolsa, 3);
-        mercadoService.comprar(comprador.id(), anuncioId);
+        mercadoService.comprar(comprador.id(), anuncioId, 3);
 
         mockMvc.perform(get("/api/users/{id}/transactions", vendedor.id())
                         .header("Authorization", bearer(vendedor)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.page").value(1));
     }
 
     @Test
@@ -415,7 +424,10 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/users/{id}/transactions", usuario.id())
                         .header("Authorization", bearer(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.page").value(1));
     }
 
     @Test
@@ -499,8 +511,12 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/users/{id}/inventario", usuario.id())
                         .header("Authorization", bearer(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(2));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.totalElements").value(2))
+                .andExpect(jsonPath("$.page").value(1));
+
+
     }
 
     @Test
@@ -510,7 +526,10 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
         mockMvc.perform(get("/api/users/{id}/inventario", usuario.id())
                         .header("Authorization", bearer(usuario)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content.length()").value(0))
+                .andExpect(jsonPath("$.totalElements").value(0))
+                .andExpect(jsonPath("$.page").value(1));
     }
 
     @Test
@@ -526,6 +545,126 @@ public class MercadoControllerTest extends AbstractIntegrationTest {
     void obtenerInventarioDeberiaRechazarSinToken() throws Exception {
         mockMvc.perform(get("/api/users/{id}/inventario", UUID.randomUUID()))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void obtenerResumenDeTokensDeInventarioRetornaForbiddenSiNoEstaLogueado() throws Exception {
+        mockMvc.perform(get("/api/resumen/tokens"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void obtenerResumenDeTokensDeInventarioRetornaOKSiSeEstaLogueado() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+
+        mockMvc.perform(get("/api/resumen/tokens")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void obtenerResumenDeTokensDeInventarioRetorna0SiNoTieneTokensComprados() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+
+        mockMvc.perform(get("/api/resumen/tokens")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(0))
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.jugadores.length()").value(0));
+    }
+
+    @Test
+    void obtenerResumenDeTokensDeInventarioRetornaValoresSiTieneTokensComprados() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+        BolsaDeJugador b1 = crearBolsa("Messi");
+
+        mercadoService.comprarSuper(usuario.id, jugadorId(b1), 5);
+
+        mockMvc.perform(get("/api/resumen/tokens")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(5))
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.jugadores.length()").value(1));
+    }
+
+    @Test
+    void obtenerResumenDeTokensDeInventarioRetornaLaSumaDeTokensSiTieneTokensComprados() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+        BolsaDeJugador b1 = crearBolsa("Messi");
+        BolsaDeJugador b2 = crearBolsa("Neymar");
+
+        mercadoService.comprarSuper(usuario.id, jugadorId(b1), 5);
+        mercadoService.comprarSuper(usuario.id, jugadorId(b2) , 7);
+
+        mockMvc.perform(get("/api/resumen/tokens")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(12))
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.jugadores.length()").value(2));
+    }
+
+
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetornaForbiddenSiNoEstaLogueado() throws Exception {
+        mockMvc.perform(get("/api/resumen/dinero"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetornaOKSiSeEstaLogueado() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+
+        mockMvc.perform(get("/api/resumen/dinero")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetorna0SiNoTieneTokensComprados() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+
+        mockMvc.perform(get("/api/resumen/dinero")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(0))
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.jugadores.length()").value(0));
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetornaValoresSiTieneTokensComprados() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+        BolsaDeJugador b1 = crearBolsa("Messi");
+
+        mercadoService.comprarSuper(usuario.id, jugadorId(b1), 5);
+
+        mockMvc.perform(get("/api/resumen/dinero")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(25))
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.jugadores.length()").value(1));
+    }
+
+    @Test
+    void obtenerResumenDeDineroDeInventarioRetornaLaSumaDeTokensSiTieneTokensComprados() throws Exception {
+        UsuarioAutenticado usuario = registrar("Usuario", "user@test.com");
+        BolsaDeJugador b1 = crearBolsa("Messi");
+        BolsaDeJugador b2 = crearBolsa("Neymar");
+
+        mercadoService.comprarSuper(usuario.id, jugadorId(b1), 5);
+        mercadoService.comprarSuper(usuario.id, jugadorId(b2) , 7);
+
+        mockMvc.perform(get("/api/resumen/dinero")
+                        .header("Authorization", "Bearer "+usuario.token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(60))
+                .andExpect(jsonPath("$.jugadores").isArray())
+                .andExpect(jsonPath("$.jugadores.length()").value(2));
     }
 
     private record UsuarioAutenticado(UUID id, String token) {

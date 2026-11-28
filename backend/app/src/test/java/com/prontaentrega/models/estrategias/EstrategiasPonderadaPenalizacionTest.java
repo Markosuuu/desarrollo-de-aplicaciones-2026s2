@@ -1,6 +1,9 @@
 package com.prontaentrega.models.estrategias;
 
-import com.prontaentrega.models.DatosValoracion;
+import com.prontaentrega.models.cotizacion.DatosValoracion;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderada;
+import com.prontaentrega.models.cotizacion.estrategias.ConfiguracionEstrategiaPonderadaPenalizacion;
+import com.prontaentrega.models.cotizacion.estrategias.EstrategiaPonderadaConPenalizacion;
 import com.prontaentrega.models.exception.ConfiguracionNoCorrespondiente;
 import com.prontaentrega.models.exception.CotizacionInvalidaException;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+﻿import { useEffect, useMemo, useState } from "react";
 import { Blobatar } from "@blobatar/react";
 import "blobatar/motion.css";
 import { useNavigate } from "react-router-dom";
@@ -10,16 +10,59 @@ const numberFormatter = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 2,
 });
 
+const DEFAULT_PAGE_SIZE = 20;
+
 function formatNumber(value) {
   if (value === null || value === undefined || value === "") return "—";
   const number = Number(value);
   return Number.isFinite(number) ? numberFormatter.format(number) : "—";
 }
 
+const extraerContenido = (response) => {
+  if (Array.isArray(response.content)) return response.content;
+  if (Array.isArray(response.listings)) return response.listings;
+  return [];
+};
+
+function normalizeListingsResponse(response) {
+  if (Array.isArray(response)) {
+    return {
+      content: response,
+      page: 1,
+      size: DEFAULT_PAGE_SIZE,
+      totalElements: response.length,
+      totalPages: 1,
+      hasNext: false,
+      hasPrevious: false,
+    };
+  }
+
+  const content = extraerContenido(response);
+
+  return {
+    content,
+    page: Number(response?.page ?? 1),
+    size: Number(response?.size ?? DEFAULT_PAGE_SIZE),
+    totalElements: Number(response?.totalElements ?? content.length),
+    totalPages: Number(response?.totalPages ?? 1),
+    hasNext: Boolean(response?.hasNext),
+    hasPrevious: Boolean(response?.hasPrevious),
+  };
+}
+
 const MercadoPage = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
-  const [listings, setListings] = useState([]);
+  const [pageData, setPageData] = useState({
+    content: [],
+    page: 1,
+    size: DEFAULT_PAGE_SIZE,
+    totalElements: 0,
+    totalPages: 1,
+    hasNext: false,
+    hasPrevious: false,
+  });
+  const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,15 +74,24 @@ const MercadoPage = () => {
     setLoading(true);
     setError("");
 
-    fetchListings(token)
+    fetchListings(token, { page, size: DEFAULT_PAGE_SIZE })
       .then((response) => {
-        if (active) setListings(response);
+        if (!active) return;
+        setPageData(normalizeListingsResponse(response));
       })
       .catch((fetchError) => {
         console.error("Error al cargar los anuncios:", fetchError);
 
         if (active) {
-          setListings([]);
+          setPageData({
+            content: [],
+            page: 1,
+            size: DEFAULT_PAGE_SIZE,
+            totalElements: 0,
+            totalPages: 1,
+            hasNext: false,
+            hasPrevious: false,
+          });
           setError(fetchError.message || "No se pudieron cargar los anuncios.");
         }
       })
@@ -50,19 +102,21 @@ const MercadoPage = () => {
     return () => {
       active = false;
     };
-  }, [retry, token]);
+  }, [page, retry, token]);
+
+  const pageItems = pageData.content;
 
   const otherUsersListings = useMemo(() => {
     const term = search.trim().toLocaleLowerCase("es");
 
-    return listings.filter((listing) => {
+    return pageItems.filter((listing) => {
       if (!term) return true;
 
       return [listing.nombreJugador, listing.vendedorNombre]
         .filter(Boolean)
         .some((value) => value.toLocaleLowerCase("es").includes(term));
     });
-  }, [listings, search]);
+  }, [pageItems, search]);
 
   return (
     <main className="home-shell mercado-shell">
@@ -106,11 +160,18 @@ const MercadoPage = () => {
             </div>
           )}
 
-          {!loading && !error && otherUsersListings.length === 0 && (
+          {!loading &&
+            !error &&
+            search.trim() &&
+            otherUsersListings.length === 0 && (
+              <div className="catalog-state">
+                No se encontraron anuncios para esta búsqueda.
+              </div>
+            )}
+
+          {!loading && !error && !search.trim() && pageItems.length === 0 && (
             <div className="catalog-state">
-              {search.trim()
-                ? "No se encontraron anuncios para esta búsqueda."
-                : "Todavía no hay anuncios disponibles de otros usuarios."}
+              No existen anuncios publicados actualmente.
             </div>
           )}
 
@@ -177,6 +238,36 @@ const MercadoPage = () => {
                   </article>
                 ))}
               </div>
+
+              {pageData.totalPages > 1 && (
+                <div className="market-pagination">
+                  <button
+                    type="button"
+                    className="pager-button"
+                    disabled={!pageData.hasPrevious || page <= 1}
+                    onClick={() =>
+                      setPage((current) => Math.max(1, current - 1))
+                    }
+                  >
+                    Anterior
+                  </button>
+                  <span className="pager-status">
+                    Página {pageData.page} de {pageData.totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    className="pager-button"
+                    disabled={!pageData.hasNext || page >= pageData.totalPages}
+                    onClick={() =>
+                      setPage((current) =>
+                        Math.min(pageData.totalPages, current + 1),
+                      )
+                    }
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              )}
             </>
           )}
         </section>
