@@ -19,17 +19,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-/**
- * Controller HTTP del catalogo de jugadores.
- */
-@Slf4j
 @RestController
 @RequestMapping("/api")
 public class PlayerController {
@@ -62,7 +57,6 @@ public class PlayerController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int perPage) {
 
-        log.info("⌛ Buscando los jugadores");
         Page<BolsaDeJugador> jugadores = playerService.search(liga, equipo, nombre, page, perPage);
 
         List<PlayerResponse> players = jugadores.getContent().stream()
@@ -76,7 +70,6 @@ public class PlayerController {
                 jugadores.getTotalPages()
         ));
 
-        log.info("✅ Jugadores encontrados: {}", jugadores.getTotalElements());
         return ResponseEntity.ok(response);
     }
 
@@ -93,7 +86,6 @@ public class PlayerController {
     })
     @PostMapping("/players/update")
     public ResponseEntity<RefreshCatalogResponse> updatePlayers() {
-        log.info("⌛ Actualizando catalogo de jugadores desde WhoScored");
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(playerService.refreshFromWhoScored());

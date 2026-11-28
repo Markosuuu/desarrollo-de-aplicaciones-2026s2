@@ -1,5 +1,6 @@
 package com.prontaentrega.services;
 
+import com.prontaentrega.auditoria.Auditable;
 import com.prontaentrega.authentication.JwtService;
 import com.prontaentrega.models.auth.TokenEstado;
 import com.prontaentrega.models.auth.Usuario;
@@ -48,6 +49,7 @@ public class AuthService {
      * @throws UsuarioRepetidoException Si ya existe un usuario registrado con el mismo correo.
      */
     @Transactional
+    @Auditable("register")
     public AuthResult register(String nombre, String correo, String password) {
         String nombreUser = normalizeName(nombre);
         String correoUser = normalizeEmail(correo);
@@ -75,6 +77,7 @@ public class AuthService {
      * @throws BadCredentialsException Si las credenciales proporcionadas son inválidas.
      */
     @Transactional
+    @Auditable("login")
     public AuthResult login(String correo, String password) {
         String correoUser = normalizeEmail(correo);
         Usuario usuario = usuarioRepository.findByCorreoIgnoreCase(correoUser)

@@ -1,5 +1,6 @@
 package com.prontaentrega.services;
 
+import com.prontaentrega.auditoria.Auditable;
 import com.prontaentrega.models.cotizacion.*;
 import com.prontaentrega.models.exception.DatosValoracionInvalidaException;
 import com.prontaentrega.models.jugadores.BolsaDeJugador;
@@ -66,6 +67,7 @@ public class CotizacionService {
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Auditable("recalcularEstrategiaActiva")
     public ResultadoRecotizacion recalcularEstrategiaActiva() {
         EstrategiaActiva estrategiaActiva = obtenerEstrategiaActiva();
 
@@ -83,6 +85,7 @@ public class CotizacionService {
 
     /** Devuelve la selección activa y su configuración persistida. */
     @Transactional(readOnly = true)
+    @Auditable("consultarActiva")
     public EstrategiaEstado consultarActiva() {
         String activeId = cotizacionRepository.buscarEstado()
                 .map(EstadoEstrategiaCotizacion::estrategiaActivaId)
@@ -104,6 +107,7 @@ public class CotizacionService {
 
     /** Devuelve las estrategias registradas y las configuraciones independientes disponibles. */
     @Transactional(readOnly = true)
+    @Auditable("listarEstrategias")
     public List<EstrategiaEstado> listarEstrategias() {
         String activeId = cotizacionRepository.buscarEstado()
                 .map(EstadoEstrategiaCotizacion::estrategiaActivaId)
@@ -120,6 +124,7 @@ public class CotizacionService {
 
     /** Guarda configuración sin modificar selección activa ni recalcular el mercado. */
     @Transactional
+    @Auditable("actualizarConfiguracion")
     public ConfiguracionEstrategiaCotizacion actualizarConfiguracion(
             String strategyId, ConfiguracionEstrategiaCotizacion configuracion) {
 
@@ -135,6 +140,7 @@ public class CotizacionService {
 
     /** Activa una estrategia y ejecuta la recotización dentro de una transacción única. */
     @Transactional(isolation = Isolation.REPEATABLE_READ)
+    @Auditable("activarEstrategia")
     public ResultadoRecotizacion activarEstrategia(String strategyId) {
         EstrategiaCotizacion strategy = buscarEstrategia(strategyId);
         cotizacionRepository.bloquearEstado().orElseThrow(() ->
@@ -279,6 +285,7 @@ public class CotizacionService {
     }
 
     @Transactional
+    @Auditable("buscarHistorialById")
     public List<HistorialCotizacion> buscarHistorialById(UUID jugadorId) {
         return historialRepository.buscarHistorialById(jugadorId);
     }

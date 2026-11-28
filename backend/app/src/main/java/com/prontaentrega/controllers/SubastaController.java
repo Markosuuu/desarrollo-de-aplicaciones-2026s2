@@ -123,7 +123,6 @@ public class SubastaController {
 
     @Operation(summary = "Ofertar en una subasta", description = "Dejar una puja en una subasta para poder " +
             "ganar.")
-    @PostMapping("/ofertar")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Retorna la informacion de la oferta creada."),
             @ApiResponse(responseCode = "404", description = "Retorna error en caso de no encontrar una subasta.",
@@ -142,6 +141,7 @@ public class SubastaController {
                             schema = @Schema(implementation = ErrorResponse.class)
             ))
     })
+    @PostMapping("/ofertar")
     public ResponseEntity<OfertaResponse> ofertar(@Valid @RequestBody OfertarSubastaRequest request) {
         UUID usuarioId = currentUserId();
         Oferta oferta = subastaService.ofertar(usuarioId, request.subastaId(), request.puja(), request.idempotencyKey());
